@@ -236,7 +236,7 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
           .videoInfo[widget.selectedIndex].data![provider.videoIndex].link!)!);
       setState(() {});
     } else {
-      print('No more videos to play.');
+      successSnack(context: context,message: "you have completed your course please collect certificate");
     }
   }
 
