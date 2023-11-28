@@ -1,4 +1,8 @@
+import 'package:edtech_application/componnents/custom_appbar.dart';
+import 'package:edtech_application/componnents/custom_snakbar.dart';
 import 'package:edtech_application/provider/home_provider.dart';
+import 'package:edtech_application/screens/home/videos_screen.dart';
+import 'package:edtech_application/util/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +19,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
     // TODO: implement initState
     WidgetsBinding.instance.addPostFrameCallback((_){
       Provider.of<HomeProvider>(context,listen: false).playList();
+      Provider.of<HomeProvider>(context,listen: false).getBookMark();
     });
     super.initState();
   }
@@ -23,48 +28,49 @@ class _HomePageScreenState extends State<HomePageScreen> {
     return Consumer<HomeProvider>(
       builder: (context, provider,child) {
         return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).primaryColor,
-            automaticallyImplyLeading: false,
-            title: Text("Edu",style: Theme.of(context).textTheme.headlineLarge!.copyWith(color: Colors.white),),
-            actions: [
-               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.white,
-                  child: CircleAvatar(
-                    radius: 18,
-                    child: Icon(Icons.bookmark,color: Theme.of(context).primaryColor,),
-                  ),
-                ),
-              )
-            ],
-          ),
-          body: provider.isLoading?const Center(child: CircularProgressIndicator()):Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+
+          body: provider.isLoading?const Center(child: CircularProgressIndicator()):
+          SingleChildScrollView(
             child: Column(
               children: [
-                ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: provider.videoInfo.length,
-                  separatorBuilder: (context,index){
-                    return const SizedBox(height: 10);
-                  },
-                  itemBuilder: (context,index){
-                    return Card(
-                      color: Theme.of(context).primaryColor,
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-                            child: Text("Lets learn ${provider.videoInfo[index].data![0].field}",style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),),
-                          )
-                        ],
-                      ),
-                    );
-                  }, )
+                customAppbar(context,provider),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.separated(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: provider.videoInfo.length,
+                    separatorBuilder: (context,index){
+                      return const SizedBox(height: 10);
+                    },
+                    itemBuilder: (context,index){
+                      return InkWell(
+                        onTap: (){
+                          Helper.toScreen(VideoViewScreen(selectedIndex: index,));
+                        },
+                        child: Card(
+                          color: Theme.of(context).primaryColor,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+                                child: Text("Lets learn ${provider.videoInfo[index].data![0].field}",style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    }, ),
+                ),
+                ElevatedButton(onPressed: (){
+                  provider.logout((value,message){
+                    if(value){
+                      successSnack(context: context,message: message);
+                    }else{
+                      errorSnack(context: context,message: message);
+                    }
+                  });
+                }, child: Text("log out",style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),)),
               ],
             ),
           ),
@@ -73,3 +79,4 @@ class _HomePageScreenState extends State<HomePageScreen> {
     );
   }
 }
+

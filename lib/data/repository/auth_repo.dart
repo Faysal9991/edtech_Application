@@ -24,14 +24,7 @@ class AuthRepo {
           .set({
         'username': userName,
         'email': email,
-        'createdAt': Timestamp.now(),
         'uid': userCredential.user!.uid,
-        "isLogin": "true",
-        "bookMark":[
-          {"playlistName":"",
-            "link":""
-          }
-        ]
       });
     return FirebaseResponse.withSuccess("", 200);
     } on FirebaseAuthException catch (error) {
@@ -42,6 +35,7 @@ class AuthRepo {
      try {
        UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(
            email: email, password: password);
+print("=============>${userCredential.user!.uid}");
        sharedPreferences .setString(AppConstant.userID, userCredential.user!.uid);
        return FirebaseResponse.withSuccess("", 200);
      } on FirebaseAuthException catch (error) {
