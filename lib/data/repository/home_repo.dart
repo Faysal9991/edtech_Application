@@ -28,6 +28,14 @@ class HomeRepo {
     }
   }
 
-
+  Future<FirebaseResponse>logout() async {
+    try {
+      dynamic response ;
+      await firebaseAuth.signOut();
+      return FirebaseResponse.withSuccess(response, 200);
+    } on FirebaseAuthException catch (error) {
+      return FirebaseResponse.withError(error, 300);
+    }
+  }
 
 }
