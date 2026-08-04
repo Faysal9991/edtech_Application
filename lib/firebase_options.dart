@@ -17,24 +17,15 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -53,10 +44,37 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyACaC42hujYmw9MeEl4XZpKzVZAUapqY9A',
-    appId: '1:128886940991:android:322e1e48f550daf21adf8a',
-    messagingSenderId: '128886940991',
-    projectId: 'edtec-406111',
-    storageBucket: 'edtec-406111.appspot.com',
+    apiKey: 'AIzaSyAydUX1m_aQtkt8ID9NeRKYwH1XPcztVeE',
+    appId: '1:72382163798:android:781857776307b7b64504f7',
+    messagingSenderId: '72382163798',
+    projectId: 'learning-mangment',
+    storageBucket: 'learning-mangment.firebasestorage.app',
+  );
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyA1VoxN3cdSXZXiDsSmvB5sxBaokwGa5Ug',
+    appId: '1:72382163798:web:d0c3dec268b2e6c04504f7',
+    messagingSenderId: '72382163798',
+    projectId: 'learning-mangment',
+    authDomain: 'learning-mangment.firebaseapp.com',
+    storageBucket: 'learning-mangment.firebasestorage.app',
+    measurementId: 'G-9DW54W7V8K',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyC0o3CGFBdPa25XcfKIFoLYTq2P2PeA_ZM',
+    appId: '1:72382163798:ios:00354237f88f71154504f7',
+    messagingSenderId: '72382163798',
+    projectId: 'learning-mangment',
+    storageBucket: 'learning-mangment.firebasestorage.app',
+    iosBundleId: 'com.example.edtechApplication',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyC0o3CGFBdPa25XcfKIFoLYTq2P2PeA_ZM',
+    appId: '1:72382163798:ios:5a8fefb56d88d6ca4504f7',
+    messagingSenderId: '72382163798',
+    projectId: 'learning-mangment',
+    storageBucket: 'learning-mangment.firebasestorage.app',
+    iosBundleId: 'com.faysal.learningmanagement',
   );
 }

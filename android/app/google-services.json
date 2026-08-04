@@ -1,21 +1,40 @@
 {
   "project_info": {
-    "project_number": "128886940991",
-    "project_id": "edtec-406111",
-    "storage_bucket": "edtec-406111.appspot.com"
+    "project_number": "72382163798",
+    "project_id": "learning-mangment",
+    "storage_bucket": "learning-mangment.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:128886940991:android:322e1e48f550daf21adf8a",
+        "mobilesdk_app_id": "1:72382163798:android:781857776307b7b64504f7",
         "android_client_info": {
-          "package_name": "com.example.edtech_application"
+          "package_name": "com.faysal.learningmanagement"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyACaC42hujYmw9MeEl4XZpKzVZAUapqY9A"
+          "current_key": "AIzaSyAydUX1m_aQtkt8ID9NeRKYwH1XPcztVeE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72382163798:android:8f39518050ffb0e24504f7",
+        "android_client_info": {
+          "package_name": "com.faysal_lllmservice.net"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAydUX1m_aQtkt8ID9NeRKYwH1XPcztVeE"
         }
       ],
       "services": {

@@ -1,4 +1,4 @@
-package com.example.edtech_application
+package com.faysal.learningmanagement
 
 import io.flutter.embedding.android.FlutterActivity
 

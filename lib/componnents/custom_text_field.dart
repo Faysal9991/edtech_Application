@@ -164,7 +164,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               ? IconButton(
             onPressed: widget.onSuffixTap,
             icon: Image.asset(widget.suffixIconUrl!,
-                width: 15, height: 15, color: Theme.of(context).textTheme.bodyText1!.color),
+                width: 15, height: 15, color: Theme.of(context).textTheme.bodyMedium!.color),
           )
               : null
               : widget.isShowSuffixWidget!

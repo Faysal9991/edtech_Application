@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAHsKVizm_IvRHaOfF925fW7rd5fiNl7Wo</string>
+	<string>AIzaSyC0o3CGFBdPa25XcfKIFoLYTq2P2PeA_ZM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>128886940991</string>
+	<string>72382163798</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.edtechApplication</string>
+	<string>com.faysal.learningmanagement</string>
 	<key>PROJECT_ID</key>
-	<string>edtec-406111</string>
+	<string>learning-mangment</string>
 	<key>STORAGE_BUCKET</key>
-	<string>edtec-406111.appspot.com</string>
+	<string>learning-mangment.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:128886940991:ios:396c36a1adf31e5a1adf8a</string>
+	<string>1:72382163798:ios:5a8fefb56d88d6ca4504f7</string>
 </dict>
 </plist>
