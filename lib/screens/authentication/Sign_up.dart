@@ -2,7 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:edtech_application/componnents/custom_snakbar.dart';
 import 'package:edtech_application/componnents/custom_text_field.dart';
 import 'package:edtech_application/provider/auth_provider.dart';
-import 'package:edtech_application/screens/home/home_page.dart';
+import 'package:edtech_application/screens/home/main_navigation_screen.dart';
 import 'package:edtech_application/util/helper.dart';
 import 'package:edtech_application/util/theme/app_colors.dart';
 import 'package:flutter/gestures.dart';
@@ -184,7 +184,7 @@ class _SignUPScreenState extends State<SignUPScreen> {
                                       provider.signup(useName.text, email.text, password.text, (value,message){
                                         if(value){
                                           successSnack(message: "Succesfully created",context: context);
-                                          Helper.toRemoveUntilScreen(const HomePageScreen());
+                                          Helper.toRemoveUntilScreen(const MainNavigationScreen());
                                         }else{
                                           errorSnack(message: message,context: context);
                                         }

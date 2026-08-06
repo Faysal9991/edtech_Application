@@ -1,28 +1,22 @@
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edtech_application/data/model/book_mark_model.dart';
-import 'package:edtech_application/data/model/response/firebase_response.dart';
 import 'package:edtech_application/data/model/response/playlist_info_model.dart';
 import 'package:edtech_application/data/model/userInfo_model.dart';
-import 'package:edtech_application/data/repository/home_repo.dart';
 import 'package:edtech_application/util/app_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomeProvider with ChangeNotifier {
-  final HomeRepo homeRepo;
-  final FirebaseFirestore firebaseFirestore;
   final SharedPreferences sharedPreferences;
 
-  HomeProvider(
-      {required this.homeRepo,
-      required this.sharedPreferences,
-      required this.firebaseFirestore});
+  HomeProvider({required this.sharedPreferences});
 
   bool _isLoading = false;
+  static const String _bookmarkStorageKey = 'localBookmarks';
   int videoIndex = 0;
+
   incrementVideoIndex() {
     videoIndex++;
     notifyListeners();
@@ -33,112 +27,108 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  resetVideoIndex({int index = 0, bool notify = true}) {
+    videoIndex = index;
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
   bool get isLoading => _isLoading;
+
   String getUserID() {
     return sharedPreferences.getString(AppConstant.userID) ?? "";
   }
 
   UserInfoModel userInfoModel = UserInfoModel();
+
   Future userInfo(Function callback) async {
     _isLoading = true;
     notifyListeners();
-    FirebaseResponse response = await homeRepo.userInfo(getUserID());
-    if (response.statusCode == 200) {
-      userInfoModel = UserInfoModel.fromJson(response.response);
-      callback(true, "Thank you Your account has been created");
-      _isLoading = false;
-      notifyListeners();
-    } else {
-      callback(false, response.response.toString());
-    }
+    userInfoModel = UserInfoModel(
+      username: sharedPreferences.getString(AppConstant.userName) ?? 'Learner',
+      email: sharedPreferences.getString(AppConstant.userEmail) ?? '',
+      uid: getUserID(),
+    );
     _isLoading = false;
     notifyListeners();
+    callback(true, "Profile loaded");
   }
 
   List<PlayListModel> videoInfo = [];
   List documentId = [];
+
   Future playList() async {
     videoInfo.clear();
     documentId.clear();
     _isLoading = true;
     notifyListeners();
 
-    firebaseFirestore.collection("Videos").get().then((documentID) {
-      for (int i = 0; i < documentID.docs.length; i++) {
-        documentId.add(documentID.docs[i].id);
-        firebaseFirestore
-            .collection("Videos")
-            .doc(documentID.docs[i].id)
-            .get()
-            .then((response) {
-          videoInfo.add(PlayListModel.fromJson(response.data()!));
-          notifyListeners();
-        });
-      }
-    });
+    documentId.addAll(['flutter-basics', 'ui-design', 'career-skills']);
+    videoInfo.addAll(_dummyPlaylists);
+    videoIndex = 0;
+
     _isLoading = false;
     notifyListeners();
   }
 
   logout(Function callback) async {
-    FirebaseResponse response = await homeRepo.logout();
-    if (response.statusCode == 200) {
-      callback(true, "See you again");
-      sharedPreferences.remove(AppConstant.userID);
-    } else {
-      callback(false, "Sorry try again");
-    }
+    await sharedPreferences.remove(AppConstant.userID);
+    callback(true, "See you again");
   }
 
   List<BookMarkModel> bookMarkModel = [];
+
   Future getBookMark() async {
-    firebaseFirestore
-        .collection('bookMark')
-        .doc(getUserID())
-        .get()
-        .then((data) {
-      jsonDecode(data.get("bookMark")).forEach((element) async {
-        bookMarkModel.add(BookMarkModel.fromJson(element));
-      });
-    });
-  }
-
-  Future setBookmark(
-      int collectionId, String videoInk, int videoID, Function callback) async {
-    if(bookMarkModel.length==0){
-      bookMarkModel.add(BookMarkModel(
-          collctionId: documentId[collectionId],
-          videoId: videoID,
-          link: videoInk));
-      getBookMark();
-      firebaseFirestore
-          .collection('bookMark')
-          .doc(getUserID())
-          .set({"bookMark": jsonEncode(bookMarkModel)});
-      callback(true, "Thanks successfully added");
+    bookMarkModel.clear();
+    final savedBookmarks = sharedPreferences.getString(_bookmarkStorageKey);
+    if (savedBookmarks == null || savedBookmarks.isEmpty) {
       notifyListeners();
-    }else{
-      for (int i = 0; i < bookMarkModel.length; i++) {
-        if (bookMarkModel[i].link == videoInk) {
-          callback(false, "This video is already added in bookMark");
-          notifyListeners();
-        } else {
-          bookMarkModel.add(BookMarkModel(
-              collctionId: documentId[collectionId],
-              videoId: videoID,
-              link: videoInk));
-          getBookMark();
-          firebaseFirestore
-              .collection('bookMark')
-              .doc(getUserID())
-              .set({"bookMark": jsonEncode(bookMarkModel)});
-          callback(true, "Thanks successfully added");
-          notifyListeners();
-        }
-
-      }
+      return;
     }
 
+    final List decodedBookmarks = jsonDecode(savedBookmarks);
+    bookMarkModel.addAll(
+      decodedBookmarks.map((element) => BookMarkModel.fromJson(element)),
+    );
+    notifyListeners();
+  }
+
+  Future setBookmark(int collectionId, String videoInk, int videoID,
+      Function callback) async {
+    final alreadyBookmarked =
+        bookMarkModel.any((bookmark) => bookmark.link == videoInk);
+
+    if (alreadyBookmarked) {
+      callback(false, "This video is already added in bookMark");
+      notifyListeners();
+      return;
+    }
+
+    bookMarkModel.add(BookMarkModel(
+      collctionId: documentId[collectionId],
+      videoId: videoID,
+      link: videoInk,
+    ));
+    await sharedPreferences.setString(
+      _bookmarkStorageKey,
+      jsonEncode(bookMarkModel.map((bookmark) => bookmark.toJson()).toList()),
+    );
+    callback(true, "Thanks successfully added");
+    notifyListeners();
+  }
+
+  Future removeBookmark(int index) async {
+    if (index < 0 || index >= bookMarkModel.length) {
+      return;
+    }
+
+    bookMarkModel.removeAt(index);
+    await sharedPreferences.setString(
+      _bookmarkStorageKey,
+      jsonEncode(bookMarkModel.map((bookmark) => bookmark.toJson()).toList()),
+    );
+    notifyListeners();
   }
 
   playPreviousVideo({String? videoLink, YoutubePlayerController? controller}) {
@@ -151,18 +141,82 @@ class HomeProvider with ChangeNotifier {
     }
   }
 
-  playNextVideo({String? videoLink, YoutubePlayerController? controller,int? videoListLength}) {
-    if (videoLink!=
-        null &&
+  playNextVideo({
+    String? videoLink,
+    YoutubePlayerController? controller,
+    int? videoListLength,
+  }) {
+    if (videoLink != null &&
         videoLink.isNotEmpty &&
-      videoIndex <
-          videoListLength! - 1) {
-  incrementVideoIndex();
+        videoIndex < videoListLength! - 1) {
+      incrementVideoIndex();
       controller!.load(YoutubePlayer.convertUrlToId(videoLink)!);
- notifyListeners();
+      notifyListeners();
     } else {
       print('No more videos to play.');
     }
   }
 
+  List<PlayListModel> get _dummyPlaylists => [
+        PlayListModel(data: [
+          Datum(
+            field: 'Flutter Fundamentals',
+            link: 'https://www.youtube.com/watch?v=VPvVD8t02U8',
+            id: 'flutter-01',
+            seen: false,
+          ),
+          Datum(
+            field: 'Widgets and Layouts',
+            link: 'https://www.youtube.com/watch?v=b_sQ9bMltGU',
+            id: 'flutter-02',
+            seen: false,
+          ),
+          Datum(
+            field: 'State Management Basics',
+            link: 'https://www.youtube.com/watch?v=3tm-R7ymwhc',
+            id: 'flutter-03',
+            seen: false,
+          ),
+        ]),
+        PlayListModel(data: [
+          Datum(
+            field: 'UI Design Principles',
+            link: 'https://www.youtube.com/watch?v=_Hp_dI0DzY4',
+            id: 'design-01',
+            seen: false,
+          ),
+          Datum(
+            field: 'Responsive App Screens',
+            link: 'https://www.youtube.com/watch?v=LeKLGzpsz9I',
+            id: 'design-02',
+            seen: false,
+          ),
+          Datum(
+            field: 'Design System Basics',
+            link: 'https://www.youtube.com/watch?v=RYDiDpW2VkM',
+            id: 'design-03',
+            seen: false,
+          ),
+        ]),
+        PlayListModel(data: [
+          Datum(
+            field: 'Career Roadmap',
+            link: 'https://www.youtube.com/watch?v=ysEN5RaKOlA',
+            id: 'career-01',
+            seen: false,
+          ),
+          Datum(
+            field: 'Interview Preparation',
+            link: 'https://www.youtube.com/watch?v=1qw5ITr3k9E',
+            id: 'career-02',
+            seen: false,
+          ),
+          Datum(
+            field: 'Portfolio Review',
+            link: 'https://www.youtube.com/watch?v=Q7AOvWpIVHU',
+            id: 'career-03',
+            seen: false,
+          ),
+        ]),
+      ];
 }

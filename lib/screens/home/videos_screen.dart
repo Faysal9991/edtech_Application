@@ -168,7 +168,12 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoViewScreen extends StatefulWidget {
   final int selectedIndex;
-  const VideoViewScreen({super.key, required this.selectedIndex});
+  final int initialVideoIndex;
+  const VideoViewScreen({
+    super.key,
+    required this.selectedIndex,
+    this.initialVideoIndex = 0,
+  });
 
   @override
   State<VideoViewScreen> createState() => _VideoViewScreenState();
@@ -181,6 +186,10 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
   @override
   void initState() {
     var provider = Provider.of<HomeProvider>(context, listen: false);
+    final videos = provider.videoInfo[widget.selectedIndex].data!;
+    final initialIndex =
+        widget.initialVideoIndex.clamp(0, videos.length - 1).toInt();
+    provider.resetVideoIndex(index: initialIndex, notify: false);
     print(
         "=====================>>${provider.videoInfo[widget.selectedIndex].data![provider.videoIndex].link!}");
     videoId = YoutubePlayer.convertUrlToId(provider
@@ -199,8 +208,6 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
         enableCaption: true,
       ),
     )..addListener(listener);
-    provider.videoInfo[widget.selectedIndex].data!
-        .removeAt(provider.videoIndex);
     super.initState();
   }
 

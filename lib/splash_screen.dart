@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:edtech_application/provider/auth_provider.dart';
-import 'package:edtech_application/provider/home_provider.dart';
 import 'package:edtech_application/screens/authentication/sigin_in.dart';
-import 'package:edtech_application/screens/home/home_page.dart';
+import 'package:edtech_application/screens/home/main_navigation_screen.dart';
 import 'package:edtech_application/util/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,17 +18,13 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState(){
-    // TODO: implement initState
-
-
-
     Future.delayed(
         const Duration(seconds: 3),
             (){
 
           Provider.of<AuthProvider1>(context,listen: false).getLoginAccess().then((value){
             if(value){
-              Helper.toScreen(const HomePageScreen());
+              Helper.toScreen(const MainNavigationScreen());
             }else{
               Helper.toScreen(const SignInScreen());
             }

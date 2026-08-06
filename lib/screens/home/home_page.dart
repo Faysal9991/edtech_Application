@@ -1,9 +1,8 @@
 import 'package:edtech_application/componnents/custom_appbar.dart';
-import 'package:edtech_application/componnents/custom_snakbar.dart';
 import 'package:edtech_application/provider/home_provider.dart';
 import 'package:edtech_application/screens/home/videos_screen.dart';
-import 'package:edtech_application/util/helper.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 
 class HomePageScreen extends StatefulWidget {
@@ -16,67 +15,72 @@ class HomePageScreen extends StatefulWidget {
 class _HomePageScreenState extends State<HomePageScreen> {
   @override
   void initState() {
-    // TODO: implement initState
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      Provider.of<HomeProvider>(context,listen: false).playList();
-      Provider.of<HomeProvider>(context,listen: false).getBookMark();
-    });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<HomeProvider>(context, listen: false);
+      if (provider.videoInfo.isEmpty) {
+        provider.playList();
+      }
+      provider.getBookMark();
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(
-      builder: (context, provider,child) {
+      builder: (context, provider, child) {
         return Scaffold(
-
-          body: provider.isLoading?const Center(child: CircularProgressIndicator()):
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                customAppbar(context,provider),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: provider.videoInfo.length,
-                    separatorBuilder: (context,index){
-                      return const SizedBox(height: 10);
-                    },
-                    itemBuilder: (context,index){
-                      return InkWell(
-                        onTap: (){
-                          Helper.toScreen(VideoViewScreen(selectedIndex: index,));
-                        },
-                        child: Card(
-                          color: Theme.of(context).primaryColor,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-                                child: Text("Lets learn ${provider.videoInfo[index].data![0].field}",style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),),
-                              )
-                            ],
-                          ),
+          body: provider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      customAppbar(context, provider),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: provider.videoInfo.length,
+                          separatorBuilder: (context, index) {
+                            return const SizedBox(height: 10);
+                          },
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                PersistentNavBarNavigator.pushNewScreen(
+                                  context,
+                                  screen: VideoViewScreen(selectedIndex: index),
+                                  withNavBar: false,
+                                  pageTransitionAnimation:
+                                      PageTransitionAnimation.cupertino,
+                                );
+                              },
+                              child: Card(
+                                color: Theme.of(context).primaryColor,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 20,
+                                  ),
+                                  child: Text(
+                                    'Lets learn ${provider.videoInfo[index].data![0].field}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    }, ),
+                      ),
+                    ],
+                  ),
                 ),
-                ElevatedButton(onPressed: (){
-                  provider.logout((value,message){
-                    if(value){
-                      successSnack(context: context,message: message);
-                    }else{
-                      errorSnack(context: context,message: message);
-                    }
-                  });
-                }, child: Text("log out",style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Colors.white),)),
-              ],
-            ),
-          ),
         );
-      }
+      },
     );
   }
 }
-

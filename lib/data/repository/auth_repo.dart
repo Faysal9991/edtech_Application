@@ -5,19 +5,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepo {
-   FirebaseAuth firebaseAuth;
-   FirebaseFirestore firebaseFireStore;
-   SharedPreferences sharedPreferences;
+  FirebaseAuth firebaseAuth;
+  FirebaseFirestore firebaseFireStore;
+  SharedPreferences sharedPreferences;
 
-  AuthRepo({required this.sharedPreferences,
+  AuthRepo({
+    required this.sharedPreferences,
     required this.firebaseAuth,
-    required this.firebaseFireStore});
+    required this.firebaseFireStore,
+  });
 
-  Future<FirebaseResponse>signUP({required String userName,
+  Future<FirebaseResponse> signUP({
+    required String userName,
     required String email,
-    required String password}) async {
+    required String password,
+  }) async {
     try {
-      UserCredential userCredential = await firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential =
+          await firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       await firebaseFireStore
           .collection('users')
           .doc(userCredential.user!.uid)
@@ -26,21 +34,36 @@ class AuthRepo {
         'email': email,
         'uid': userCredential.user!.uid,
       });
-    return FirebaseResponse.withSuccess("", 200);
+      await sharedPreferences.setString(
+        AppConstant.userID,
+        userCredential.user!.uid,
+      );
+      await sharedPreferences.setString(AppConstant.userName, userName);
+      await sharedPreferences.setString(AppConstant.userEmail, email);
+      return FirebaseResponse.withSuccess("", 200);
     } on FirebaseAuthException catch (error) {
       return FirebaseResponse.withError(error, 300);
     }
   }
-   Future<FirebaseResponse>signIn({required String email, required String password}) async {
-     try {
-       UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(
-           email: email, password: password);
-print("=============>${userCredential.user!.uid}");
-       sharedPreferences .setString(AppConstant.userID, userCredential.user!.uid);
-       return FirebaseResponse.withSuccess("", 200);
-     } on FirebaseAuthException catch (error) {
-       return FirebaseResponse.withError(error, 300);
-     }
-   }
 
+  Future<FirebaseResponse> signIn({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      UserCredential userCredential =
+          await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      await sharedPreferences.setString(
+        AppConstant.userID,
+        userCredential.user!.uid,
+      );
+      await sharedPreferences.setString(AppConstant.userEmail, email);
+      return FirebaseResponse.withSuccess("", 200);
+    } on FirebaseAuthException catch (error) {
+      return FirebaseResponse.withError(error, 300);
+    }
+  }
 }
