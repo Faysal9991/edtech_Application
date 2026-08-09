@@ -41,7 +41,7 @@ class _SplashPageState extends State<SplashPage> {
             Text(
               context.l10n.tr('appName'),
               style: const TextStyle(
-                color: AppColors.white,
+                color: AppColors.textOnPrimary,
                 fontSize: 32,
                 fontWeight: FontWeight.w800,
               ),
@@ -49,7 +49,7 @@ class _SplashPageState extends State<SplashPage> {
             const SizedBox(height: 6),
             Text(
               context.l10n.tr('appTagline'),
-              style: const TextStyle(color: AppColors.green200),
+              style: const TextStyle(color: AppColors.primaryLight),
             ),
           ],
         ),
@@ -67,7 +67,7 @@ class _LogoMark extends StatelessWidget {
       width: 82,
       height: 82,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
       ),
       child: const Icon(

@@ -1,5 +1,6 @@
 import 'package:edtech_application/core/routing/app_routes.dart';
 import 'package:edtech_application/core/theme/app_colors.dart';
+import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
 import 'package:edtech_application/shared/animations/app_animations.dart';
@@ -19,9 +20,57 @@ class HomePage extends StatelessWidget {
     final lms = context.watch<StudentLmsController>();
     final firstName =
         user?.name.split(' ').first ?? context.l10n.tr('profile.fallbackName');
-    final continueCourse = lms.enrollments.isEmpty
+    final dashboard = lms.dashboard;
+    final continueItem = dashboard?.continueLearning.isNotEmpty == true
+        ? dashboard!.continueLearning.first
+        : null;
+    final continueCourse = continueItem != null
+        ? Course(
+            id: continueItem.courseId,
+            slug: continueItem.courseSlug,
+            title: continueItem.courseTitle,
+            category: context.l10n.tr('home.continueLearning'),
+            instructor: '',
+            duration: '',
+            lessons: 100,
+            completedLessons: continueItem.completionPercentage
+                .clamp(0, 100)
+                .round(),
+            rating: 0,
+            colorValue: AppColors.primary.toARGB32(),
+            subject: continueItem.lessonTitle,
+            thumbnailAssetId: continueItem.thumbnailAssetId,
+            enrollmentId: continueItem.enrollmentId,
+          )
+        : lms.enrollments.isEmpty
         ? null
         : lms.enrollments.first;
+    final upcomingLive = dashboard?.upcomingLiveClasses.isNotEmpty == true
+        ? dashboard!.upcomingLiveClasses.first
+        : null;
+    final displayCourses = dashboard?.recommendedCourses.isNotEmpty == true
+        ? dashboard!.recommendedCourses
+              .map(
+                (item) => Course(
+                  id: item.id,
+                  slug: item.slug,
+                  title: item.title,
+                  category: item.reason,
+                  instructor: '',
+                  duration: '',
+                  lessons: 0,
+                  rating: 0,
+                  colorValue: AppColors.primaryLight.toARGB32(),
+                  language: item.language,
+                  priceMinor: item.priceMinor,
+                  isFree: item.isFree,
+                  overview: item.description,
+                  currency: item.currency,
+                  thumbnailAssetId: item.thumbnailAssetId,
+                ),
+              )
+              .toList()
+        : lms.courses;
 
     return SafeArea(
       child: CustomScrollView(
@@ -80,11 +129,22 @@ class HomePage extends StatelessWidget {
                 AppEntrance(
                   type: EntranceType.fadeInUp,
                   delay: const Duration(milliseconds: 170),
-                  child: _HomeEmptyCard(
-                    icon: AppIcons.live,
-                    title: context.l10n.tr('home.upcomingLive'),
-                    subtitle: context.l10n.tr('home.liveApiMissing'),
-                  ),
+                  child: upcomingLive == null
+                      ? _HomeEmptyCard(
+                          icon: AppIcons.live,
+                          title: context.l10n.tr('home.upcomingLive'),
+                          subtitle: context.l10n.tr('home.liveApiMissing'),
+                        )
+                      : _UpcomingLiveCard(
+                          title: upcomingLive.title,
+                          courseTitle: upcomingLive.courseTitle,
+                          startsAt: upcomingLive.scheduledStartAt,
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.liveRoom,
+                            arguments: upcomingLive.id,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 28),
                 SectionHeader(
@@ -92,11 +152,23 @@ class HomePage extends StatelessWidget {
                   subtitle: context.l10n.tr('home.todayTasksSubtitle'),
                 ),
                 const SizedBox(height: 12),
-                _HomeEmptyCard(
-                  icon: AppIcons.task,
-                  title: context.l10n.tr('home.noTasks'),
-                  subtitle: context.l10n.tr('home.tasksApiMissing'),
-                ),
+                if (dashboard != null &&
+                    (dashboard.dueAssignments.isNotEmpty ||
+                        dashboard.availableQuizzes.isNotEmpty))
+                  _TodayTaskCard(
+                    assignment: dashboard.dueAssignments.isEmpty
+                        ? null
+                        : dashboard.dueAssignments.first,
+                    quiz: dashboard.availableQuizzes.isEmpty
+                        ? null
+                        : dashboard.availableQuizzes.first,
+                  )
+                else
+                  _HomeEmptyCard(
+                    icon: AppIcons.task,
+                    title: context.l10n.tr('home.noTasks'),
+                    subtitle: context.l10n.tr('home.tasksApiMissing'),
+                  ),
                 const SizedBox(height: 18),
                 SectionHeader(
                   title: context.l10n.tr('home.popularCourses'),
@@ -108,7 +180,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                if (lms.isLoadingCourses && lms.courses.isEmpty)
+                if (lms.isLoadingCourses && displayCourses.isEmpty)
                   Container(
                     height: 190,
                     decoration: BoxDecoration(
@@ -118,13 +190,13 @@ class HomePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   )
-                else if (lms.coursesError != null && lms.courses.isEmpty)
+                else if (lms.coursesError != null && displayCourses.isEmpty)
                   _HomeEmptyCard(
                     icon: AppIcons.cloudOff,
                     title: context.l10n.tr('home.courseLoadFailed'),
                     subtitle: lms.coursesError!,
                   )
-                else if (lms.courses.isEmpty)
+                else if (displayCourses.isEmpty)
                   _HomeEmptyCard(
                     icon: AppIcons.empty,
                     title: context.l10n.tr('home.noPublishedCourse'),
@@ -135,10 +207,10 @@ class HomePage extends StatelessWidget {
                     height: 240,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: lms.courses.length,
+                      itemCount: displayCourses.length,
                       separatorBuilder: (_, _) => const SizedBox(width: 12),
                       itemBuilder: (context, index) {
-                        final course = lms.courses[index];
+                        final course = displayCourses[index];
                         return StaggeredAnimation(
                           index: index,
                           type: EntranceType.fadeInRight,
@@ -253,7 +325,7 @@ class _ContinueLearningCard extends StatelessWidget {
             Text(
               context.l10n.tr('home.continueLearning').toUpperCase(),
               style: const TextStyle(
-                color: AppColors.green200,
+                color: AppColors.primaryLight,
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
                 letterSpacing: .9,
@@ -264,7 +336,7 @@ class _ContinueLearningCard extends StatelessWidget {
               course.subject,
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(color: AppColors.white),
+              ).textTheme.titleLarge?.copyWith(color: AppColors.textOnPrimary),
             ),
             const SizedBox(height: 12),
             Row(
@@ -273,15 +345,17 @@ class _ContinueLearningCard extends StatelessWidget {
                   child: AnimatedProgressBar(
                     value: progress,
                     height: 7,
-                    backgroundColor: Color(0x33FFFFFF),
-                    color: AppColors.green200,
+                    backgroundColor: AppColors.textOnPrimary.withValues(
+                      alpha: .20,
+                    ),
+                    color: AppColors.secondaryLight,
                   ),
                 ),
                 SizedBox(width: 10),
                 Text(
                   context.l10n.percent((progress * 100).round()),
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: AppColors.textOnPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -293,13 +367,13 @@ class _ContinueLearningCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     course.title,
-                    style: TextStyle(color: AppColors.white),
+                    style: TextStyle(color: AppColors.textOnPrimary),
                   ),
                 ),
                 IconButton.filled(
                   onPressed: onTap,
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.white,
+                    backgroundColor: AppColors.surface,
                     foregroundColor: AppColors.primary,
                   ),
                   icon: const AppIcon(AppIcons.play),
@@ -308,6 +382,117 @@ class _ContinueLearningCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _UpcomingLiveCard extends StatelessWidget {
+  const _UpcomingLiveCard({
+    required this.title,
+    required this.courseTitle,
+    required this.startsAt,
+    required this.onTap,
+  });
+
+  final String title;
+  final String courseTitle;
+  final DateTime startsAt;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final localStart = startsAt.toLocal();
+    final minute = localStart.minute.toString().padLeft(2, '0');
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const AppIconBadge(
+              icon: AppIcons.live,
+              backgroundColor: AppColors.errorBackground,
+              foregroundColor: AppColors.error,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$courseTitle • ${context.l10n.number(localStart.hour)}:${context.l10n.digits(minute)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton.tonal(
+              onPressed: onTap,
+              child: Text(context.l10n.tr('live.joinNow')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TodayTaskCard extends StatelessWidget {
+  const _TodayTaskCard({this.assignment, this.quiz});
+
+  final DashboardAssignmentDto? assignment;
+  final DashboardQuizDto? quiz;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Column(
+        children: [
+          if (quiz != null)
+            ListTile(
+              leading: const AppIconBadge(icon: AppIcons.task, size: 44),
+              title: Text(
+                quiz!.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(quiz!.courseTitle),
+              trailing: const AppIcon(AppIcons.arrowRight, size: 19),
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.quiz,
+                arguments: quiz!.id,
+              ),
+            ),
+          if (quiz != null && assignment != null)
+            const Divider(height: 1, indent: 72),
+          if (assignment != null)
+            ListTile(
+              leading: const AppIconBadge(icon: AppIcons.learning, size: 44),
+              title: Text(
+                assignment!.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(assignment!.courseTitle),
+              trailing: const AppIcon(AppIcons.arrowRight, size: 19),
+              onTap: () => Navigator.pushNamed(
+                context,
+                AppRoutes.assignment,
+                arguments: assignment!.id,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -351,11 +536,9 @@ class _PopularCourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final thumbnailColor = Color(course.colorValue);
-    final thumbnailForeground =
-        ThemeData.estimateBrightnessForColor(thumbnailColor) == Brightness.dark
-        ? AppColors.white
-        : AppColors.primary;
+    final colors = Theme.of(context).colorScheme;
+    final thumbnailColor = colors.primaryContainer;
+    final thumbnailForeground = colors.onPrimaryContainer;
     return SizedBox(
       width: 238,
       child: PressableScale(
@@ -391,7 +574,7 @@ class _PopularCourseCard extends StatelessWidget {
                           const Icon(
                             Icons.star_rounded,
                             size: 17,
-                            color: AppColors.secondary,
+                            color: AppColors.warning,
                           ),
                           const SizedBox(width: 3),
                           Text(course.rating.toStringAsFixed(1)),

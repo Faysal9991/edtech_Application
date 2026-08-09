@@ -96,7 +96,11 @@ class _VerificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: result.valid ? AppColors.green50 : null,
+      color: result.valid
+          ? Theme.of(context).brightness == Brightness.dark
+                ? AppColors.darkSuccessBackground
+                : AppColors.successBackground
+          : null,
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -105,7 +109,9 @@ class _VerificationCard extends StatelessWidget {
               result.valid ? Icons.verified_rounded : Icons.gpp_bad_outlined,
               size: 58,
               color: result.valid
-                  ? AppColors.primary
+                  ? Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.darkSuccess
+                        : AppColors.success
                   : Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 12),

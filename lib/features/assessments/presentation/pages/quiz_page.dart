@@ -154,8 +154,10 @@ class _QuizPageState extends State<QuizPage> {
               LinearProgressIndicator(
                 minHeight: 5,
                 value: (_index + 1) / attempt.questions.length,
-                color: AppColors.secondary,
-                backgroundColor: AppColors.green50,
+                color: Theme.of(context).colorScheme.secondary,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer,
               ),
               Expanded(
                 child: ListView(
@@ -239,7 +241,7 @@ class _QuizPageState extends State<QuizPage> {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: const Border(top: BorderSide(color: AppColors.border)),
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: Row(
         children: [
@@ -472,11 +474,12 @@ class _AnswerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Material(
-      color: selected ? AppColors.green50 : Colors.transparent,
+      color: selected ? colors.primaryContainer : Colors.transparent,
       shape: RoundedRectangleBorder(
         side: BorderSide(
-          color: selected ? AppColors.secondary : AppColors.border,
+          color: selected ? colors.primary : colors.outline,
           width: selected ? 1.5 : 1,
         ),
         borderRadius: BorderRadius.circular(16),
@@ -491,18 +494,17 @@ class _AnswerOption extends StatelessWidget {
               CircleAvatar(
                 radius: 18,
                 backgroundColor: selected
-                    ? AppColors.primary
-                    : AppColors.green50,
-                foregroundColor: selected ? Colors.white : AppColors.primary,
+                    ? colors.primary
+                    : colors.primaryContainer,
+                foregroundColor: selected
+                    ? colors.onPrimary
+                    : colors.onPrimaryContainer,
                 child: Text(label),
               ),
               const SizedBox(width: 14),
               Expanded(child: Text(text)),
               if (selected)
-                const Icon(
-                  Icons.check_circle_rounded,
-                  color: AppColors.primary,
-                ),
+                Icon(Icons.check_circle_rounded, color: colors.primary),
             ],
           ),
         ),

@@ -53,12 +53,16 @@ class _CertificateCardState extends State<_CertificateCard> {
         padding: const EdgeInsets.all(18),
         child: Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 28,
-              backgroundColor: AppColors.green50,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark
+                  ? AppColors.darkSuccessBackground
+                  : AppColors.successBackground,
               child: Icon(
                 Icons.workspace_premium_rounded,
-                color: AppColors.primary,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkSuccess
+                    : AppColors.success,
                 size: 30,
               ),
             ),

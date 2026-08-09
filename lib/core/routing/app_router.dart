@@ -1,6 +1,7 @@
 import 'package:edtech_application/core/routing/app_routes.dart';
 import 'package:edtech_application/features/assessments/presentation/pages/assessments_page.dart';
 import 'package:edtech_application/features/assessments/presentation/pages/assignment_page.dart';
+import 'package:edtech_application/features/assessments/presentation/pages/exam_page.dart';
 import 'package:edtech_application/features/assessments/presentation/pages/quiz_page.dart';
 import 'package:edtech_application/features/authentication/presentation/pages/forgot_password_page.dart';
 import 'package:edtech_application/features/authentication/presentation/pages/reset_password_page.dart';
@@ -57,6 +58,11 @@ class AppRouter {
       AppRoutes.assessments => const AssessmentsPage(),
       AppRoutes.quiz => QuizPage(
         quizId: settings.arguments is String
+            ? settings.arguments! as String
+            : null,
+      ),
+      AppRoutes.exam => ExamPage(
+        examId: settings.arguments is String
             ? settings.arguments! as String
             : null,
       ),

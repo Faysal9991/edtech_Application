@@ -190,7 +190,9 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            border: const Border(top: BorderSide(color: AppColors.border)),
+            border: Border(
+              top: BorderSide(color: Theme.of(context).dividerColor),
+            ),
           ),
           child: Row(
             children: [
@@ -201,7 +203,9 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
                   children: [
                     Text(
                       context.l10n.tr('course.price'),
-                      style: const TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     Text(
                       course.displayPrice,
@@ -299,9 +303,9 @@ class _CourseThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Color(course.colorValue);
-    final dark = ThemeData.estimateBrightnessForColor(color) == Brightness.dark;
-    final foreground = dark ? AppColors.white : AppColors.primary;
+    final colors = Theme.of(context).colorScheme;
+    final color = colors.primaryContainer;
+    final foreground = colors.onPrimaryContainer;
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Container(
@@ -324,7 +328,7 @@ class _CourseThumbnail extends StatelessWidget {
                   vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -373,13 +377,13 @@ class _Tag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.green50,
+        color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(9),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: AppColors.primary,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),
@@ -399,8 +403,8 @@ class _Instructor extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 22,
-          backgroundColor: AppColors.green200,
-          foregroundColor: AppColors.primary,
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
           child: Text(name.substring(0, 1)),
         ),
         const SizedBox(width: 12),
@@ -410,8 +414,8 @@ class _Instructor extends StatelessWidget {
             children: [
               Text(
                 context.l10n.tr('course.teacher'),
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 12,
                 ),
               ),
@@ -419,9 +423,9 @@ class _Instructor extends StatelessWidget {
             ],
           ),
         ),
-        const Icon(
+        Icon(
           Icons.verified_rounded,
-          color: AppColors.secondary,
+          color: Theme.of(context).colorScheme.secondary,
           size: 20,
         ),
       ],
@@ -439,7 +443,7 @@ class _CourseStats extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -489,8 +493,8 @@ class _Stat extends StatelessWidget {
           ),
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 11,
             ),
           ),

@@ -61,7 +61,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
         children: [
           Card(
-            color: AppColors.green50,
+            color: Theme.of(context).colorScheme.tertiaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Column(
@@ -105,11 +105,13 @@ class _AssignmentPageState extends State<AssignmentPage> {
           else
             Card(
               child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: AppColors.green50,
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                   child: Icon(
                     Icons.insert_drive_file_outlined,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                 ),
                 title: Text(_attachment!.file.name),
@@ -132,7 +134,9 @@ class _AssignmentPageState extends State<AssignmentPage> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            border: const Border(top: BorderSide(color: AppColors.border)),
+            border: Border(
+              top: BorderSide(color: Theme.of(context).dividerColor),
+            ),
           ),
           child: FilledButton.icon(
             onPressed: _submitting ? null : _submit,

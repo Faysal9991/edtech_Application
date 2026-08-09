@@ -29,43 +29,51 @@ class AppTheme {
       // elevation via explicit colors instead.
       surfaceTint: AppColors.transparent,
       primary: isDark ? AppColors.darkPrimary : AppColors.primary,
-      onPrimary: isDark ? AppColors.green900 : AppColors.white,
+      onPrimary: isDark ? AppColors.darkBackground : AppColors.textOnPrimary,
       primaryContainer: isDark
-          ? AppColors.darkSurfaceSelected
-          : AppColors.green50,
+          ? AppColors.darkPrimaryContainer
+          : AppColors.primaryLight,
       onPrimaryContainer: isDark
           ? AppColors.darkTextPrimary
-          : AppColors.green900,
+          : AppColors.primaryDark,
       secondary: isDark ? AppColors.darkSecondary : AppColors.secondary,
-      onSecondary: AppColors.ink,
+      onSecondary: isDark ? AppColors.darkBackground : AppColors.textPrimary,
       secondaryContainer: isDark
-          ? AppColors.darkSurfaceSelected
-          : AppColors.green50,
+          ? AppColors.darkSecondaryContainer
+          : AppColors.secondaryLight,
       onSecondaryContainer: isDark
           ? AppColors.darkTextPrimary
-          : AppColors.green900,
-      error: AppColors.danger,
-      onError: AppColors.white,
-      errorContainer: AppColors.dangerBackground,
-      onErrorContainer: AppColors.danger,
-      tertiary: AppColors.info,
-      onTertiary: AppColors.white,
-      tertiaryContainer: AppColors.infoBackground,
-      onSurface: isDark ? AppColors.darkTextPrimary : AppColors.ink,
+          : AppColors.secondaryDark,
+      error: isDark ? AppColors.darkError : AppColors.error,
+      onError: AppColors.textOnPrimary,
+      errorContainer: isDark
+          ? AppColors.darkErrorBackground
+          : AppColors.errorBackground,
+      onErrorContainer: isDark ? AppColors.darkError : AppColors.error,
+      tertiary: isDark ? AppColors.darkInfo : AppColors.info,
+      onTertiary: isDark ? AppColors.darkBackground : AppColors.textOnPrimary,
+      tertiaryContainer: isDark
+          ? AppColors.darkInfoBackground
+          : AppColors.infoBackground,
+      onSurface: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
       onSurfaceVariant: isDark
           ? AppColors.darkTextSecondary
           : AppColors.textSecondary,
       outline: isDark ? AppColors.darkBorder : AppColors.border,
       outlineVariant: isDark ? AppColors.darkBorder : AppColors.divider,
-      surfaceContainerLowest: isDark ? AppColors.darkScaffold : AppColors.white,
-      surfaceContainerLow: isDark ? AppColors.darkSurface : AppColors.canvas,
-      surfaceContainer: isDark ? AppColors.darkSurface : AppColors.white,
+      surfaceContainerLowest: isDark
+          ? AppColors.darkBackground
+          : AppColors.surface,
+      surfaceContainerLow: isDark
+          ? AppColors.darkSurface
+          : AppColors.background,
+      surfaceContainer: isDark ? AppColors.darkSurface : AppColors.surface,
       surfaceContainerHigh: isDark
-          ? AppColors.darkSurfaceSoft
-          : AppColors.fieldFill,
+          ? AppColors.darkSurfaceMuted
+          : AppColors.surfaceMuted,
       surfaceContainerHighest: isDark
-          ? AppColors.darkSurfaceSelected
-          : AppColors.green50,
+          ? AppColors.darkSurfaceMuted
+          : AppColors.surfaceMuted,
     );
 
     final banglaFont = GoogleFonts.notoSansBengali().fontFamily!;
@@ -76,8 +84,10 @@ class AppTheme {
           ),
           banglaFont,
         ).apply(
-          bodyColor: isDark ? AppColors.darkTextPrimary : AppColors.ink,
-          displayColor: isDark ? AppColors.darkTextPrimary : AppColors.ink,
+          bodyColor: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+          displayColor: isDark
+              ? AppColors.darkTextPrimary
+              : AppColors.textPrimary,
         );
 
     final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
@@ -86,18 +96,19 @@ class AppTheme {
         : AppColors.textSecondary;
     final borderColor = isDark ? AppColors.darkBorder : AppColors.border;
     final dividerColor = isDark ? AppColors.darkBorder : AppColors.divider;
-    // Dark mode's surfaceSoft is already a visibly elevated tone against
-    // darkScaffold, so it doesn't have the same "too flat" problem light
-    // mode had — only light mode needs the extra fieldFill step.
-    final fieldFill = isDark ? AppColors.darkSurfaceSoft : AppColors.fieldFill;
+    // Muted surfaces are neutral in both modes; color is introduced only by
+    // explicit brand, progress, or semantic state containers.
+    final fieldFill = isDark
+        ? AppColors.darkSurfaceMuted
+        : AppColors.surfaceMuted;
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: isDark
-          ? AppColors.darkScaffold
-          : AppColors.canvas,
+          ? AppColors.darkBackground
+          : AppColors.background,
       disabledColor: AppColors.disabled,
       hintColor: mutedText,
       dividerColor: dividerColor,
@@ -131,7 +142,7 @@ class AppTheme {
         centerTitle: false,
         iconTheme: IconThemeData(color: colorScheme.onSurface),
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: isDark ? AppColors.darkTextPrimary : AppColors.ink,
+          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -153,7 +164,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titleTextStyle: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w800,
-          color: isDark ? AppColors.darkTextPrimary : AppColors.ink,
+          color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
         ),
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: secondaryText),
       ),
@@ -189,7 +200,7 @@ class AppTheme {
         ),
         hintStyle: TextStyle(color: mutedText),
         errorStyle: TextStyle(
-          color: AppColors.danger,
+          color: colorScheme.error,
           fontWeight: FontWeight.w500,
           fontSize: 12.5,
         ),
@@ -199,8 +210,8 @@ class AppTheme {
         enabledBorder: _inputBorder(borderColor),
         disabledBorder: _inputBorder(dividerColor),
         focusedBorder: _inputBorder(colorScheme.primary),
-        errorBorder: _inputBorder(AppColors.danger),
-        focusedErrorBorder: _inputBorder(AppColors.danger),
+        errorBorder: _inputBorder(colorScheme.error),
+        focusedErrorBorder: _inputBorder(colorScheme.error),
       ),
 
       textSelectionTheme: TextSelectionThemeData(
@@ -247,7 +258,7 @@ class AppTheme {
               ? colorScheme.primary
               : AppColors.transparent,
         ),
-        checkColor: WidgetStateProperty.all(AppColors.white),
+        checkColor: WidgetStateProperty.all(AppColors.textOnPrimary),
         side: BorderSide(color: borderColor, width: 1.4),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       ),
@@ -256,7 +267,7 @@ class AppTheme {
         thumbColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
               ? colorScheme.primary
-              : AppColors.white,
+              : AppColors.surface,
         ),
         trackColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
@@ -266,7 +277,7 @@ class AppTheme {
       ),
 
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: colorScheme.primary,
+        color: colorScheme.secondary,
       ),
 
       listTileTheme: ListTileThemeData(
@@ -287,8 +298,10 @@ class AppTheme {
       ),
 
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark ? AppColors.darkSurfaceSoft : AppColors.ink,
-        contentTextStyle: const TextStyle(color: AppColors.white),
+        backgroundColor: isDark
+            ? AppColors.darkSurfaceMuted
+            : AppColors.textPrimary,
+        contentTextStyle: const TextStyle(color: AppColors.textOnPrimary),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -299,8 +312,8 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
         indicatorColor: isDark
-            ? AppColors.darkSurfaceSelected
-            : AppColors.green50,
+            ? AppColors.darkPrimaryContainer
+            : AppColors.primaryLight,
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             color: states.contains(WidgetState.selected)
@@ -325,8 +338,8 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: fieldFill,
         selectedColor: isDark
-            ? AppColors.darkSurfaceSelected
-            : AppColors.green50,
+            ? AppColors.darkPrimaryContainer
+            : AppColors.primaryLight,
         checkmarkColor: colorScheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         side: BorderSide.none,
@@ -338,10 +351,13 @@ class AppTheme {
 
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurfaceSoft : AppColors.ink,
+          color: isDark ? AppColors.darkSurfaceMuted : AppColors.textPrimary,
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: const TextStyle(color: AppColors.white, fontSize: 12),
+        textStyle: const TextStyle(
+          color: AppColors.textOnPrimary,
+          fontSize: 12,
+        ),
       ),
     );
   }

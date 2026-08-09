@@ -5075,7 +5075,7 @@ as List<QuizOptionDto>,
 /// @nodoc
 mixin _$QuizAttemptDto {
 
- String get id;@JsonKey(name: 'quiz_id') String get quizId;@JsonKey(name: 'attempt_number') int get attemptNumber; String get status;@JsonKey(name: 'started_at') DateTime get startedAt;@JsonKey(name: 'expires_at') DateTime? get expiresAt; List<QuizQuestionDto> get questions; double? get percentage; bool? get passed;
+ String get id;@JsonKey(name: 'quiz_id') String get quizId;@JsonKey(name: 'attempt_number') int get attemptNumber; String get status;@JsonKey(name: 'started_at') DateTime get startedAt;@JsonKey(name: 'expires_at') DateTime? get expiresAt;@JsonKey(name: 'submit_before') DateTime? get submitBefore; List<QuizQuestionDto> get questions; double? get percentage; bool? get passed;
 /// Create a copy of QuizAttemptDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5088,16 +5088,16 @@ $QuizAttemptDtoCopyWith<QuizAttemptDto> get copyWith => _$QuizAttemptDtoCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizAttemptDto&&(identical(other.id, id) || other.id == id)&&(identical(other.quizId, quizId) || other.quizId == quizId)&&(identical(other.attemptNumber, attemptNumber) || other.attemptNumber == attemptNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.percentage, percentage) || other.percentage == percentage)&&(identical(other.passed, passed) || other.passed == passed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is QuizAttemptDto&&(identical(other.id, id) || other.id == id)&&(identical(other.quizId, quizId) || other.quizId == quizId)&&(identical(other.attemptNumber, attemptNumber) || other.attemptNumber == attemptNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.submitBefore, submitBefore) || other.submitBefore == submitBefore)&&const DeepCollectionEquality().equals(other.questions, questions)&&(identical(other.percentage, percentage) || other.percentage == percentage)&&(identical(other.passed, passed) || other.passed == passed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,quizId,attemptNumber,status,startedAt,expiresAt,const DeepCollectionEquality().hash(questions),percentage,passed);
+int get hashCode => Object.hash(runtimeType,id,quizId,attemptNumber,status,startedAt,expiresAt,submitBefore,const DeepCollectionEquality().hash(questions),percentage,passed);
 
 @override
 String toString() {
-  return 'QuizAttemptDto(id: $id, quizId: $quizId, attemptNumber: $attemptNumber, status: $status, startedAt: $startedAt, expiresAt: $expiresAt, questions: $questions, percentage: $percentage, passed: $passed)';
+  return 'QuizAttemptDto(id: $id, quizId: $quizId, attemptNumber: $attemptNumber, status: $status, startedAt: $startedAt, expiresAt: $expiresAt, submitBefore: $submitBefore, questions: $questions, percentage: $percentage, passed: $passed)';
 }
 
 
@@ -5108,7 +5108,7 @@ abstract mixin class $QuizAttemptDtoCopyWith<$Res>  {
   factory $QuizAttemptDtoCopyWith(QuizAttemptDto value, $Res Function(QuizAttemptDto) _then) = _$QuizAttemptDtoCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'quiz_id') String quizId,@JsonKey(name: 'attempt_number') int attemptNumber, String status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'expires_at') DateTime? expiresAt, List<QuizQuestionDto> questions, double? percentage, bool? passed
+ String id,@JsonKey(name: 'quiz_id') String quizId,@JsonKey(name: 'attempt_number') int attemptNumber, String status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'expires_at') DateTime? expiresAt,@JsonKey(name: 'submit_before') DateTime? submitBefore, List<QuizQuestionDto> questions, double? percentage, bool? passed
 });
 
 
@@ -5125,7 +5125,7 @@ class _$QuizAttemptDtoCopyWithImpl<$Res>
 
 /// Create a copy of QuizAttemptDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? quizId = null,Object? attemptNumber = null,Object? status = null,Object? startedAt = null,Object? expiresAt = freezed,Object? questions = null,Object? percentage = freezed,Object? passed = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? quizId = null,Object? attemptNumber = null,Object? status = null,Object? startedAt = null,Object? expiresAt = freezed,Object? submitBefore = freezed,Object? questions = null,Object? percentage = freezed,Object? passed = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,quizId: null == quizId ? _self.quizId : quizId // ignore: cast_nullable_to_non_nullable
@@ -5133,6 +5133,7 @@ as String,attemptNumber: null == attemptNumber ? _self.attemptNumber : attemptNu
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,submitBefore: freezed == submitBefore ? _self.submitBefore : submitBefore // ignore: cast_nullable_to_non_nullable
 as DateTime?,questions: null == questions ? _self.questions : questions // ignore: cast_nullable_to_non_nullable
 as List<QuizQuestionDto>,percentage: freezed == percentage ? _self.percentage : percentage // ignore: cast_nullable_to_non_nullable
 as double?,passed: freezed == passed ? _self.passed : passed // ignore: cast_nullable_to_non_nullable
@@ -5221,10 +5222,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'quiz_id')  String quizId, @JsonKey(name: 'attempt_number')  int attemptNumber,  String status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'expires_at')  DateTime? expiresAt,  List<QuizQuestionDto> questions,  double? percentage,  bool? passed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'quiz_id')  String quizId, @JsonKey(name: 'attempt_number')  int attemptNumber,  String status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'expires_at')  DateTime? expiresAt, @JsonKey(name: 'submit_before')  DateTime? submitBefore,  List<QuizQuestionDto> questions,  double? percentage,  bool? passed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _QuizAttemptDto() when $default != null:
-return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.startedAt,_that.expiresAt,_that.questions,_that.percentage,_that.passed);case _:
+return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.startedAt,_that.expiresAt,_that.submitBefore,_that.questions,_that.percentage,_that.passed);case _:
   return orElse();
 
 }
@@ -5242,10 +5243,10 @@ return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.sta
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'quiz_id')  String quizId, @JsonKey(name: 'attempt_number')  int attemptNumber,  String status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'expires_at')  DateTime? expiresAt,  List<QuizQuestionDto> questions,  double? percentage,  bool? passed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'quiz_id')  String quizId, @JsonKey(name: 'attempt_number')  int attemptNumber,  String status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'expires_at')  DateTime? expiresAt, @JsonKey(name: 'submit_before')  DateTime? submitBefore,  List<QuizQuestionDto> questions,  double? percentage,  bool? passed)  $default,) {final _that = this;
 switch (_that) {
 case _QuizAttemptDto():
-return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.startedAt,_that.expiresAt,_that.questions,_that.percentage,_that.passed);case _:
+return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.startedAt,_that.expiresAt,_that.submitBefore,_that.questions,_that.percentage,_that.passed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5262,10 +5263,10 @@ return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.sta
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'quiz_id')  String quizId, @JsonKey(name: 'attempt_number')  int attemptNumber,  String status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'expires_at')  DateTime? expiresAt,  List<QuizQuestionDto> questions,  double? percentage,  bool? passed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'quiz_id')  String quizId, @JsonKey(name: 'attempt_number')  int attemptNumber,  String status, @JsonKey(name: 'started_at')  DateTime startedAt, @JsonKey(name: 'expires_at')  DateTime? expiresAt, @JsonKey(name: 'submit_before')  DateTime? submitBefore,  List<QuizQuestionDto> questions,  double? percentage,  bool? passed)?  $default,) {final _that = this;
 switch (_that) {
 case _QuizAttemptDto() when $default != null:
-return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.startedAt,_that.expiresAt,_that.questions,_that.percentage,_that.passed);case _:
+return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.startedAt,_that.expiresAt,_that.submitBefore,_that.questions,_that.percentage,_that.passed);case _:
   return null;
 
 }
@@ -5277,7 +5278,7 @@ return $default(_that.id,_that.quizId,_that.attemptNumber,_that.status,_that.sta
 @JsonSerializable()
 
 class _QuizAttemptDto implements QuizAttemptDto {
-  const _QuizAttemptDto({required this.id, @JsonKey(name: 'quiz_id') required this.quizId, @JsonKey(name: 'attempt_number') required this.attemptNumber, required this.status, @JsonKey(name: 'started_at') required this.startedAt, @JsonKey(name: 'expires_at') this.expiresAt, final  List<QuizQuestionDto> questions = const <QuizQuestionDto>[], this.percentage, this.passed}): _questions = questions;
+  const _QuizAttemptDto({required this.id, @JsonKey(name: 'quiz_id') required this.quizId, @JsonKey(name: 'attempt_number') required this.attemptNumber, required this.status, @JsonKey(name: 'started_at') required this.startedAt, @JsonKey(name: 'expires_at') this.expiresAt, @JsonKey(name: 'submit_before') this.submitBefore, final  List<QuizQuestionDto> questions = const <QuizQuestionDto>[], this.percentage, this.passed}): _questions = questions;
   factory _QuizAttemptDto.fromJson(Map<String, dynamic> json) => _$QuizAttemptDtoFromJson(json);
 
 @override final  String id;
@@ -5286,6 +5287,7 @@ class _QuizAttemptDto implements QuizAttemptDto {
 @override final  String status;
 @override@JsonKey(name: 'started_at') final  DateTime startedAt;
 @override@JsonKey(name: 'expires_at') final  DateTime? expiresAt;
+@override@JsonKey(name: 'submit_before') final  DateTime? submitBefore;
  final  List<QuizQuestionDto> _questions;
 @override@JsonKey() List<QuizQuestionDto> get questions {
   if (_questions is EqualUnmodifiableListView) return _questions;
@@ -5309,16 +5311,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizAttemptDto&&(identical(other.id, id) || other.id == id)&&(identical(other.quizId, quizId) || other.quizId == quizId)&&(identical(other.attemptNumber, attemptNumber) || other.attemptNumber == attemptNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.percentage, percentage) || other.percentage == percentage)&&(identical(other.passed, passed) || other.passed == passed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuizAttemptDto&&(identical(other.id, id) || other.id == id)&&(identical(other.quizId, quizId) || other.quizId == quizId)&&(identical(other.attemptNumber, attemptNumber) || other.attemptNumber == attemptNumber)&&(identical(other.status, status) || other.status == status)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.submitBefore, submitBefore) || other.submitBefore == submitBefore)&&const DeepCollectionEquality().equals(other._questions, _questions)&&(identical(other.percentage, percentage) || other.percentage == percentage)&&(identical(other.passed, passed) || other.passed == passed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,quizId,attemptNumber,status,startedAt,expiresAt,const DeepCollectionEquality().hash(_questions),percentage,passed);
+int get hashCode => Object.hash(runtimeType,id,quizId,attemptNumber,status,startedAt,expiresAt,submitBefore,const DeepCollectionEquality().hash(_questions),percentage,passed);
 
 @override
 String toString() {
-  return 'QuizAttemptDto(id: $id, quizId: $quizId, attemptNumber: $attemptNumber, status: $status, startedAt: $startedAt, expiresAt: $expiresAt, questions: $questions, percentage: $percentage, passed: $passed)';
+  return 'QuizAttemptDto(id: $id, quizId: $quizId, attemptNumber: $attemptNumber, status: $status, startedAt: $startedAt, expiresAt: $expiresAt, submitBefore: $submitBefore, questions: $questions, percentage: $percentage, passed: $passed)';
 }
 
 
@@ -5329,7 +5331,7 @@ abstract mixin class _$QuizAttemptDtoCopyWith<$Res> implements $QuizAttemptDtoCo
   factory _$QuizAttemptDtoCopyWith(_QuizAttemptDto value, $Res Function(_QuizAttemptDto) _then) = __$QuizAttemptDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'quiz_id') String quizId,@JsonKey(name: 'attempt_number') int attemptNumber, String status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'expires_at') DateTime? expiresAt, List<QuizQuestionDto> questions, double? percentage, bool? passed
+ String id,@JsonKey(name: 'quiz_id') String quizId,@JsonKey(name: 'attempt_number') int attemptNumber, String status,@JsonKey(name: 'started_at') DateTime startedAt,@JsonKey(name: 'expires_at') DateTime? expiresAt,@JsonKey(name: 'submit_before') DateTime? submitBefore, List<QuizQuestionDto> questions, double? percentage, bool? passed
 });
 
 
@@ -5346,7 +5348,7 @@ class __$QuizAttemptDtoCopyWithImpl<$Res>
 
 /// Create a copy of QuizAttemptDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? quizId = null,Object? attemptNumber = null,Object? status = null,Object? startedAt = null,Object? expiresAt = freezed,Object? questions = null,Object? percentage = freezed,Object? passed = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? quizId = null,Object? attemptNumber = null,Object? status = null,Object? startedAt = null,Object? expiresAt = freezed,Object? submitBefore = freezed,Object? questions = null,Object? percentage = freezed,Object? passed = freezed,}) {
   return _then(_QuizAttemptDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,quizId: null == quizId ? _self.quizId : quizId // ignore: cast_nullable_to_non_nullable
@@ -5354,6 +5356,7 @@ as String,attemptNumber: null == attemptNumber ? _self.attemptNumber : attemptNu
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,submitBefore: freezed == submitBefore ? _self.submitBefore : submitBefore // ignore: cast_nullable_to_non_nullable
 as DateTime?,questions: null == questions ? _self._questions : questions // ignore: cast_nullable_to_non_nullable
 as List<QuizQuestionDto>,percentage: freezed == percentage ? _self.percentage : percentage // ignore: cast_nullable_to_non_nullable
 as double?,passed: freezed == passed ? _self.passed : passed // ignore: cast_nullable_to_non_nullable
@@ -9489,7 +9492,7 @@ as String,
 /// @nodoc
 mixin _$NotificationDto {
 
- String get id; String get type; String get title; String get body; Map<String, dynamic> get data;@JsonKey(name: 'read_at') DateTime? get readAt;@JsonKey(name: 'created_at') DateTime get createdAt;
+ String get id; String get type; String get title; String get body;@JsonKey(name: 'entity_type') String? get entityType;@JsonKey(name: 'entity_id') String? get entityId;@JsonKey(name: 'deep_link') String? get deepLink; Map<String, dynamic> get data;@JsonKey(name: 'read_at') DateTime? get readAt;@JsonKey(name: 'created_at') DateTime get createdAt;
 /// Create a copy of NotificationDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -9502,16 +9505,16 @@ $NotificationDtoCopyWith<NotificationDto> get copyWith => _$NotificationDtoCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is NotificationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.entityType, entityType) || other.entityType == entityType)&&(identical(other.entityId, entityId) || other.entityId == entityId)&&(identical(other.deepLink, deepLink) || other.deepLink == deepLink)&&const DeepCollectionEquality().equals(other.data, data)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,body,const DeepCollectionEquality().hash(data),readAt,createdAt);
+int get hashCode => Object.hash(runtimeType,id,type,title,body,entityType,entityId,deepLink,const DeepCollectionEquality().hash(data),readAt,createdAt);
 
 @override
 String toString() {
-  return 'NotificationDto(id: $id, type: $type, title: $title, body: $body, data: $data, readAt: $readAt, createdAt: $createdAt)';
+  return 'NotificationDto(id: $id, type: $type, title: $title, body: $body, entityType: $entityType, entityId: $entityId, deepLink: $deepLink, data: $data, readAt: $readAt, createdAt: $createdAt)';
 }
 
 
@@ -9522,7 +9525,7 @@ abstract mixin class $NotificationDtoCopyWith<$Res>  {
   factory $NotificationDtoCopyWith(NotificationDto value, $Res Function(NotificationDto) _then) = _$NotificationDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String type, String title, String body, Map<String, dynamic> data,@JsonKey(name: 'read_at') DateTime? readAt,@JsonKey(name: 'created_at') DateTime createdAt
+ String id, String type, String title, String body,@JsonKey(name: 'entity_type') String? entityType,@JsonKey(name: 'entity_id') String? entityId,@JsonKey(name: 'deep_link') String? deepLink, Map<String, dynamic> data,@JsonKey(name: 'read_at') DateTime? readAt,@JsonKey(name: 'created_at') DateTime createdAt
 });
 
 
@@ -9539,13 +9542,16 @@ class _$NotificationDtoCopyWithImpl<$Res>
 
 /// Create a copy of NotificationDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? body = null,Object? data = null,Object? readAt = freezed,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? body = null,Object? entityType = freezed,Object? entityId = freezed,Object? deepLink = freezed,Object? data = null,Object? readAt = freezed,Object? createdAt = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
-as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as String,entityType: freezed == entityType ? _self.entityType : entityType // ignore: cast_nullable_to_non_nullable
+as String?,entityId: freezed == entityId ? _self.entityId : entityId // ignore: cast_nullable_to_non_nullable
+as String?,deepLink: freezed == deepLink ? _self.deepLink : deepLink // ignore: cast_nullable_to_non_nullable
+as String?,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,
@@ -9633,10 +9639,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String type,  String title,  String body,  Map<String, dynamic> data, @JsonKey(name: 'read_at')  DateTime? readAt, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String type,  String title,  String body, @JsonKey(name: 'entity_type')  String? entityType, @JsonKey(name: 'entity_id')  String? entityId, @JsonKey(name: 'deep_link')  String? deepLink,  Map<String, dynamic> data, @JsonKey(name: 'read_at')  DateTime? readAt, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _NotificationDto() when $default != null:
-return $default(_that.id,_that.type,_that.title,_that.body,_that.data,_that.readAt,_that.createdAt);case _:
+return $default(_that.id,_that.type,_that.title,_that.body,_that.entityType,_that.entityId,_that.deepLink,_that.data,_that.readAt,_that.createdAt);case _:
   return orElse();
 
 }
@@ -9654,10 +9660,10 @@ return $default(_that.id,_that.type,_that.title,_that.body,_that.data,_that.read
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String type,  String title,  String body,  Map<String, dynamic> data, @JsonKey(name: 'read_at')  DateTime? readAt, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String type,  String title,  String body, @JsonKey(name: 'entity_type')  String? entityType, @JsonKey(name: 'entity_id')  String? entityId, @JsonKey(name: 'deep_link')  String? deepLink,  Map<String, dynamic> data, @JsonKey(name: 'read_at')  DateTime? readAt, @JsonKey(name: 'created_at')  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _NotificationDto():
-return $default(_that.id,_that.type,_that.title,_that.body,_that.data,_that.readAt,_that.createdAt);case _:
+return $default(_that.id,_that.type,_that.title,_that.body,_that.entityType,_that.entityId,_that.deepLink,_that.data,_that.readAt,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -9674,10 +9680,10 @@ return $default(_that.id,_that.type,_that.title,_that.body,_that.data,_that.read
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String type,  String title,  String body,  Map<String, dynamic> data, @JsonKey(name: 'read_at')  DateTime? readAt, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String type,  String title,  String body, @JsonKey(name: 'entity_type')  String? entityType, @JsonKey(name: 'entity_id')  String? entityId, @JsonKey(name: 'deep_link')  String? deepLink,  Map<String, dynamic> data, @JsonKey(name: 'read_at')  DateTime? readAt, @JsonKey(name: 'created_at')  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _NotificationDto() when $default != null:
-return $default(_that.id,_that.type,_that.title,_that.body,_that.data,_that.readAt,_that.createdAt);case _:
+return $default(_that.id,_that.type,_that.title,_that.body,_that.entityType,_that.entityId,_that.deepLink,_that.data,_that.readAt,_that.createdAt);case _:
   return null;
 
 }
@@ -9689,13 +9695,16 @@ return $default(_that.id,_that.type,_that.title,_that.body,_that.data,_that.read
 @JsonSerializable()
 
 class _NotificationDto implements NotificationDto {
-  const _NotificationDto({required this.id, required this.type, required this.title, required this.body, final  Map<String, dynamic> data = const <String, dynamic>{}, @JsonKey(name: 'read_at') this.readAt, @JsonKey(name: 'created_at') required this.createdAt}): _data = data;
+  const _NotificationDto({required this.id, required this.type, required this.title, required this.body, @JsonKey(name: 'entity_type') this.entityType, @JsonKey(name: 'entity_id') this.entityId, @JsonKey(name: 'deep_link') this.deepLink, final  Map<String, dynamic> data = const <String, dynamic>{}, @JsonKey(name: 'read_at') this.readAt, @JsonKey(name: 'created_at') required this.createdAt}): _data = data;
   factory _NotificationDto.fromJson(Map<String, dynamic> json) => _$NotificationDtoFromJson(json);
 
 @override final  String id;
 @override final  String type;
 @override final  String title;
 @override final  String body;
+@override@JsonKey(name: 'entity_type') final  String? entityType;
+@override@JsonKey(name: 'entity_id') final  String? entityId;
+@override@JsonKey(name: 'deep_link') final  String? deepLink;
  final  Map<String, dynamic> _data;
 @override@JsonKey() Map<String, dynamic> get data {
   if (_data is EqualUnmodifiableMapView) return _data;
@@ -9719,16 +9728,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&const DeepCollectionEquality().equals(other._data, _data)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotificationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.body, body) || other.body == body)&&(identical(other.entityType, entityType) || other.entityType == entityType)&&(identical(other.entityId, entityId) || other.entityId == entityId)&&(identical(other.deepLink, deepLink) || other.deepLink == deepLink)&&const DeepCollectionEquality().equals(other._data, _data)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,type,title,body,const DeepCollectionEquality().hash(_data),readAt,createdAt);
+int get hashCode => Object.hash(runtimeType,id,type,title,body,entityType,entityId,deepLink,const DeepCollectionEquality().hash(_data),readAt,createdAt);
 
 @override
 String toString() {
-  return 'NotificationDto(id: $id, type: $type, title: $title, body: $body, data: $data, readAt: $readAt, createdAt: $createdAt)';
+  return 'NotificationDto(id: $id, type: $type, title: $title, body: $body, entityType: $entityType, entityId: $entityId, deepLink: $deepLink, data: $data, readAt: $readAt, createdAt: $createdAt)';
 }
 
 
@@ -9739,7 +9748,7 @@ abstract mixin class _$NotificationDtoCopyWith<$Res> implements $NotificationDto
   factory _$NotificationDtoCopyWith(_NotificationDto value, $Res Function(_NotificationDto) _then) = __$NotificationDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String type, String title, String body, Map<String, dynamic> data,@JsonKey(name: 'read_at') DateTime? readAt,@JsonKey(name: 'created_at') DateTime createdAt
+ String id, String type, String title, String body,@JsonKey(name: 'entity_type') String? entityType,@JsonKey(name: 'entity_id') String? entityId,@JsonKey(name: 'deep_link') String? deepLink, Map<String, dynamic> data,@JsonKey(name: 'read_at') DateTime? readAt,@JsonKey(name: 'created_at') DateTime createdAt
 });
 
 
@@ -9756,13 +9765,16 @@ class __$NotificationDtoCopyWithImpl<$Res>
 
 /// Create a copy of NotificationDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? body = null,Object? data = null,Object? readAt = freezed,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? body = null,Object? entityType = freezed,Object? entityId = freezed,Object? deepLink = freezed,Object? data = null,Object? readAt = freezed,Object? createdAt = null,}) {
   return _then(_NotificationDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
-as String,data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
+as String,entityType: freezed == entityType ? _self.entityType : entityType // ignore: cast_nullable_to_non_nullable
+as String?,entityId: freezed == entityId ? _self.entityId : entityId // ignore: cast_nullable_to_non_nullable
+as String?,deepLink: freezed == deepLink ? _self.deepLink : deepLink // ignore: cast_nullable_to_non_nullable
+as String?,data: null == data ? _self._data : data // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,

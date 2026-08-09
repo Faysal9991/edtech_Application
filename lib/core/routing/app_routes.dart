@@ -14,6 +14,7 @@ class AppRoutes {
   static const lesson = '/lesson';
   static const assessments = '/assessments';
   static const quiz = '/quiz';
+  static const exam = '/exam';
   static const assignment = '/assignment';
   static const liveClasses = '/live-classes';
   static const liveRoom = '/live-room';

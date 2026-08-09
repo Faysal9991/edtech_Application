@@ -30,10 +30,10 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkScaffold,
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.darkScaffold,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.darkBackground,
+        foregroundColor: AppColors.darkTextPrimary,
         title: Text(context.l10n.tr('live.title')),
       ),
       body: FutureBuilder<LiveClassTokenResponse>(
@@ -47,7 +47,7 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
           }
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(
-              child: CircularProgressIndicator(color: AppColors.green200),
+              child: CircularProgressIndicator(color: AppColors.darkSecondary),
             );
           }
           if (snapshot.hasError) {
@@ -59,6 +59,7 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
           final credential = snapshot.data!;
           return _RoomStatus(
             icon: Icons.verified_user_outlined,
+            isSuccess: true,
             title: context.l10n.tr('live.roomReady'),
             message: context.l10n.tr(
               'live.secureCredential',
@@ -79,11 +80,13 @@ class _RoomStatus extends StatelessWidget {
     required this.message,
     required this.title,
     this.icon = Icons.videocam_off_outlined,
+    this.isSuccess = false,
   });
 
   final String title;
   final String message;
   final IconData icon;
+  final bool isSuccess;
 
   @override
   Widget build(BuildContext context) {
@@ -93,13 +96,17 @@ class _RoomStatus extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: AppColors.green200, size: 64),
+            Icon(
+              icon,
+              color: isSuccess ? AppColors.darkSecondary : AppColors.error,
+              size: 64,
+            ),
             const SizedBox(height: 16),
             Text(
               title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: Colors.white),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppColors.darkTextPrimary,
+              ),
             ),
             const SizedBox(height: 10),
             Text(

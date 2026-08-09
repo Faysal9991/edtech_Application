@@ -1,4 +1,5 @@
 import 'package:edtech_application/core/error/app_exception.dart';
+import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/network/phase_one_dto.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/models/course.dart';
@@ -16,11 +17,20 @@ class StudentLmsController extends ChangeNotifier {
   List<ResultDto> results = const [];
   List<CertificateDto> certificates = const [];
   List<NotificationDto> notifications = const [];
+  StudentDashboardDto? dashboard;
+  List<StudentLiveClassDto> liveClasses = const [];
+  List<StudentQuizDto> quizzes = const [];
+  List<StudentAssignmentDto> assignments = const [];
+  List<ExamDto> exams = const [];
   int unreadNotifications = 0;
   bool isLoadingCourses = false;
   bool isLoadingStudentData = false;
+  bool isLoadingActivities = false;
+  bool isLoadingLiveClasses = false;
   String? coursesError;
   String? studentDataError;
+  String? activitiesError;
+  String? liveClassesError;
 
   Future<void> loadInitialData() async {
     if (_repository == null) {
@@ -81,6 +91,10 @@ class StudentLmsController extends ChangeNotifier {
 
     await Future.wait([
       capture(() async {
+        dashboard = await repository.getDashboard();
+        unreadNotifications = dashboard!.unreadNotificationCount;
+      }),
+      capture(() async {
         enrollments = await repository.listEnrollments();
       }),
       capture(() async {
@@ -99,6 +113,49 @@ class StudentLmsController extends ChangeNotifier {
     studentDataError = firstError?.message;
     isLoadingStudentData = false;
     notifyListeners();
+  }
+
+  Future<void> loadAssessments() async {
+    final repository = _repository;
+    if (repository == null) return;
+    isLoadingActivities = true;
+    activitiesError = null;
+    notifyListeners();
+    try {
+      final loaded = await Future.wait<Object>([
+        repository.listQuizzes(),
+        repository.listAssignments(),
+        repository.listExams(),
+      ]);
+      quizzes = loaded[0] as List<StudentQuizDto>;
+      assignments = loaded[1] as List<StudentAssignmentDto>;
+      exams = loaded[2] as List<ExamDto>;
+    } on AppException catch (error) {
+      activitiesError = error.message;
+    } catch (_) {
+      activitiesError = 'Assessment response বোঝা যায়নি।';
+    } finally {
+      isLoadingActivities = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadLiveClasses() async {
+    final repository = _repository;
+    if (repository == null) return;
+    isLoadingLiveClasses = true;
+    liveClassesError = null;
+    notifyListeners();
+    try {
+      liveClasses = await repository.listLiveClasses();
+    } on AppException catch (error) {
+      liveClassesError = error.message;
+    } catch (_) {
+      liveClassesError = 'Live-class response বোঝা যায়নি।';
+    } finally {
+      isLoadingLiveClasses = false;
+      notifyListeners();
+    }
   }
 
   Future<Course> getCourse(Course course) {
@@ -134,6 +191,17 @@ class StudentLmsController extends ChangeNotifier {
     unreadNotifications = notifications
         .where((item) => item.readAt == null)
         .length;
+    notifyListeners();
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    final repository = _repository;
+    if (repository == null) return;
+    await repository.markAllNotificationsRead();
+    notifications = notifications
+        .map((item) => item.copyWith(readAt: DateTime.now().toUtc()))
+        .toList();
+    unreadNotifications = 0;
     notifyListeners();
   }
 }

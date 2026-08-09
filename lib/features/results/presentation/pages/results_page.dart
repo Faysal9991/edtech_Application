@@ -197,7 +197,7 @@ class _ScoreLine extends StatelessWidget {
             value: normalized,
             height: 8,
             color: AppColors.secondary,
-            backgroundColor: AppColors.green50,
+            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
           ),
         ),
         const SizedBox(width: 10),

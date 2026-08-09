@@ -47,14 +47,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 32,
-            backgroundColor: AppColors.green50,
-            child: Icon(
-              Icons.lock_reset_rounded,
-              color: AppColors.primary,
-              size: 34,
-            ),
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: const Icon(Icons.lock_reset_rounded, size: 34),
           ),
           const SizedBox(height: 24),
           Text(

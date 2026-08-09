@@ -208,7 +208,7 @@ class ProfilePage extends StatelessWidget {
                       : Icons.radio_button_off_rounded,
                   color: controller.isBangla
                       ? AppColors.primary
-                      : AppColors.textMuted,
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               ListTile(
@@ -221,7 +221,7 @@ class ProfilePage extends StatelessWidget {
                       : Icons.radio_button_off_rounded,
                   color: !controller.isBangla
                       ? AppColors.primary
-                      : AppColors.textMuted,
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

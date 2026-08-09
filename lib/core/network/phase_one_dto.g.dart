@@ -392,6 +392,9 @@ _QuizAttemptDto _$QuizAttemptDtoFromJson(Map<String, dynamic> json) =>
       expiresAt: json['expires_at'] == null
           ? null
           : DateTime.parse(json['expires_at'] as String),
+      submitBefore: json['submit_before'] == null
+          ? null
+          : DateTime.parse(json['submit_before'] as String),
       questions:
           (json['questions'] as List<dynamic>?)
               ?.map((e) => QuizQuestionDto.fromJson(e as Map<String, dynamic>))
@@ -409,6 +412,7 @@ Map<String, dynamic> _$QuizAttemptDtoToJson(_QuizAttemptDto instance) =>
       'status': instance.status,
       'started_at': instance.startedAt.toIso8601String(),
       'expires_at': instance.expiresAt?.toIso8601String(),
+      'submit_before': instance.submitBefore?.toIso8601String(),
       'questions': instance.questions,
       'percentage': instance.percentage,
       'passed': instance.passed,
@@ -678,6 +682,9 @@ _NotificationDto _$NotificationDtoFromJson(Map<String, dynamic> json) =>
       type: json['type'] as String,
       title: json['title'] as String,
       body: json['body'] as String,
+      entityType: json['entity_type'] as String?,
+      entityId: json['entity_id'] as String?,
+      deepLink: json['deep_link'] as String?,
       data: json['data'] as Map<String, dynamic>? ?? const <String, dynamic>{},
       readAt: json['read_at'] == null
           ? null
@@ -691,6 +698,9 @@ Map<String, dynamic> _$NotificationDtoToJson(_NotificationDto instance) =>
       'type': instance.type,
       'title': instance.title,
       'body': instance.body,
+      'entity_type': instance.entityType,
+      'entity_id': instance.entityId,
+      'deep_link': instance.deepLink,
       'data': instance.data,
       'read_at': instance.readAt?.toIso8601String(),
       'created_at': instance.createdAt.toIso8601String(),

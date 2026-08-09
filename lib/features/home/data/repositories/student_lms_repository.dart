@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/api_service.dart';
+import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/network/phase_one_dto.dart';
 import 'package:edtech_application/shared/models/course.dart';
 
@@ -55,13 +56,123 @@ class StudentLmsRepository {
         lessons: 100,
         completedLessons: progress.round(),
         rating: 0,
-        colorValue: 0xFFE8F5E9,
+        colorValue: 0xFFEAF2FF,
         overview: '',
         enrollmentId: _asString(json['id']),
         status: _asString(json['status'], fallback: 'active'),
       );
     }).toList();
   });
+
+  Future<StudentDashboardDto> getDashboard() => _guard(_api.studentDashboard);
+
+  Future<List<StudentLiveClassDto>> listLiveClasses({String? status}) =>
+      _guard(() async {
+        final items = await _allPages(
+          (cursor) => _api.studentListLiveClasses(
+            null,
+            null,
+            status,
+            null,
+            null,
+            cursor,
+            100,
+          ),
+        );
+        return items.map(StudentLiveClassDto.fromJson).toList();
+      });
+
+  Future<StudentLiveClassDto> getLiveClass(String id) =>
+      _guard(() => _api.studentGetLiveClass(id));
+
+  Future<List<StudentQuizDto>> listQuizzes({String? status}) =>
+      _guard(() async {
+        final items = await _allPages(
+          (cursor) => _api.studentListQuizzes(
+            null,
+            null,
+            status,
+            null,
+            null,
+            cursor,
+            100,
+          ),
+        );
+        return items.map(StudentQuizDto.fromJson).toList();
+      });
+
+  Future<StudentQuizDto> getQuiz(String id) =>
+      _guard(() => _api.studentGetQuiz(id));
+
+  Future<List<StudentAssignmentDto>> listAssignments({String? status}) =>
+      _guard(() async {
+        final items = await _allPages(
+          (cursor) => _api.studentListAssignments(
+            null,
+            null,
+            status,
+            null,
+            null,
+            null,
+            cursor,
+            100,
+          ),
+        );
+        return items.map(StudentAssignmentDto.fromJson).toList();
+      });
+
+  Future<StudentAssignmentDto> getAssignment(String id) =>
+      _guard(() => _api.studentGetAssignment(id));
+
+  Future<List<StudentSubmissionDto>> listSubmissions({String? status}) =>
+      _guard(() async {
+        final items = await _allPages(
+          (cursor) => _api.studentListSubmissions(
+            null,
+            null,
+            status,
+            null,
+            null,
+            cursor,
+            100,
+          ),
+        );
+        return items.map(StudentSubmissionDto.fromJson).toList();
+      });
+
+  Future<List<ExamDto>> listExams({String? status}) => _guard(() async {
+    final items = await _allPages(
+      (cursor) => _api.studentListExams(null, null, status, cursor, 100),
+    );
+    return items.map(ExamDto.fromJson).toList();
+  });
+
+  Future<ExamAttemptDto> startExam(String examId) =>
+      _guard(() => _api.studentStartExamAttempt(examId));
+
+  Future<void> saveExamAnswer({
+    required String attemptId,
+    required String questionId,
+    List<String>? selectedOptionIds,
+    String? textAnswer,
+  }) => _guard(() async {
+    await _api.studentAutosaveExamAnswer(
+      attemptId,
+      AnswerWriteRequest(
+        questionId: questionId,
+        selectedOptionIds: selectedOptionIds,
+        textAnswer: textAnswer,
+      ),
+    );
+  });
+
+  Future<ExamAttemptDto> submitExam(String attemptId) =>
+      _guard(() => _api.studentSubmitExamAttempt(attemptId));
+
+  Future<ExamLeaderboardDto> getExamLeaderboard(
+    String examId, {
+    String scope = 'course',
+  }) => _guard(() => _api.studentExamLeaderboard(examId, scope, null, 100));
 
   Future<EnrollmentDto> enroll(String courseId) =>
       _guard(() => _api.enroll(courseId));
@@ -167,6 +278,9 @@ class StudentLmsRepository {
     return url;
   });
 
+  Future<PlaybackMetadataDto> getMediaPlayback(String mediaAssetId) =>
+      _guard(() => _api.mediaPlayback(mediaAssetId));
+
   Future<OrderDto> createOrder(String courseId) => _guard(
     () => _api.createPaymentOrder(
       _idempotencyKey(),
@@ -228,6 +342,10 @@ class StudentLmsRepository {
 
   Future<void> markNotificationRead(String id) => _guard(() async {
     await _api.markNotificationRead(id);
+  });
+
+  Future<void> markAllNotificationsRead() => _guard(() async {
+    await _api.markAllNotificationsRead();
   });
 
   Course _courseFromDto(
@@ -344,10 +462,7 @@ class StudentLmsRepository {
     _ => 'সব লেভেল',
   };
 
-  static int _courseColor(String id) {
-    const colors = [0xFF1B5E20, 0xFF66BB6A, 0xFFA5D6A7, 0xFFE8F5E9];
-    return colors[id.hashCode.abs() % colors.length];
-  }
+  static int _courseColor(String _) => 0xFFEAF2FF;
 
   static String _idempotencyKey() =>
       'mobile-${DateTime.now().microsecondsSinceEpoch}';

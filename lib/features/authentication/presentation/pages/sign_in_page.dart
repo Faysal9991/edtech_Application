@@ -75,7 +75,7 @@ class _SignInPageState extends State<SignInPage> {
                     Positioned(
                       top: -80,
                       right: -60,
-                      child: _SoftGlow(color: AppColors.secondary, size: 220),
+                      child: _SoftGlow(color: AppColors.primary, size: 220),
                     ),
                     Positioned(
                       top: 160,
@@ -93,14 +93,16 @@ class _SignInPageState extends State<SignInPage> {
                               )
                             : const EdgeInsets.only(top: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: isWide
                               ? BorderRadius.circular(32)
                               : const BorderRadius.vertical(
                                   bottom: Radius.circular(0),
                                 ),
                           border: isWide
-                              ? Border.all(color: AppColors.border)
+                              ? Border.all(
+                                  color: Theme.of(context).colorScheme.outline,
+                                )
                               : null,
                           boxShadow: isWide
                               ? [
@@ -240,15 +242,15 @@ class _SignInHeader extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.18),
+                    color: AppColors.textOnPrimary.withValues(alpha: 0.18),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: AppColors.white.withValues(alpha: 0.28),
+                      color: AppColors.textOnPrimary.withValues(alpha: 0.28),
                     ),
                   ),
                   child: const AppIcon(
                     AppIcons.book,
-                    color: AppColors.white,
+                    color: AppColors.textOnPrimary,
                     size: 24,
                   ),
                 ),
@@ -256,7 +258,7 @@ class _SignInHeader extends StatelessWidget {
                 Text(
                   context.l10n.tr('appName'),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.white,
+                    color: AppColors.textOnPrimary,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.2,
                   ),
@@ -267,7 +269,7 @@ class _SignInHeader extends StatelessWidget {
             Text(
               context.l10n.tr('auth.welcome'),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppColors.white,
+                color: AppColors.textOnPrimary,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.5,
                 height: 1.15,
@@ -277,7 +279,7 @@ class _SignInHeader extends StatelessWidget {
             Text(
               context.l10n.tr('auth.welcomeSubtitle'),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.white.withValues(alpha: 0.85),
+                color: AppColors.textOnPrimary.withValues(alpha: 0.85),
                 height: 1.4,
               ),
             ),
@@ -406,7 +408,7 @@ class _SignInForm extends StatelessWidget {
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                       key: ValueKey(obscurePassword),
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       size: 21,
                     ),
                   ),
@@ -423,7 +425,7 @@ class _SignInForm extends StatelessWidget {
                     height: 24,
                     child: Checkbox(
                       value: rememberEmail,
-                      activeColor: AppColors.primary,
+                      activeColor: Theme.of(context).colorScheme.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
@@ -450,7 +452,9 @@ class _SignInForm extends StatelessWidget {
                           context.l10n.tr('auth.rememberEmail'),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: AppColors.textSecondary,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
                         ),
@@ -509,7 +513,7 @@ class _SignInForm extends StatelessWidget {
                     child: Text(
                       context.l10n.tr('auth.newHere'),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -599,7 +603,7 @@ class _PrimarySignInButton extends StatelessWidget {
                         dimension: 22,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.4,
-                          color: AppColors.white,
+                          color: AppColors.textOnPrimary,
                         ),
                       )
                     : Row(
@@ -609,7 +613,7 @@ class _PrimarySignInButton extends StatelessWidget {
                           Text(
                             context.l10n.tr('auth.signIn'),
                             style: const TextStyle(
-                              color: AppColors.white,
+                              color: AppColors.textOnPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                               letterSpacing: 0.1,
@@ -618,7 +622,7 @@ class _PrimarySignInButton extends StatelessWidget {
                           const SizedBox(width: 8),
                           const AppIcon(
                             AppIcons.arrowRight,
-                            color: AppColors.white,
+                            color: AppColors.textOnPrimary,
                             size: 19,
                           ),
                         ],
@@ -721,8 +725,11 @@ class _AuthField extends StatelessWidget {
             ),
             enabledBorder: _border(Theme.of(context).colorScheme.outline),
             focusedBorder: _border(AppColors.primary, width: 1.6),
-            errorBorder: _border(AppColors.primaryDark),
-            focusedErrorBorder: _border(AppColors.primaryDark, width: 1.6),
+            errorBorder: _border(Theme.of(context).colorScheme.error),
+            focusedErrorBorder: _border(
+              Theme.of(context).colorScheme.error,
+              width: 1.6,
+            ),
             errorStyle: const TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 12.5,
@@ -748,26 +755,23 @@ class _ErrorMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.dangerBackground,
+        color: colors.errorContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.danger.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.error.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            color: AppColors.danger,
-            size: 20,
-          ),
+          Icon(Icons.error_outline_rounded, color: colors.error, size: 20),
           const SizedBox(width: 9),
           Expanded(
             child: Text(
               message,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.danger,
+                color: colors.onErrorContainer,
                 fontWeight: FontWeight.w500,
               ),
             ),

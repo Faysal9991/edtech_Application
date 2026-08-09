@@ -29,7 +29,9 @@ class RemoteAuthRepository implements AuthRepository {
     try {
       final tokens = await _refreshTokens(refreshToken);
       await _tokenStorage.save(tokens);
-      return (await _api.me()).toDomain();
+      return AuthUserDto.fromJson(
+        (await _api.getCurrentProfile()).value,
+      ).toDomain();
     } on AppException catch (error) {
       await _tokenStorage.clear();
       if (error.statusCode == 401) return null;
@@ -121,6 +123,11 @@ class RemoteAuthRepository implements AuthRepository {
       _guard(() => _api.verifyEmail(TokenRequest(token: token)));
 
   @override
+  Future<void> resendVerification(String email) => _guard(() async {
+    await _api.resendVerification(ForgotPasswordRequest(email: email));
+  });
+
+  @override
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
@@ -158,7 +165,9 @@ class RemoteAuthRepository implements AuthRepository {
           biography: biography,
         ),
       );
-      return (await _api.me()).toDomain();
+      return AuthUserDto.fromJson(
+        (await _api.getCurrentProfile()).value,
+      ).toDomain();
     } on DioException catch (error) {
       throw AppException.fromDioException(error);
     }

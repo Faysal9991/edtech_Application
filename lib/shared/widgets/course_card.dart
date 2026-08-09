@@ -17,19 +17,7 @@ class CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Color(course.colorValue);
-    final foregroundColor =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? AppColors.white
-        : AppColors.green900;
-    final accentColor =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? color
-        : AppColors.green900;
-    final progressColor =
-        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-        ? color
-        : AppColors.green400;
+    final colors = Theme.of(context).colorScheme;
     final progress = course.lessons == 0
         ? 0.0
         : course.completedLessons / course.lessons;
@@ -47,12 +35,12 @@ class CourseCard extends StatelessWidget {
                   width: compact ? 64 : 78,
                   height: compact ? 72 : 88,
                   decoration: BoxDecoration(
-                    color: color,
+                    color: colors.primaryContainer,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Icon(
                     _categoryIcon(course.category),
-                    color: foregroundColor,
+                    color: colors.onPrimaryContainer,
                     size: compact ? 28 : 34,
                   ),
                 ),
@@ -68,7 +56,7 @@ class CourseCard extends StatelessWidget {
                               '${course.educationLevel} • ${course.subject}',
                               style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
-                                    color: accentColor,
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: .8,
                                   ),
@@ -78,7 +66,7 @@ class CourseCard extends StatelessWidget {
                             Icon(
                               Icons.bookmark_rounded,
                               size: 18,
-                              color: accentColor,
+                              color: AppColors.primary,
                             ),
                         ],
                       ),
@@ -99,7 +87,7 @@ class CourseCard extends StatelessWidget {
                           const Icon(
                             Icons.star_rounded,
                             size: 16,
-                            color: AppColors.green400,
+                            color: AppColors.warning,
                           ),
                           const SizedBox(width: 3),
                           Text(course.rating.toStringAsFixed(1)),
@@ -118,8 +106,8 @@ class CourseCard extends StatelessWidget {
                         AnimatedProgressBar(
                           height: 6,
                           value: progress,
-                          color: progressColor,
-                          backgroundColor: AppColors.green50,
+                          color: AppColors.secondary,
+                          backgroundColor: colors.secondaryContainer,
                         ),
                       ],
                     ],

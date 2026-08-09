@@ -84,6 +84,9 @@ class AuthController extends ChangeNotifier {
   Future<bool> verifyEmail(String token) =>
       _run(() => _repository.verifyEmail(token));
 
+  Future<bool> resendVerification(String email) =>
+      _run(() => _repository.resendVerification(email));
+
   Future<bool> resetPassword({
     required String token,
     required String newPassword,

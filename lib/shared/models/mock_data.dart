@@ -18,7 +18,7 @@ class MockData {
       studentCount: 2840,
       priceMinor: 149900,
       rating: 4.9,
-      colorValue: 0xFF1B5E20,
+      colorValue: 0xFFEAF2FF,
       isBookmarked: true,
       overview:
           'বিশ্ববিদ্যালয় ভর্তি পরীক্ষার English অংশের grammar, vocabulary এবং comprehension-এর পূর্ণাঙ্গ প্রস্তুতি।',
@@ -36,7 +36,7 @@ class MockData {
       studentCount: 1930,
       isFree: true,
       rating: 4.8,
-      colorValue: 0xFF66BB6A,
+      colorValue: 0xFFEAF2FF,
       overview:
           'একাদশ-দ্বাদশ শ্রেণির গতি, নিউটনের সূত্র এবং সংখ্যাভিত্তিক সমস্যার concept-first কোর্স।',
     ),
@@ -52,7 +52,7 @@ class MockData {
       studentCount: 1260,
       priceMinor: 99900,
       rating: 4.7,
-      colorValue: 0xFFA5D6A7,
+      colorValue: 0xFFEAF2FF,
       overview:
           'Organic reaction, nomenclature এবং board-focused creative question practice।',
     ),
@@ -69,7 +69,7 @@ class MockData {
       studentCount: 3210,
       priceMinor: 179900,
       rating: 4.9,
-      colorValue: 0xFFE8F5E9,
+      colorValue: 0xFFEAF2FF,
       overview:
           'Medical admission-এর জন্য chapter-wise model test, negative marking এবং merit analysis।',
     ),

@@ -129,7 +129,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
         AspectRatio(
           aspectRatio: 16 / 9,
           child: ColoredBox(
-            color: Color(widget.course.colorValue),
+            color: AppColors.textPrimary,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -141,7 +141,9 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                     ),
                   ),
                 if (_preparingVideo)
-                  const CircularProgressIndicator(color: Colors.white)
+                  const CircularProgressIndicator(
+                    color: AppColors.textOnPrimary,
+                  )
                 else
                   IconButton.filled(
                     tooltip: _isPlaying
@@ -149,7 +151,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                         : context.l10n.tr('lesson.play'),
                     onPressed: videoReady ? _togglePlayback : null,
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.white,
+                      backgroundColor: AppColors.surface,
                       foregroundColor: AppColors.primary,
                       fixedSize: const Size(68, 68),
                     ),
@@ -164,20 +166,26 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                     children: [
                       LinearProgressIndicator(
                         value: progress,
-                        color: AppColors.white,
-                        backgroundColor: AppColors.white.withValues(alpha: .3),
+                        color: AppColors.textOnPrimary,
+                        backgroundColor: AppColors.textOnPrimary.withValues(
+                          alpha: .3,
+                        ),
                       ),
                       const SizedBox(height: 5),
                       Row(
                         children: [
                           Text(
                             _time(_positionSeconds),
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(
+                              color: AppColors.textOnPrimary,
+                            ),
                           ),
                           const Spacer(),
                           Text(
                             _time(totalSeconds),
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(
+                              color: AppColors.textOnPrimary,
+                            ),
                           ),
                         ],
                       ),
@@ -221,7 +229,9 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                 const SizedBox(height: 10),
                 Text(
                   context.l10n.tr('lesson.mediaMissing'),
-                  style: const TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
               if (lesson.body?.isNotEmpty == true) ...[
@@ -279,7 +289,9 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
                         if (entry.key > 0) const Divider(height: 1, indent: 58),
                         ListTile(
                           selected: item.id == lesson.id,
-                          selectedTileColor: AppColors.green50,
+                          selectedTileColor: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer,
                           onTap: () => _selectLesson(item),
                           leading: Icon(
                             _mediaIcon(item.type),
@@ -384,7 +396,11 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
       _mediaError = null;
     });
     try {
-      final url = await repository.getMediaAccessUrl(lesson.mediaAssetId!);
+      final playback = await repository.getMediaPlayback(lesson.mediaAssetId!);
+      final url = Uri.tryParse(playback.url);
+      if (url == null || !url.hasScheme) {
+        throw const FormatException('Invalid playback URL');
+      }
       final controller = VideoPlayerController.networkUrl(url);
       await controller.initialize();
       controller.addListener(() {

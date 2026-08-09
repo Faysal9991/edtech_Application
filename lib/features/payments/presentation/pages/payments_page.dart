@@ -21,6 +21,8 @@ class _PaymentsPageState extends State<PaymentsPage> {
   Widget build(BuildContext context) {
     final course = widget.course;
     if (course == null) return _PaymentHistory(repository: context.read());
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.tr('payments.checkout'))),
       body: ListView(
@@ -40,10 +42,13 @@ class _PaymentsPageState extends State<PaymentsPage> {
                     width: 84,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: Color(course.colorValue),
+                      color: colors.primaryContainer,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.school_rounded),
+                    child: Icon(
+                      Icons.school_rounded,
+                      color: colors.onPrimaryContainer,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -67,13 +72,18 @@ class _PaymentsPageState extends State<PaymentsPage> {
           ),
           const SizedBox(height: 24),
           Card(
-            color: AppColors.green50,
+            color: isDark
+                ? AppColors.darkWarningBackground
+                : AppColors.warningBackground,
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.science_outlined, color: AppColors.primary),
+                  Icon(
+                    Icons.science_outlined,
+                    color: isDark ? AppColors.darkWarning : AppColors.warning,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -120,7 +130,9 @@ class _PaymentsPageState extends State<PaymentsPage> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            border: const Border(top: BorderSide(color: AppColors.border)),
+            border: Border(
+              top: BorderSide(color: Theme.of(context).dividerColor),
+            ),
           ),
           child: FilledButton.icon(
             onPressed: _processing

@@ -128,6 +128,25 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                       : Text(context.l10n.tr('auth.verifyAction')),
                 ),
                 const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: auth.isLoading
+                      ? null
+                      : () async {
+                          final success = await context
+                              .read<AuthController>()
+                              .resendVerification(widget.email);
+                          if (!context.mounted || !success) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                context.l10n.tr('auth.verificationSent'),
+                              ),
+                            ),
+                          );
+                        },
+                  child: Text(context.l10n.tr('auth.resendVerification')),
+                ),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () =>
                       Navigator.pushReplacementNamed(context, AppRoutes.signIn),

@@ -33,15 +33,18 @@ class LearningPage extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.green50,
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 27,
-                      backgroundColor: AppColors.primary,
-                      child: AppIcon(AppIcons.streak, color: Colors.white),
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      child: const AppIcon(
+                        AppIcons.streak,
+                        color: AppColors.textOnPrimary,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -167,7 +170,7 @@ class _WeeklyActivity extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: done
-                        ? AppColors.primary
+                        ? Theme.of(context).colorScheme.secondary
                         : Theme.of(context).colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
@@ -175,7 +178,7 @@ class _WeeklyActivity extends StatelessWidget {
                       ? const AppIcon(
                           AppIcons.check,
                           size: 18,
-                          color: Colors.white,
+                          color: AppColors.textOnPrimary,
                         )
                       : Container(
                           width: 9,

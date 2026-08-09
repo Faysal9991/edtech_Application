@@ -13,7 +13,16 @@ class NotificationsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.watch<StudentLmsController>();
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.tr('notifications.title'))),
+      appBar: AppBar(
+        title: Text(context.l10n.tr('notifications.title')),
+        actions: [
+          if (state.unreadNotifications > 0)
+            TextButton(
+              onPressed: state.markAllNotificationsRead,
+              child: Text(context.l10n.tr('notifications.markAll')),
+            ),
+        ],
+      ),
       body: _body(context, state),
     );
   }
@@ -92,8 +101,11 @@ class _NotificationCard extends StatelessWidget {
         contentPadding: const EdgeInsets.all(14),
         onTap: onTap,
         leading: CircleAvatar(
-          backgroundColor: AppColors.green50,
-          child: Icon(_iconFor(item.type), color: AppColors.primary),
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          child: Icon(
+            _iconFor(item.type),
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
         ),
         title: Text(
           item.title,
