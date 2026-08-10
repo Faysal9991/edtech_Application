@@ -215,5 +215,5 @@ class _NavigationItem {
 
   final String label;
   final String hint;
-  final List<List<dynamic>> icon;
+  final IconData icon;
 }

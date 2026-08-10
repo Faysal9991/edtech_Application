@@ -24,7 +24,8 @@ class CertificatesPage extends StatelessWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.all(20),
                 itemCount: state.certificates.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) =>
                     _CertificateCard(certificate: state.certificates[index]),
               ),

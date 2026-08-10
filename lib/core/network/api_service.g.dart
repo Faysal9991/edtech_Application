@@ -2,13 +2,11 @@
 
 part of 'api_service.dart';
 
-// dart format off
-
 // **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main,avoid_redundant_argument_values
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations
 
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl, this.errorLogger});
@@ -40,7 +38,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -67,7 +65,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -81,11 +79,11 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<String>(
       Options(
-            method: 'GET',
-            headers: _headers,
-            extra: _extra,
-            responseType: ResponseType.plain,
-          )
+        method: 'GET',
+        headers: _headers,
+        extra: _extra,
+        responseType: ResponseType.plain,
+      )
           .compose(
             _dio.options,
             '/metrics',
@@ -99,7 +97,7 @@ class _ApiService implements ApiService {
     try {
       _value = _result.data!;
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -113,11 +111,11 @@ class _ApiService implements ApiService {
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<String>(
       Options(
-            method: 'GET',
-            headers: _headers,
-            extra: _extra,
-            responseType: ResponseType.plain,
-          )
+        method: 'GET',
+        headers: _headers,
+        extra: _extra,
+        responseType: ResponseType.plain,
+      )
           .compose(
             _dio.options,
             '/openapi.yaml',
@@ -131,7 +129,7 @@ class _ApiService implements ApiService {
     try {
       _value = _result.data!;
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -159,7 +157,7 @@ class _ApiService implements ApiService {
     try {
       _value = RegistrationResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -187,7 +185,7 @@ class _ApiService implements ApiService {
     try {
       _value = TokenPairDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -215,7 +213,7 @@ class _ApiService implements ApiService {
     try {
       _value = TokenPairDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -281,7 +279,7 @@ class _ApiService implements ApiService {
     try {
       _value = AuthUserDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -389,7 +387,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -416,7 +414,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -444,7 +442,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -472,7 +470,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -499,7 +497,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -527,7 +525,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -555,7 +553,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -582,7 +580,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -609,7 +607,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -637,7 +635,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -664,7 +662,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -691,7 +689,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -722,7 +720,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -749,7 +747,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -781,7 +779,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -827,7 +825,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -855,7 +853,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -883,7 +881,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -910,7 +908,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -940,7 +938,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -980,7 +978,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1007,7 +1005,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1061,7 +1059,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1103,7 +1101,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1130,7 +1128,7 @@ class _ApiService implements ApiService {
     try {
       _value = CourseDetailDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1161,7 +1159,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1189,7 +1187,7 @@ class _ApiService implements ApiService {
     try {
       _value = CourseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1216,7 +1214,7 @@ class _ApiService implements ApiService {
     try {
       _value = CourseDetailDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1247,7 +1245,7 @@ class _ApiService implements ApiService {
     try {
       _value = CourseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1274,7 +1272,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1305,7 +1303,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1340,7 +1338,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1367,7 +1365,7 @@ class _ApiService implements ApiService {
     try {
       _value = CourseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1394,7 +1392,7 @@ class _ApiService implements ApiService {
     try {
       _value = CourseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1425,7 +1423,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1456,7 +1454,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1506,7 +1504,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1537,7 +1535,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1594,7 +1592,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1621,7 +1619,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1659,7 +1657,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1686,7 +1684,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1721,7 +1719,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1760,7 +1758,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1798,7 +1796,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1826,7 +1824,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1853,7 +1851,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1881,7 +1879,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -1957,7 +1955,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2010,7 +2008,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2041,7 +2039,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2090,7 +2088,7 @@ class _ApiService implements ApiService {
     try {
       _value = UploadIntentDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2117,7 +2115,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2144,7 +2142,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2171,7 +2169,7 @@ class _ApiService implements ApiService {
     try {
       _value = PlaybackMetadataDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2202,7 +2200,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2231,7 +2229,7 @@ class _ApiService implements ApiService {
     try {
       _value = MediaProcessingStatusDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2260,7 +2258,7 @@ class _ApiService implements ApiService {
     try {
       _value = MediaProcessingStatusDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2287,7 +2285,7 @@ class _ApiService implements ApiService {
     try {
       _value = EnrollmentDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2321,7 +2319,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2348,7 +2346,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2380,7 +2378,7 @@ class _ApiService implements ApiService {
     try {
       _value = ProgressDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2407,7 +2405,7 @@ class _ApiService implements ApiService {
     try {
       _value = StudentDashboardDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2451,7 +2449,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2478,7 +2476,7 @@ class _ApiService implements ApiService {
     try {
       _value = StudentLiveClassDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2522,7 +2520,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2549,7 +2547,7 @@ class _ApiService implements ApiService {
     try {
       _value = StudentQuizDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2595,7 +2593,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2622,7 +2620,7 @@ class _ApiService implements ApiService {
     try {
       _value = StudentAssignmentDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2666,7 +2664,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2693,7 +2691,7 @@ class _ApiService implements ApiService {
     try {
       _value = StudentSubmissionDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2733,7 +2731,7 @@ class _ApiService implements ApiService {
     try {
       _value = StudentCalendarDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2773,7 +2771,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2809,7 +2807,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2837,7 +2835,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2864,7 +2862,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2897,7 +2895,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2947,7 +2945,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -2978,7 +2976,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3032,7 +3030,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3059,7 +3057,7 @@ class _ApiService implements ApiService {
     try {
       _value = QuizAttemptDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3090,7 +3088,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3117,7 +3115,7 @@ class _ApiService implements ApiService {
     try {
       _value = QuizAttemptDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3157,7 +3155,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3184,7 +3182,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3211,7 +3209,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamAttemptDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3238,7 +3236,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamAttemptDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3269,7 +3267,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3296,7 +3294,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamAttemptDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3323,7 +3321,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamAttemptDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3360,7 +3358,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamLeaderboardDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3404,7 +3402,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3432,7 +3430,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3463,7 +3461,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3491,7 +3489,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3518,7 +3516,7 @@ class _ApiService implements ApiService {
     try {
       _value = ExamDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3549,7 +3547,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3580,7 +3578,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3621,7 +3619,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3648,7 +3646,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3689,7 +3687,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3716,7 +3714,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3752,7 +3750,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3782,7 +3780,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3809,7 +3807,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3842,7 +3840,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3892,7 +3890,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3919,7 +3917,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3953,7 +3951,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -3988,7 +3986,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4032,7 +4030,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4068,7 +4066,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4098,7 +4096,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4125,7 +4123,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4156,7 +4154,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4183,7 +4181,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4210,7 +4208,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4237,7 +4235,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4266,7 +4264,7 @@ class _ApiService implements ApiService {
     try {
       _value = LiveClassTokenResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4301,7 +4299,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4340,7 +4338,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4372,7 +4370,7 @@ class _ApiService implements ApiService {
     try {
       _value = OrderDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4399,7 +4397,7 @@ class _ApiService implements ApiService {
     try {
       _value = OrderDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4426,7 +4424,7 @@ class _ApiService implements ApiService {
     try {
       _value = PaymentIntentDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4457,7 +4455,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4495,7 +4493,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4526,7 +4524,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4560,7 +4558,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4614,7 +4612,7 @@ class _ApiService implements ApiService {
     try {
       _value = CertificateVerificationDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4645,7 +4643,7 @@ class _ApiService implements ApiService {
     try {
       _value = ListResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4672,7 +4670,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4699,7 +4697,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4745,7 +4743,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4773,7 +4771,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4801,7 +4799,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4851,7 +4849,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4882,7 +4880,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4913,7 +4911,7 @@ class _ApiService implements ApiService {
     try {
       _value = RawJsonMap.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
+      errorLogger?.logError(e, s, _options);
       rethrow;
     }
     return _value;
@@ -4921,7 +4919,7 @@ class _ApiService implements ApiService {
 
   RequestOptions newRequestOptions(Object? options) {
     if (options is RequestOptions) {
-      return options;
+      return options as RequestOptions;
     }
     if (options is Options) {
       return RequestOptions(
@@ -4931,7 +4929,7 @@ class _ApiService implements ApiService {
         extra: options.extra,
         headers: options.headers,
         responseType: options.responseType,
-        contentType: options.contentType?.toString(),
+        contentType: options.contentType.toString(),
         validateStatus: options.validateStatus,
         receiveDataWhenStatusError: options.receiveDataWhenStatusError,
         followRedirects: options.followRedirects,
@@ -4971,5 +4969,3 @@ class _ApiService implements ApiService {
     return Uri.parse(dioBaseUrl).resolveUri(url).toString();
   }
 }
-
-// dart format on

@@ -161,7 +161,7 @@ class _ActivityTile extends StatelessWidget {
     required this.onTap,
   });
 
-  final List<List<dynamic>> icon;
+  final IconData icon;
   final String title;
   final String subtitle;
   final String badge;

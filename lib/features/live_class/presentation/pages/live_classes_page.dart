@@ -86,7 +86,7 @@ class _LiveClassesPageState extends State<LiveClassesPage> {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
       itemCount: state.liveClasses.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) =>
           _LiveClassCard(item: state.liveClasses[index]),
     );

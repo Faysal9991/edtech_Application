@@ -12,7 +12,7 @@ class AppIcon extends StatelessWidget {
     super.key,
   });
 
-  final List<List<dynamic>> icon;
+  final IconData icon;
   final double size;
   final Color? color;
   final double strokeWidth;
@@ -27,8 +27,7 @@ class AppIcon extends StatelessWidget {
       child: HugeIcon(
         icon: icon,
         size: size,
-        color: color ?? IconTheme.of(context).color,
-        strokeWidth: strokeWidth,
+        color: color ?? IconTheme.of(context).color ?? Colors.black,
       ),
     );
   }
@@ -46,7 +45,7 @@ class AppIconBadge extends StatelessWidget {
     super.key,
   });
 
-  final List<List<dynamic>> icon;
+  final IconData icon;
   final double size;
   final double iconSize;
   final Color? backgroundColor;
@@ -91,7 +90,7 @@ abstract final class AppIcons {
   static const live = HugeIcons.strokeRoundedVideo01;
   static const task = HugeIcons.strokeRoundedTaskDone01;
   static const empty = HugeIcons.strokeRoundedSearchRemove;
-  static const cloudOff = HugeIcons.strokeRoundedCloudOff;
+  static const cloudOff = HugeIcons.strokeRoundedCloud;
   static const streak = HugeIcons.strokeRoundedFire;
   static const check = HugeIcons.strokeRoundedTick02;
   static const bookmark = HugeIcons.strokeRoundedBookmark02;

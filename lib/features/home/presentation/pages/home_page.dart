@@ -208,7 +208,8 @@ class HomePage extends StatelessWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: displayCourses.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 12),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 12),
                       itemBuilder: (context, index) {
                         final course = displayCourses[index];
                         return StaggeredAnimation(
@@ -505,7 +506,7 @@ class _HomeEmptyCard extends StatelessWidget {
     required this.subtitle,
   });
 
-  final List<List<dynamic>> icon;
+  final IconData icon;
   final String title;
   final String subtitle;
 

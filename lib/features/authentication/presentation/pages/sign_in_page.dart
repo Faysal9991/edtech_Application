@@ -155,6 +155,11 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                               ),
                             ),
+                             Container(
+      height: 300, 
+      width: double.infinity,
+      color: Colors.white,
+    ),
                           ],
                         ),
                       ),
@@ -229,9 +234,10 @@ class _SignInHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(28, 28, 28, 40),
+      padding: const EdgeInsets.fromLTRB(28, 0, 28, 40),
       decoration: const BoxDecoration(color: AppColors.primary),
       child: SafeArea(
+        top: true,
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,10 +336,11 @@ class _SignInForm extends StatelessWidget {
       width: double.infinity,
       transform: Matrix4.translationValues(0, -20, 0),
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
+     decoration: const BoxDecoration(
+  color: Colors.white,   
+  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+),
+    
       child: AutofillGroup(
         child: Form(
           key: formKey,

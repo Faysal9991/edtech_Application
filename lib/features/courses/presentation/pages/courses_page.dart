@@ -113,7 +113,8 @@ class _CoursesPageState extends State<CoursesPage> {
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
                     itemCount: courses.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final course = courses[index];
                       return StaggeredAnimation(
@@ -145,8 +146,8 @@ class _CourseLoading extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
       itemCount: 4,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, _) => Container(
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) => Container(
         height: 142,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,

@@ -253,7 +253,7 @@ class _ProfileTile extends StatelessWidget {
     required this.onTap,
     this.trailing,
   });
-  final List<List<dynamic>> icon;
+  final IconData icon;
   final String title;
   final String? trailing;
   final VoidCallback onTap;

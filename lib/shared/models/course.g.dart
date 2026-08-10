@@ -6,82 +6,81 @@ part of 'course.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_Course _$CourseFromJson(Map<String, dynamic> json) => _Course(
-  id: json['id'] as String,
-  title: json['title'] as String,
-  category: json['category'] as String,
-  instructor: json['instructor'] as String,
-  duration: json['duration'] as String,
-  lessons: (json['lessons'] as num).toInt(),
-  rating: (json['rating'] as num).toDouble(),
-  colorValue: (json['colorValue'] as num).toInt(),
-  completedLessons: (json['completedLessons'] as num?)?.toInt() ?? 0,
-  isBookmarked: json['isBookmarked'] as bool? ?? false,
-  educationLevel: json['educationLevel'] as String? ?? 'admission',
-  subject: json['subject'] as String? ?? 'General',
-  language: json['language'] as String? ?? 'বাংলা',
-  admissionTarget: json['admissionTarget'] as String? ?? '',
-  studentCount: (json['studentCount'] as num?)?.toInt() ?? 0,
-  priceMinor: (json['priceMinor'] as num?)?.toInt() ?? 0,
-  isFree: json['isFree'] as bool? ?? false,
-  overview: json['overview'] as String? ?? '',
-  slug: json['slug'] as String? ?? '',
-  organizationId: json['organizationId'] as String? ?? '',
-  level: json['level'] as String? ?? 'all',
-  status: json['status'] as String? ?? 'published',
-  currency: json['currency'] as String? ?? 'BDT',
-  thumbnailAssetId: json['thumbnailAssetId'] as String?,
-  enrollmentId: json['enrollmentId'] as String?,
-  modules:
-      (json['modules'] as List<dynamic>?)
-          ?.map((e) => CourseModule.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const <CourseModule>[],
-);
+_$CourseImpl _$$CourseImplFromJson(Map<String, dynamic> json) => _$CourseImpl(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      category: json['category'] as String,
+      instructor: json['instructor'] as String,
+      duration: json['duration'] as String,
+      lessons: (json['lessons'] as num).toInt(),
+      rating: (json['rating'] as num).toDouble(),
+      colorValue: (json['colorValue'] as num).toInt(),
+      completedLessons: (json['completedLessons'] as num?)?.toInt() ?? 0,
+      isBookmarked: json['isBookmarked'] as bool? ?? false,
+      educationLevel: json['educationLevel'] as String? ?? 'admission',
+      subject: json['subject'] as String? ?? 'General',
+      language: json['language'] as String? ?? 'বাংলা',
+      admissionTarget: json['admissionTarget'] as String? ?? '',
+      studentCount: (json['studentCount'] as num?)?.toInt() ?? 0,
+      priceMinor: (json['priceMinor'] as num?)?.toInt() ?? 0,
+      isFree: json['isFree'] as bool? ?? false,
+      overview: json['overview'] as String? ?? '',
+      slug: json['slug'] as String? ?? '',
+      organizationId: json['organizationId'] as String? ?? '',
+      level: json['level'] as String? ?? 'all',
+      status: json['status'] as String? ?? 'published',
+      currency: json['currency'] as String? ?? 'BDT',
+      thumbnailAssetId: json['thumbnailAssetId'] as String?,
+      enrollmentId: json['enrollmentId'] as String?,
+      modules: (json['modules'] as List<dynamic>?)
+              ?.map((e) => CourseModule.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <CourseModule>[],
+    );
 
-Map<String, dynamic> _$CourseToJson(_Course instance) => <String, dynamic>{
-  'id': instance.id,
-  'title': instance.title,
-  'category': instance.category,
-  'instructor': instance.instructor,
-  'duration': instance.duration,
-  'lessons': instance.lessons,
-  'rating': instance.rating,
-  'colorValue': instance.colorValue,
-  'completedLessons': instance.completedLessons,
-  'isBookmarked': instance.isBookmarked,
-  'educationLevel': instance.educationLevel,
-  'subject': instance.subject,
-  'language': instance.language,
-  'admissionTarget': instance.admissionTarget,
-  'studentCount': instance.studentCount,
-  'priceMinor': instance.priceMinor,
-  'isFree': instance.isFree,
-  'overview': instance.overview,
-  'slug': instance.slug,
-  'organizationId': instance.organizationId,
-  'level': instance.level,
-  'status': instance.status,
-  'currency': instance.currency,
-  'thumbnailAssetId': instance.thumbnailAssetId,
-  'enrollmentId': instance.enrollmentId,
-  'modules': instance.modules,
-};
+Map<String, dynamic> _$$CourseImplToJson(_$CourseImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'category': instance.category,
+      'instructor': instance.instructor,
+      'duration': instance.duration,
+      'lessons': instance.lessons,
+      'rating': instance.rating,
+      'colorValue': instance.colorValue,
+      'completedLessons': instance.completedLessons,
+      'isBookmarked': instance.isBookmarked,
+      'educationLevel': instance.educationLevel,
+      'subject': instance.subject,
+      'language': instance.language,
+      'admissionTarget': instance.admissionTarget,
+      'studentCount': instance.studentCount,
+      'priceMinor': instance.priceMinor,
+      'isFree': instance.isFree,
+      'overview': instance.overview,
+      'slug': instance.slug,
+      'organizationId': instance.organizationId,
+      'level': instance.level,
+      'status': instance.status,
+      'currency': instance.currency,
+      'thumbnailAssetId': instance.thumbnailAssetId,
+      'enrollmentId': instance.enrollmentId,
+      'modules': instance.modules,
+    };
 
-_CourseModule _$CourseModuleFromJson(Map<String, dynamic> json) =>
-    _CourseModule(
+_$CourseModuleImpl _$$CourseModuleImplFromJson(Map<String, dynamic> json) =>
+    _$CourseModuleImpl(
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
       position: (json['position'] as num?)?.toInt() ?? 0,
-      lessons:
-          (json['lessons'] as List<dynamic>?)
+      lessons: (json['lessons'] as List<dynamic>?)
               ?.map((e) => CourseLesson.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <CourseLesson>[],
     );
 
-Map<String, dynamic> _$CourseModuleToJson(_CourseModule instance) =>
+Map<String, dynamic> _$$CourseModuleImplToJson(_$CourseModuleImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
@@ -90,8 +89,8 @@ Map<String, dynamic> _$CourseModuleToJson(_CourseModule instance) =>
       'lessons': instance.lessons,
     };
 
-_CourseLesson _$CourseLessonFromJson(Map<String, dynamic> json) =>
-    _CourseLesson(
+_$CourseLessonImpl _$$CourseLessonImplFromJson(Map<String, dynamic> json) =>
+    _$CourseLessonImpl(
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
@@ -105,7 +104,7 @@ _CourseLesson _$CourseLessonFromJson(Map<String, dynamic> json) =>
       body: json['body'] as String?,
     );
 
-Map<String, dynamic> _$CourseLessonToJson(_CourseLesson instance) =>
+Map<String, dynamic> _$$CourseLessonImplToJson(_$CourseLessonImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,

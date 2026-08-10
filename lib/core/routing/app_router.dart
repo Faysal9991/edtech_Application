@@ -91,11 +91,11 @@ class AppRouter {
 
     return PageRouteBuilder<dynamic>(
       settings: settings,
-      pageBuilder: (_, animation, _) => FadeTransition(
+      pageBuilder: (context, animation, secondaryAnimation) => FadeTransition(
         opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
         child: page,
       ),
-      transitionsBuilder: (_, animation, _, child) {
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final offset =
             Tween<Offset>(
               begin: const Offset(.025, .02),

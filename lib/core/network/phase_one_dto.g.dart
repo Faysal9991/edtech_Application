@@ -6,24 +6,33 @@ part of 'phase_one_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_UserStatusWriteRequest _$UserStatusWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _UserStatusWriteRequest(status: json['status'] as String);
+_$UserStatusWriteRequestImpl _$$UserStatusWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UserStatusWriteRequestImpl(
+      status: json['status'] as String,
+    );
 
-Map<String, dynamic> _$UserStatusWriteRequestToJson(
-  _UserStatusWriteRequest instance,
-) => <String, dynamic>{'status': instance.status};
+Map<String, dynamic> _$$UserStatusWriteRequestImplToJson(
+        _$UserStatusWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'status': instance.status,
+    };
 
-_RoleWriteRequest _$RoleWriteRequestFromJson(Map<String, dynamic> json) =>
-    _RoleWriteRequest(
+_$RoleWriteRequestImpl _$$RoleWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$RoleWriteRequestImpl(
       roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
     );
 
-Map<String, dynamic> _$RoleWriteRequestToJson(_RoleWriteRequest instance) =>
-    <String, dynamic>{'roles': instance.roles};
+Map<String, dynamic> _$$RoleWriteRequestImplToJson(
+        _$RoleWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'roles': instance.roles,
+    };
 
-_ProfileWriteRequest _$ProfileWriteRequestFromJson(Map<String, dynamic> json) =>
-    _ProfileWriteRequest(
+_$ProfileWriteRequestImpl _$$ProfileWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ProfileWriteRequestImpl(
       displayName: json['display_name'] as String,
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
@@ -36,37 +45,38 @@ _ProfileWriteRequest _$ProfileWriteRequestFromJson(Map<String, dynamic> json) =>
           .toList(),
     );
 
-Map<String, dynamic> _$ProfileWriteRequestToJson(
-  _ProfileWriteRequest instance,
-) => <String, dynamic>{
-  'display_name': instance.displayName,
-  'first_name': instance.firstName,
-  'last_name': instance.lastName,
-  'phone': instance.phone,
-  'timezone': instance.timezone,
-  'locale': instance.locale,
-  'biography': instance.biography,
-  'expertise': instance.expertise,
-};
+Map<String, dynamic> _$$ProfileWriteRequestImplToJson(
+        _$ProfileWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'display_name': instance.displayName,
+      'first_name': instance.firstName,
+      'last_name': instance.lastName,
+      'phone': instance.phone,
+      'timezone': instance.timezone,
+      'locale': instance.locale,
+      'biography': instance.biography,
+      'expertise': instance.expertise,
+    };
 
-_CourseDto _$CourseDtoFromJson(Map<String, dynamic> json) => _CourseDto(
-  id: json['id'] as String,
-  organizationId: json['organization_id'] as String,
-  thumbnailAssetId: json['thumbnail_asset_id'] as String?,
-  title: json['title'] as String,
-  slug: json['slug'] as String,
-  description: json['description'] as String? ?? '',
-  language: json['language'] as String? ?? 'bn',
-  level: json['level'] as String? ?? 'all',
-  status: json['status'] as String? ?? 'published',
-  isFree: json['is_free'] as bool? ?? false,
-  priceMinor: (json['price_minor'] as num?)?.toInt() ?? 0,
-  currency: json['currency'] as String? ?? 'BDT',
-  version: (json['version'] as num?)?.toInt() ?? 0,
-  categoryName: json['category_name'] as String?,
-);
+_$CourseDtoImpl _$$CourseDtoImplFromJson(Map<String, dynamic> json) =>
+    _$CourseDtoImpl(
+      id: json['id'] as String,
+      organizationId: json['organization_id'] as String,
+      thumbnailAssetId: json['thumbnail_asset_id'] as String?,
+      title: json['title'] as String,
+      slug: json['slug'] as String,
+      description: json['description'] as String? ?? '',
+      language: json['language'] as String? ?? 'bn',
+      level: json['level'] as String? ?? 'all',
+      status: json['status'] as String? ?? 'published',
+      isFree: json['is_free'] as bool? ?? false,
+      priceMinor: (json['price_minor'] as num?)?.toInt() ?? 0,
+      currency: json['currency'] as String? ?? 'BDT',
+      version: (json['version'] as num?)?.toInt() ?? 0,
+      categoryName: json['category_name'] as String?,
+    );
 
-Map<String, dynamic> _$CourseDtoToJson(_CourseDto instance) =>
+Map<String, dynamic> _$$CourseDtoImplToJson(_$CourseDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'organization_id': instance.organizationId,
@@ -84,8 +94,9 @@ Map<String, dynamic> _$CourseDtoToJson(_CourseDto instance) =>
       'category_name': instance.categoryName,
     };
 
-_CourseWriteRequest _$CourseWriteRequestFromJson(Map<String, dynamic> json) =>
-    _CourseWriteRequest(
+_$CourseWriteRequestImpl _$$CourseWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$CourseWriteRequestImpl(
       title: json['title'] as String,
       slug: json['slug'] as String,
       description: json['description'] as String,
@@ -99,7 +110,8 @@ _CourseWriteRequest _$CourseWriteRequestFromJson(Map<String, dynamic> json) =>
       thumbnailAssetId: json['thumbnail_asset_id'] as String?,
     );
 
-Map<String, dynamic> _$CourseWriteRequestToJson(_CourseWriteRequest instance) =>
+Map<String, dynamic> _$$CourseWriteRequestImplToJson(
+        _$CourseWriteRequestImpl instance) =>
     <String, dynamic>{
       'title': instance.title,
       'slug': instance.slug,
@@ -114,22 +126,25 @@ Map<String, dynamic> _$CourseWriteRequestToJson(_CourseWriteRequest instance) =>
       'thumbnail_asset_id': instance.thumbnailAssetId,
     };
 
-_ModuleWriteRequest _$ModuleWriteRequestFromJson(Map<String, dynamic> json) =>
-    _ModuleWriteRequest(
+_$ModuleWriteRequestImpl _$$ModuleWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ModuleWriteRequestImpl(
       title: json['title'] as String,
       position: (json['position'] as num).toInt(),
       description: json['description'] as String?,
     );
 
-Map<String, dynamic> _$ModuleWriteRequestToJson(_ModuleWriteRequest instance) =>
+Map<String, dynamic> _$$ModuleWriteRequestImplToJson(
+        _$ModuleWriteRequestImpl instance) =>
     <String, dynamic>{
       'title': instance.title,
       'position': instance.position,
       'description': instance.description,
     };
 
-_LessonWriteRequest _$LessonWriteRequestFromJson(Map<String, dynamic> json) =>
-    _LessonWriteRequest(
+_$LessonWriteRequestImpl _$$LessonWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LessonWriteRequestImpl(
       title: json['title'] as String,
       lessonType: json['lesson_type'] as String,
       position: (json['position'] as num).toInt(),
@@ -142,7 +157,8 @@ _LessonWriteRequest _$LessonWriteRequestFromJson(Map<String, dynamic> json) =>
       durationSeconds: (json['duration_seconds'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$LessonWriteRequestToJson(_LessonWriteRequest instance) =>
+Map<String, dynamic> _$$LessonWriteRequestImplToJson(
+        _$LessonWriteRequestImpl instance) =>
     <String, dynamic>{
       'title': instance.title,
       'lesson_type': instance.lessonType,
@@ -156,33 +172,38 @@ Map<String, dynamic> _$LessonWriteRequestToJson(_LessonWriteRequest instance) =>
       'duration_seconds': instance.durationSeconds,
     };
 
-_CourseDetailDto _$CourseDetailDtoFromJson(Map<String, dynamic> json) =>
-    _CourseDetailDto(
+_$CourseDetailDtoImpl _$$CourseDetailDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$CourseDetailDtoImpl(
       course: CourseDto.fromJson(json['course'] as Map<String, dynamic>),
-      modules:
-          (json['modules'] as List<dynamic>?)
+      modules: (json['modules'] as List<dynamic>?)
               ?.map((e) => CourseModuleDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <CourseModuleDto>[],
     );
 
-Map<String, dynamic> _$CourseDetailDtoToJson(_CourseDetailDto instance) =>
-    <String, dynamic>{'course': instance.course, 'modules': instance.modules};
+Map<String, dynamic> _$$CourseDetailDtoImplToJson(
+        _$CourseDetailDtoImpl instance) =>
+    <String, dynamic>{
+      'course': instance.course,
+      'modules': instance.modules,
+    };
 
-_CourseModuleDto _$CourseModuleDtoFromJson(Map<String, dynamic> json) =>
-    _CourseModuleDto(
+_$CourseModuleDtoImpl _$$CourseModuleDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$CourseModuleDtoImpl(
       id: json['id'] as String,
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
       position: (json['position'] as num?)?.toInt() ?? 0,
-      lessons:
-          (json['lessons'] as List<dynamic>?)
+      lessons: (json['lessons'] as List<dynamic>?)
               ?.map((e) => LessonDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <LessonDto>[],
     );
 
-Map<String, dynamic> _$CourseModuleDtoToJson(_CourseModuleDto instance) =>
+Map<String, dynamic> _$$CourseModuleDtoImplToJson(
+        _$CourseModuleDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
@@ -191,22 +212,23 @@ Map<String, dynamic> _$CourseModuleDtoToJson(_CourseModuleDto instance) =>
       'lessons': instance.lessons,
     };
 
-_LessonDto _$LessonDtoFromJson(Map<String, dynamic> json) => _LessonDto(
-  id: json['id'] as String,
-  title: json['title'] as String,
-  description: json['description'] as String? ?? '',
-  type: json['type'] as String? ?? 'text',
-  lessonType: json['lesson_type'] as String?,
-  position: (json['position'] as num?)?.toInt() ?? 0,
-  isPreview: json['is_preview'] as bool? ?? false,
-  isRequired: json['is_required'] as bool? ?? false,
-  isPublished: json['is_published'] as bool? ?? true,
-  durationSeconds: (json['duration_seconds'] as num?)?.toInt(),
-  mediaAssetId: json['media_asset_id'] as String?,
-  body: json['body'] as String?,
-);
+_$LessonDtoImpl _$$LessonDtoImplFromJson(Map<String, dynamic> json) =>
+    _$LessonDtoImpl(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String? ?? '',
+      type: json['type'] as String? ?? 'text',
+      lessonType: json['lesson_type'] as String?,
+      position: (json['position'] as num?)?.toInt() ?? 0,
+      isPreview: json['is_preview'] as bool? ?? false,
+      isRequired: json['is_required'] as bool? ?? false,
+      isPublished: json['is_published'] as bool? ?? true,
+      durationSeconds: (json['duration_seconds'] as num?)?.toInt(),
+      mediaAssetId: json['media_asset_id'] as String?,
+      body: json['body'] as String?,
+    );
 
-Map<String, dynamic> _$LessonDtoToJson(_LessonDto instance) =>
+Map<String, dynamic> _$$LessonDtoImplToJson(_$LessonDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
@@ -222,8 +244,8 @@ Map<String, dynamic> _$LessonDtoToJson(_LessonDto instance) =>
       'body': instance.body,
     };
 
-_EnrollmentDto _$EnrollmentDtoFromJson(Map<String, dynamic> json) =>
-    _EnrollmentDto(
+_$EnrollmentDtoImpl _$$EnrollmentDtoImplFromJson(Map<String, dynamic> json) =>
+    _$EnrollmentDtoImpl(
       id: json['id'] as String,
       courseId: json['course_id'] as String,
       studentId: json['student_id'] as String,
@@ -232,7 +254,7 @@ _EnrollmentDto _$EnrollmentDtoFromJson(Map<String, dynamic> json) =>
           (json['completion_percentage'] as num?)?.toDouble() ?? 0,
     );
 
-Map<String, dynamic> _$EnrollmentDtoToJson(_EnrollmentDto instance) =>
+Map<String, dynamic> _$$EnrollmentDtoImplToJson(_$EnrollmentDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'course_id': instance.courseId,
@@ -241,30 +263,31 @@ Map<String, dynamic> _$EnrollmentDtoToJson(_EnrollmentDto instance) =>
       'completion_percentage': instance.completionPercentage,
     };
 
-_ProgressWriteRequest _$ProgressWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _ProgressWriteRequest(
-  positionSeconds: (json['position_seconds'] as num).toInt(),
-  watchedSecondsDelta: (json['watched_seconds_delta'] as num).toInt(),
-  manualComplete: json['manual_complete'] as bool? ?? false,
-);
+_$ProgressWriteRequestImpl _$$ProgressWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ProgressWriteRequestImpl(
+      positionSeconds: (json['position_seconds'] as num).toInt(),
+      watchedSecondsDelta: (json['watched_seconds_delta'] as num).toInt(),
+      manualComplete: json['manual_complete'] as bool? ?? false,
+    );
 
-Map<String, dynamic> _$ProgressWriteRequestToJson(
-  _ProgressWriteRequest instance,
-) => <String, dynamic>{
-  'position_seconds': instance.positionSeconds,
-  'watched_seconds_delta': instance.watchedSecondsDelta,
-  'manual_complete': instance.manualComplete,
-};
+Map<String, dynamic> _$$ProgressWriteRequestImplToJson(
+        _$ProgressWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'position_seconds': instance.positionSeconds,
+      'watched_seconds_delta': instance.watchedSecondsDelta,
+      'manual_complete': instance.manualComplete,
+    };
 
-_ProgressDto _$ProgressDtoFromJson(Map<String, dynamic> json) => _ProgressDto(
-  lessonId: json['lesson_id'] as String,
-  state: json['state'] as String,
-  positionSeconds: (json['position_seconds'] as num).toInt(),
-  totalWatchedSeconds: (json['total_watched_seconds'] as num).toInt(),
-);
+_$ProgressDtoImpl _$$ProgressDtoImplFromJson(Map<String, dynamic> json) =>
+    _$ProgressDtoImpl(
+      lessonId: json['lesson_id'] as String,
+      state: json['state'] as String,
+      positionSeconds: (json['position_seconds'] as num).toInt(),
+      totalWatchedSeconds: (json['total_watched_seconds'] as num).toInt(),
+    );
 
-Map<String, dynamic> _$ProgressDtoToJson(_ProgressDto instance) =>
+Map<String, dynamic> _$$ProgressDtoImplToJson(_$ProgressDtoImpl instance) =>
     <String, dynamic>{
       'lesson_id': instance.lessonId,
       'state': instance.state,
@@ -272,58 +295,61 @@ Map<String, dynamic> _$ProgressDtoToJson(_ProgressDto instance) =>
       'total_watched_seconds': instance.totalWatchedSeconds,
     };
 
-_QuizOptionDto _$QuizOptionDtoFromJson(Map<String, dynamic> json) =>
-    _QuizOptionDto(
+_$QuizOptionDtoImpl _$$QuizOptionDtoImplFromJson(Map<String, dynamic> json) =>
+    _$QuizOptionDtoImpl(
       id: json['id'] as String,
       text: json['text'] as String,
       correct: json['correct'] as bool?,
     );
 
-Map<String, dynamic> _$QuizOptionDtoToJson(_QuizOptionDto instance) =>
+Map<String, dynamic> _$$QuizOptionDtoImplToJson(_$QuizOptionDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'text': instance.text,
       'correct': instance.correct,
     };
 
-_OptionWriteRequest _$OptionWriteRequestFromJson(Map<String, dynamic> json) =>
-    _OptionWriteRequest(
+_$OptionWriteRequestImpl _$$OptionWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$OptionWriteRequestImpl(
       text: json['text'] as String,
       isCorrect: json['is_correct'] as bool,
       position: (json['position'] as num).toInt(),
     );
 
-Map<String, dynamic> _$OptionWriteRequestToJson(_OptionWriteRequest instance) =>
+Map<String, dynamic> _$$OptionWriteRequestImplToJson(
+        _$OptionWriteRequestImpl instance) =>
     <String, dynamic>{
       'text': instance.text,
       'is_correct': instance.isCorrect,
       'position': instance.position,
     };
 
-_QuestionWriteRequest _$QuestionWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _QuestionWriteRequest(
-  questionType: json['question_type'] as String,
-  prompt: json['prompt'] as String,
-  points: (json['points'] as num).toDouble(),
-  position: (json['position'] as num).toInt(),
-  options: (json['options'] as List<dynamic>)
-      .map((e) => OptionWriteRequest.fromJson(e as Map<String, dynamic>))
-      .toList(),
-);
+_$QuestionWriteRequestImpl _$$QuestionWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$QuestionWriteRequestImpl(
+      questionType: json['question_type'] as String,
+      prompt: json['prompt'] as String,
+      points: (json['points'] as num).toDouble(),
+      position: (json['position'] as num).toInt(),
+      options: (json['options'] as List<dynamic>)
+          .map((e) => OptionWriteRequest.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
 
-Map<String, dynamic> _$QuestionWriteRequestToJson(
-  _QuestionWriteRequest instance,
-) => <String, dynamic>{
-  'question_type': instance.questionType,
-  'prompt': instance.prompt,
-  'points': instance.points,
-  'position': instance.position,
-  'options': instance.options,
-};
+Map<String, dynamic> _$$QuestionWriteRequestImplToJson(
+        _$QuestionWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'question_type': instance.questionType,
+      'prompt': instance.prompt,
+      'points': instance.points,
+      'position': instance.position,
+      'options': instance.options,
+    };
 
-_QuizWriteRequest _$QuizWriteRequestFromJson(Map<String, dynamic> json) =>
-    _QuizWriteRequest(
+_$QuizWriteRequestImpl _$$QuizWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$QuizWriteRequestImpl(
       courseId: json['course_id'] as String,
       title: json['title'] as String,
       attemptLimit: (json['attempt_limit'] as num).toInt(),
@@ -343,7 +369,8 @@ _QuizWriteRequest _$QuizWriteRequestFromJson(Map<String, dynamic> json) =>
       isRequired: json['is_required'] as bool?,
     );
 
-Map<String, dynamic> _$QuizWriteRequestToJson(_QuizWriteRequest instance) =>
+Map<String, dynamic> _$$QuizWriteRequestImplToJson(
+        _$QuizWriteRequestImpl instance) =>
     <String, dynamic>{
       'course_id': instance.courseId,
       'title': instance.title,
@@ -360,20 +387,21 @@ Map<String, dynamic> _$QuizWriteRequestToJson(_QuizWriteRequest instance) =>
       'is_required': instance.isRequired,
     };
 
-_QuizQuestionDto _$QuizQuestionDtoFromJson(Map<String, dynamic> json) =>
-    _QuizQuestionDto(
+_$QuizQuestionDtoImpl _$$QuizQuestionDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$QuizQuestionDtoImpl(
       id: json['id'] as String,
       type: json['type'] as String,
       prompt: json['prompt'] as String,
       points: (json['points'] as num?)?.toDouble() ?? 1,
-      options:
-          (json['options'] as List<dynamic>?)
+      options: (json['options'] as List<dynamic>?)
               ?.map((e) => QuizOptionDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <QuizOptionDto>[],
     );
 
-Map<String, dynamic> _$QuizQuestionDtoToJson(_QuizQuestionDto instance) =>
+Map<String, dynamic> _$$QuizQuestionDtoImplToJson(
+        _$QuizQuestionDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
@@ -382,8 +410,8 @@ Map<String, dynamic> _$QuizQuestionDtoToJson(_QuizQuestionDto instance) =>
       'options': instance.options,
     };
 
-_QuizAttemptDto _$QuizAttemptDtoFromJson(Map<String, dynamic> json) =>
-    _QuizAttemptDto(
+_$QuizAttemptDtoImpl _$$QuizAttemptDtoImplFromJson(Map<String, dynamic> json) =>
+    _$QuizAttemptDtoImpl(
       id: json['id'] as String,
       quizId: json['quiz_id'] as String,
       attemptNumber: (json['attempt_number'] as num).toInt(),
@@ -395,8 +423,7 @@ _QuizAttemptDto _$QuizAttemptDtoFromJson(Map<String, dynamic> json) =>
       submitBefore: json['submit_before'] == null
           ? null
           : DateTime.parse(json['submit_before'] as String),
-      questions:
-          (json['questions'] as List<dynamic>?)
+      questions: (json['questions'] as List<dynamic>?)
               ?.map((e) => QuizQuestionDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <QuizQuestionDto>[],
@@ -404,7 +431,8 @@ _QuizAttemptDto _$QuizAttemptDtoFromJson(Map<String, dynamic> json) =>
       passed: json['passed'] as bool?,
     );
 
-Map<String, dynamic> _$QuizAttemptDtoToJson(_QuizAttemptDto instance) =>
+Map<String, dynamic> _$$QuizAttemptDtoImplToJson(
+        _$QuizAttemptDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'quiz_id': instance.quizId,
@@ -418,8 +446,9 @@ Map<String, dynamic> _$QuizAttemptDtoToJson(_QuizAttemptDto instance) =>
       'passed': instance.passed,
     };
 
-_AnswerWriteRequest _$AnswerWriteRequestFromJson(Map<String, dynamic> json) =>
-    _AnswerWriteRequest(
+_$AnswerWriteRequestImpl _$$AnswerWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$AnswerWriteRequestImpl(
       questionId: json['question_id'] as String,
       selectedOptionIds: (json['selected_option_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -427,130 +456,135 @@ _AnswerWriteRequest _$AnswerWriteRequestFromJson(Map<String, dynamic> json) =>
       textAnswer: json['text_answer'] as String?,
     );
 
-Map<String, dynamic> _$AnswerWriteRequestToJson(_AnswerWriteRequest instance) =>
+Map<String, dynamic> _$$AnswerWriteRequestImplToJson(
+        _$AnswerWriteRequestImpl instance) =>
     <String, dynamic>{
       'question_id': instance.questionId,
       'selected_option_ids': instance.selectedOptionIds,
       'text_answer': instance.textAnswer,
     };
 
-_SubmissionWriteRequest _$SubmissionWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _SubmissionWriteRequest(
-  textContent: json['text_content'] as String?,
-  mediaAssetIds: (json['media_asset_ids'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-);
+_$SubmissionWriteRequestImpl _$$SubmissionWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$SubmissionWriteRequestImpl(
+      textContent: json['text_content'] as String?,
+      mediaAssetIds: (json['media_asset_ids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+    );
 
-Map<String, dynamic> _$SubmissionWriteRequestToJson(
-  _SubmissionWriteRequest instance,
-) => <String, dynamic>{
-  'text_content': instance.textContent,
-  'media_asset_ids': instance.mediaAssetIds,
-};
+Map<String, dynamic> _$$SubmissionWriteRequestImplToJson(
+        _$SubmissionWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'text_content': instance.textContent,
+      'media_asset_ids': instance.mediaAssetIds,
+    };
 
-_AssignmentWriteRequest _$AssignmentWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _AssignmentWriteRequest(
-  courseId: json['course_id'] as String,
-  title: json['title'] as String,
-  maximumScore: (json['maximum_score'] as num).toDouble(),
-  passingScore: (json['passing_score'] as num).toDouble(),
-  maximumSubmissions: (json['maximum_submissions'] as num).toInt(),
-  lessonId: json['lesson_id'] as String?,
-  instructions: json['instructions'] as String?,
-  attachmentAssetIds: (json['attachment_asset_ids'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  dueAt: json['due_at'] == null
-      ? null
-      : DateTime.parse(json['due_at'] as String),
-  allowedFileTypes: (json['allowed_file_types'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
-  isRequired: json['is_required'] as bool?,
-);
+_$AssignmentWriteRequestImpl _$$AssignmentWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$AssignmentWriteRequestImpl(
+      courseId: json['course_id'] as String,
+      title: json['title'] as String,
+      maximumScore: (json['maximum_score'] as num).toDouble(),
+      passingScore: (json['passing_score'] as num).toDouble(),
+      maximumSubmissions: (json['maximum_submissions'] as num).toInt(),
+      lessonId: json['lesson_id'] as String?,
+      instructions: json['instructions'] as String?,
+      attachmentAssetIds: (json['attachment_asset_ids'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      dueAt: json['due_at'] == null
+          ? null
+          : DateTime.parse(json['due_at'] as String),
+      allowedFileTypes: (json['allowed_file_types'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+      isRequired: json['is_required'] as bool?,
+    );
 
-Map<String, dynamic> _$AssignmentWriteRequestToJson(
-  _AssignmentWriteRequest instance,
-) => <String, dynamic>{
-  'course_id': instance.courseId,
-  'title': instance.title,
-  'maximum_score': instance.maximumScore,
-  'passing_score': instance.passingScore,
-  'maximum_submissions': instance.maximumSubmissions,
-  'lesson_id': instance.lessonId,
-  'instructions': instance.instructions,
-  'attachment_asset_ids': instance.attachmentAssetIds,
-  'due_at': instance.dueAt?.toIso8601String(),
-  'allowed_file_types': instance.allowedFileTypes,
-  'is_required': instance.isRequired,
-};
+Map<String, dynamic> _$$AssignmentWriteRequestImplToJson(
+        _$AssignmentWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'course_id': instance.courseId,
+      'title': instance.title,
+      'maximum_score': instance.maximumScore,
+      'passing_score': instance.passingScore,
+      'maximum_submissions': instance.maximumSubmissions,
+      'lesson_id': instance.lessonId,
+      'instructions': instance.instructions,
+      'attachment_asset_ids': instance.attachmentAssetIds,
+      'due_at': instance.dueAt?.toIso8601String(),
+      'allowed_file_types': instance.allowedFileTypes,
+      'is_required': instance.isRequired,
+    };
 
-_GradeWriteRequest _$GradeWriteRequestFromJson(Map<String, dynamic> json) =>
-    _GradeWriteRequest(
+_$GradeWriteRequestImpl _$$GradeWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$GradeWriteRequestImpl(
       points: (json['points'] as num).toDouble(),
       feedback: json['feedback'] as String?,
       questionId: json['question_id'] as String?,
     );
 
-Map<String, dynamic> _$GradeWriteRequestToJson(_GradeWriteRequest instance) =>
+Map<String, dynamic> _$$GradeWriteRequestImplToJson(
+        _$GradeWriteRequestImpl instance) =>
     <String, dynamic>{
       'points': instance.points,
       'feedback': instance.feedback,
       'question_id': instance.questionId,
     };
 
-_LiveSessionWriteRequest _$LiveSessionWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _LiveSessionWriteRequest(
-  courseId: json['course_id'] as String,
-  title: json['title'] as String,
-  scheduledStartAt: DateTime.parse(json['scheduled_start_at'] as String),
-  scheduledEndAt: DateTime.parse(json['scheduled_end_at'] as String),
-  description: json['description'] as String?,
-);
+_$LiveSessionWriteRequestImpl _$$LiveSessionWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LiveSessionWriteRequestImpl(
+      courseId: json['course_id'] as String,
+      title: json['title'] as String,
+      scheduledStartAt: DateTime.parse(json['scheduled_start_at'] as String),
+      scheduledEndAt: DateTime.parse(json['scheduled_end_at'] as String),
+      description: json['description'] as String?,
+    );
 
-Map<String, dynamic> _$LiveSessionWriteRequestToJson(
-  _LiveSessionWriteRequest instance,
-) => <String, dynamic>{
-  'course_id': instance.courseId,
-  'title': instance.title,
-  'scheduled_start_at': instance.scheduledStartAt.toIso8601String(),
-  'scheduled_end_at': instance.scheduledEndAt.toIso8601String(),
-  'description': instance.description,
-};
+Map<String, dynamic> _$$LiveSessionWriteRequestImplToJson(
+        _$LiveSessionWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'course_id': instance.courseId,
+      'title': instance.title,
+      'scheduled_start_at': instance.scheduledStartAt.toIso8601String(),
+      'scheduled_end_at': instance.scheduledEndAt.toIso8601String(),
+      'description': instance.description,
+    };
 
-_UploadIntentWriteRequest _$UploadIntentWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _UploadIntentWriteRequest(
-  kind: json['kind'] as String,
-  filename: json['filename'] as String,
-  contentType: json['content_type'] as String,
-  sizeBytes: (json['size_bytes'] as num).toInt(),
-  checksumSha256: json['checksum_sha256'] as String?,
-);
+_$UploadIntentWriteRequestImpl _$$UploadIntentWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UploadIntentWriteRequestImpl(
+      kind: json['kind'] as String,
+      filename: json['filename'] as String,
+      contentType: json['content_type'] as String,
+      sizeBytes: (json['size_bytes'] as num).toInt(),
+      checksumSha256: json['checksum_sha256'] as String?,
+    );
 
-Map<String, dynamic> _$UploadIntentWriteRequestToJson(
-  _UploadIntentWriteRequest instance,
-) => <String, dynamic>{
-  'kind': instance.kind,
-  'filename': instance.filename,
-  'content_type': instance.contentType,
-  'size_bytes': instance.sizeBytes,
-  'checksum_sha256': instance.checksumSha256,
-};
+Map<String, dynamic> _$$UploadIntentWriteRequestImplToJson(
+        _$UploadIntentWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'kind': instance.kind,
+      'filename': instance.filename,
+      'content_type': instance.contentType,
+      'size_bytes': instance.sizeBytes,
+      'checksum_sha256': instance.checksumSha256,
+    };
 
-_UploadIntentDto _$UploadIntentDtoFromJson(Map<String, dynamic> json) =>
-    _UploadIntentDto(
+_$UploadIntentDtoImpl _$$UploadIntentDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UploadIntentDtoImpl(
       id: json['id'] as String,
       mediaAssetId: json['media_asset_id'] as String,
       uploadUrl: json['upload_url'] as String,
       expiresAt: DateTime.parse(json['expires_at'] as String),
     );
 
-Map<String, dynamic> _$UploadIntentDtoToJson(_UploadIntentDto instance) =>
+Map<String, dynamic> _$$UploadIntentDtoImplToJson(
+        _$UploadIntentDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'media_asset_id': instance.mediaAssetId,
@@ -558,73 +592,91 @@ Map<String, dynamic> _$UploadIntentDtoToJson(_UploadIntentDto instance) =>
       'expires_at': instance.expiresAt.toIso8601String(),
     };
 
-_LiveClassTokenResponse _$LiveClassTokenResponseFromJson(
-  Map<String, dynamic> json,
-) => _LiveClassTokenResponse(
-  token: json['token'] as String,
-  url: json['url'] as String,
-  expiresAt: DateTime.parse(json['expires_at'] as String),
-);
+_$LiveClassTokenResponseImpl _$$LiveClassTokenResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LiveClassTokenResponseImpl(
+      token: json['token'] as String,
+      url: json['url'] as String,
+      expiresAt: DateTime.parse(json['expires_at'] as String),
+    );
 
-Map<String, dynamic> _$LiveClassTokenResponseToJson(
-  _LiveClassTokenResponse instance,
-) => <String, dynamic>{
-  'token': instance.token,
-  'url': instance.url,
-  'expires_at': instance.expiresAt.toIso8601String(),
-};
+Map<String, dynamic> _$$LiveClassTokenResponseImplToJson(
+        _$LiveClassTokenResponseImpl instance) =>
+    <String, dynamic>{
+      'token': instance.token,
+      'url': instance.url,
+      'expires_at': instance.expiresAt.toIso8601String(),
+    };
 
-_OrderWriteRequest _$OrderWriteRequestFromJson(Map<String, dynamic> json) =>
-    _OrderWriteRequest(courseId: json['course_id'] as String);
+_$OrderWriteRequestImpl _$$OrderWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$OrderWriteRequestImpl(
+      courseId: json['course_id'] as String,
+    );
 
-Map<String, dynamic> _$OrderWriteRequestToJson(_OrderWriteRequest instance) =>
-    <String, dynamic>{'course_id': instance.courseId};
+Map<String, dynamic> _$$OrderWriteRequestImplToJson(
+        _$OrderWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'course_id': instance.courseId,
+    };
 
-_OrderDto _$OrderDtoFromJson(Map<String, dynamic> json) => _OrderDto(
-  id: json['id'] as String,
-  status: json['status'] as String,
-  amountMinor: (json['amount_minor'] as num).toInt(),
-  currency: json['currency'] as String,
-);
+_$OrderDtoImpl _$$OrderDtoImplFromJson(Map<String, dynamic> json) =>
+    _$OrderDtoImpl(
+      id: json['id'] as String,
+      status: json['status'] as String,
+      amountMinor: (json['amount_minor'] as num).toInt(),
+      currency: json['currency'] as String,
+    );
 
-Map<String, dynamic> _$OrderDtoToJson(_OrderDto instance) => <String, dynamic>{
-  'id': instance.id,
-  'status': instance.status,
-  'amount_minor': instance.amountMinor,
-  'currency': instance.currency,
-};
+Map<String, dynamic> _$$OrderDtoImplToJson(_$OrderDtoImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'status': instance.status,
+      'amount_minor': instance.amountMinor,
+      'currency': instance.currency,
+    };
 
-_PaymentIntentDto _$PaymentIntentDtoFromJson(Map<String, dynamic> json) =>
-    _PaymentIntentDto(clientSecret: json['client_secret'] as String);
+_$PaymentIntentDtoImpl _$$PaymentIntentDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$PaymentIntentDtoImpl(
+      clientSecret: json['client_secret'] as String,
+    );
 
-Map<String, dynamic> _$PaymentIntentDtoToJson(_PaymentIntentDto instance) =>
-    <String, dynamic>{'client_secret': instance.clientSecret};
+Map<String, dynamic> _$$PaymentIntentDtoImplToJson(
+        _$PaymentIntentDtoImpl instance) =>
+    <String, dynamic>{
+      'client_secret': instance.clientSecret,
+    };
 
-_DeviceTokenWriteRequest _$DeviceTokenWriteRequestFromJson(
-  Map<String, dynamic> json,
-) => _DeviceTokenWriteRequest(
-  token: json['token'] as String,
-  platform: json['platform'] as String,
-);
+_$DeviceTokenWriteRequestImpl _$$DeviceTokenWriteRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$DeviceTokenWriteRequestImpl(
+      token: json['token'] as String,
+      platform: json['platform'] as String,
+    );
 
-Map<String, dynamic> _$DeviceTokenWriteRequestToJson(
-  _DeviceTokenWriteRequest instance,
-) => <String, dynamic>{'token': instance.token, 'platform': instance.platform};
+Map<String, dynamic> _$$DeviceTokenWriteRequestImplToJson(
+        _$DeviceTokenWriteRequestImpl instance) =>
+    <String, dynamic>{
+      'token': instance.token,
+      'platform': instance.platform,
+    };
 
-_ResultDto _$ResultDtoFromJson(Map<String, dynamic> json) => _ResultDto(
-  enrollmentId: json['enrollment_id'] as String,
-  courseId: json['course_id'] as String,
-  courseTitle: json['course_title'] as String,
-  status: json['status'] as String,
-  completion: (json['completion_percentage'] as num?)?.toDouble() ?? 0,
-  quizAverage: (json['quiz_average'] as num?)?.toDouble() ?? 0,
-  assignmentAverage: (json['assignment_average'] as num?)?.toDouble() ?? 0,
-  completedAt: json['completed_at'] == null
-      ? null
-      : DateTime.parse(json['completed_at'] as String),
-);
+_$ResultDtoImpl _$$ResultDtoImplFromJson(Map<String, dynamic> json) =>
+    _$ResultDtoImpl(
+      enrollmentId: json['enrollment_id'] as String,
+      courseId: json['course_id'] as String,
+      courseTitle: json['course_title'] as String,
+      status: json['status'] as String,
+      completion: (json['completion_percentage'] as num?)?.toDouble() ?? 0,
+      quizAverage: (json['quiz_average'] as num?)?.toDouble() ?? 0,
+      assignmentAverage: (json['assignment_average'] as num?)?.toDouble() ?? 0,
+      completedAt: json['completed_at'] == null
+          ? null
+          : DateTime.parse(json['completed_at'] as String),
+    );
 
-Map<String, dynamic> _$ResultDtoToJson(_ResultDto instance) =>
+Map<String, dynamic> _$$ResultDtoImplToJson(_$ResultDtoImpl instance) =>
     <String, dynamic>{
       'enrollment_id': instance.enrollmentId,
       'course_id': instance.courseId,
@@ -636,8 +688,8 @@ Map<String, dynamic> _$ResultDtoToJson(_ResultDto instance) =>
       'completed_at': instance.completedAt?.toIso8601String(),
     };
 
-_CertificateDto _$CertificateDtoFromJson(Map<String, dynamic> json) =>
-    _CertificateDto(
+_$CertificateDtoImpl _$$CertificateDtoImplFromJson(Map<String, dynamic> json) =>
+    _$CertificateDtoImpl(
       id: json['id'] as String,
       courseId: json['course_id'] as String,
       certificateNumber: json['certificate_number'] as String,
@@ -645,7 +697,8 @@ _CertificateDto _$CertificateDtoFromJson(Map<String, dynamic> json) =>
       issuedAt: DateTime.parse(json['issued_at'] as String),
     );
 
-Map<String, dynamic> _$CertificateDtoToJson(_CertificateDto instance) =>
+Map<String, dynamic> _$$CertificateDtoImplToJson(
+        _$CertificateDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'course_id': instance.courseId,
@@ -654,30 +707,31 @@ Map<String, dynamic> _$CertificateDtoToJson(_CertificateDto instance) =>
       'issued_at': instance.issuedAt.toIso8601String(),
     };
 
-_CertificateVerificationDto _$CertificateVerificationDtoFromJson(
-  Map<String, dynamic> json,
-) => _CertificateVerificationDto(
-  valid: json['valid'] as bool,
-  studentName: json['student_name'] as String,
-  courseTitle: json['course_title'] as String,
-  organizationName: json['organization_name'] as String,
-  issuedAt: DateTime.parse(json['issued_at'] as String),
-  certificateNumber: json['certificate_number'] as String,
-);
+_$CertificateVerificationDtoImpl _$$CertificateVerificationDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$CertificateVerificationDtoImpl(
+      valid: json['valid'] as bool,
+      studentName: json['student_name'] as String,
+      courseTitle: json['course_title'] as String,
+      organizationName: json['organization_name'] as String,
+      issuedAt: DateTime.parse(json['issued_at'] as String),
+      certificateNumber: json['certificate_number'] as String,
+    );
 
-Map<String, dynamic> _$CertificateVerificationDtoToJson(
-  _CertificateVerificationDto instance,
-) => <String, dynamic>{
-  'valid': instance.valid,
-  'student_name': instance.studentName,
-  'course_title': instance.courseTitle,
-  'organization_name': instance.organizationName,
-  'issued_at': instance.issuedAt.toIso8601String(),
-  'certificate_number': instance.certificateNumber,
-};
+Map<String, dynamic> _$$CertificateVerificationDtoImplToJson(
+        _$CertificateVerificationDtoImpl instance) =>
+    <String, dynamic>{
+      'valid': instance.valid,
+      'student_name': instance.studentName,
+      'course_title': instance.courseTitle,
+      'organization_name': instance.organizationName,
+      'issued_at': instance.issuedAt.toIso8601String(),
+      'certificate_number': instance.certificateNumber,
+    };
 
-_NotificationDto _$NotificationDtoFromJson(Map<String, dynamic> json) =>
-    _NotificationDto(
+_$NotificationDtoImpl _$$NotificationDtoImplFromJson(
+        Map<String, dynamic> json) =>
+    _$NotificationDtoImpl(
       id: json['id'] as String,
       type: json['type'] as String,
       title: json['title'] as String,
@@ -692,7 +746,8 @@ _NotificationDto _$NotificationDtoFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['created_at'] as String),
     );
 
-Map<String, dynamic> _$NotificationDtoToJson(_NotificationDto instance) =>
+Map<String, dynamic> _$$NotificationDtoImplToJson(
+        _$NotificationDtoImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
@@ -706,22 +761,22 @@ Map<String, dynamic> _$NotificationDtoToJson(_NotificationDto instance) =>
       'created_at': instance.createdAt.toIso8601String(),
     };
 
-_ProblemDetails _$ProblemDetailsFromJson(Map<String, dynamic> json) =>
-    _ProblemDetails(
+_$ProblemDetailsImpl _$$ProblemDetailsImplFromJson(Map<String, dynamic> json) =>
+    _$ProblemDetailsImpl(
       type: json['type'] as String,
       title: json['title'] as String,
       status: (json['status'] as num).toInt(),
       detail: json['detail'] as String?,
       instance: json['instance'] as String?,
       requestId: json['request_id'] as String?,
-      errors:
-          (json['errors'] as List<dynamic>?)
+      errors: (json['errors'] as List<dynamic>?)
               ?.map((e) => FieldErrorDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const <FieldErrorDto>[],
     );
 
-Map<String, dynamic> _$ProblemDetailsToJson(_ProblemDetails instance) =>
+Map<String, dynamic> _$$ProblemDetailsImplToJson(
+        _$ProblemDetailsImpl instance) =>
     <String, dynamic>{
       'type': instance.type,
       'title': instance.title,
@@ -732,11 +787,14 @@ Map<String, dynamic> _$ProblemDetailsToJson(_ProblemDetails instance) =>
       'errors': instance.errors,
     };
 
-_FieldErrorDto _$FieldErrorDtoFromJson(Map<String, dynamic> json) =>
-    _FieldErrorDto(
+_$FieldErrorDtoImpl _$$FieldErrorDtoImplFromJson(Map<String, dynamic> json) =>
+    _$FieldErrorDtoImpl(
       field: json['field'] as String,
       message: json['message'] as String,
     );
 
-Map<String, dynamic> _$FieldErrorDtoToJson(_FieldErrorDto instance) =>
-    <String, dynamic>{'field': instance.field, 'message': instance.message};
+Map<String, dynamic> _$$FieldErrorDtoImplToJson(_$FieldErrorDtoImpl instance) =>
+    <String, dynamic>{
+      'field': instance.field,
+      'message': instance.message,
+    };

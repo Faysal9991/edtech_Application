@@ -48,7 +48,7 @@ class NotificationsPage extends StatelessWidget {
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
         itemCount: state.notifications.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 10),
+        separatorBuilder: (_, index) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
           final item = state.notifications[index];
           return StaggeredAnimation(

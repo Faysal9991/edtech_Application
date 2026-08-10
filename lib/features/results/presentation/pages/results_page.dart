@@ -112,7 +112,7 @@ class _Metric extends StatelessWidget {
 
   final String value;
   final String label;
-  final List<List<dynamic>> icon;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +210,7 @@ class _ScoreLine extends StatelessWidget {
 class _Status extends StatelessWidget {
   const _Status({required this.icon, required this.message, this.action});
 
-  final List<List<dynamic>> icon;
+  final IconData icon;
   final String message;
   final Widget? action;
 
