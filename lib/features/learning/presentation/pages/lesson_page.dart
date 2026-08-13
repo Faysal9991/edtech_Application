@@ -1,19 +1,30 @@
 import 'dart:async';
 
-import 'package:edtech_application/core/theme/app_colors.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/features/learning/data/services/lesson_progress_tracker.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:edtech_application/shared/models/course.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
-class LessonPage extends StatefulWidget {
-  const LessonPage({required this.course, super.key});
+class LessonRouteArguments {
+  const LessonRouteArguments({required this.course, this.initialLessonId});
 
   final Course course;
+  final String? initialLessonId;
+}
+
+class LessonPage extends StatefulWidget {
+  const LessonPage({required this.course, this.initialLessonId, super.key});
+
+  final Course course;
+  final String? initialLessonId;
 
   @override
   State<LessonPage> createState() => _LessonPageState();
@@ -25,10 +36,15 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
   CourseLesson? _selectedLesson;
   VideoPlayerController? _videoController;
   int _positionSeconds = 0;
+  int _mediaRequestGeneration = 0;
   bool _isPlaying = false;
   bool _openingMedia = false;
   bool _preparingVideo = false;
+  bool _isCompleting = false;
   String? _mediaError;
+  String? _feedbackMessage;
+  AppStateTone _feedbackTone = AppStateTone.info;
+  final Set<String> _completedLessonIds = <String>{};
 
   @override
   void initState() {
@@ -38,7 +54,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
         .expand((module) => module.lessons)
         .where((lesson) => lesson.isPublished)
         .toList();
-    _selectedLesson = _lessons.isEmpty ? null : _lessons.first;
+    _selectedLesson = _initialLesson();
     final repository = context.read<StudentLmsRepository?>();
     _progressTracker = LessonProgressTracker(
       reporter:
@@ -65,6 +81,17 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
     });
   }
 
+  CourseLesson? _initialLesson() {
+    if (_lessons.isEmpty) return null;
+    final requestedId = widget.initialLessonId;
+    if (requestedId != null) {
+      for (final lesson in _lessons) {
+        if (lesson.id == requestedId) return lesson;
+      }
+    }
+    return _lessons.first;
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
@@ -78,6 +105,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _mediaRequestGeneration++;
     _videoController?.dispose();
     unawaited(_safeStop());
     _progressTracker.dispose();
@@ -99,21 +127,13 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _emptyCurriculum() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.menu_book_outlined, size: 58),
-            const SizedBox(height: 12),
-            Text(context.l10n.tr('lesson.noPublished')),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _emptyCurriculum() => Center(
+    child: AppStateView(
+      icon: AppIcons.book,
+      title: context.l10n.tr('lesson.courseContent'),
+      message: context.l10n.tr('lesson.noPublished'),
+    ),
+  );
 
   Widget _lessonBody(CourseLesson lesson) {
     final video = _videoController;
@@ -123,215 +143,164 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
         ? video.value.duration.inSeconds.clamp(1, 86400)
         : (lesson.durationSeconds ?? 1);
     final progress = (_positionSeconds / totalSeconds).clamp(0.0, 1.0);
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 28),
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: ColoredBox(
-            color: AppColors.textPrimary,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                if (videoReady)
-                  Center(
-                    child: AspectRatio(
-                      aspectRatio: video.value.aspectRatio,
-                      child: VideoPlayer(video),
-                    ),
+
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppLayout.maxContentWidth,
+          ),
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+            children: [
+              _LessonStage(
+                lesson: lesson,
+                video: video,
+                videoReady: videoReady,
+                preparing: _preparingVideo,
+                isPlaying: _isPlaying,
+                positionSeconds: _positionSeconds,
+                totalSeconds: totalSeconds,
+                progress: progress,
+                onPlayPause: _togglePlayback,
+                typeLabel: _lessonTypeLabel(context, lesson.type),
+                timeLabel: _time,
+              ),
+              Padding(
+                padding: AppLayout.pagePadding(context),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppLayout.maxReadingWidth,
                   ),
-                if (_preparingVideo)
-                  const CircularProgressIndicator(
-                    color: AppColors.textOnPrimary,
-                  )
-                else
-                  IconButton.filled(
-                    tooltip: _isPlaying
-                        ? context.l10n.tr('lesson.pause')
-                        : context.l10n.tr('lesson.play'),
-                    onPressed: videoReady ? _togglePlayback : null,
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surface,
-                      foregroundColor: AppColors.primary,
-                      fixedSize: const Size(68, 68),
-                    ),
-                    iconSize: 34,
-                    icon: Icon(_mediaIcon(lesson.type, playing: _isPlaying)),
-                  ),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 12,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LinearProgressIndicator(
-                        value: progress,
-                        color: AppColors.textOnPrimary,
-                        backgroundColor: AppColors.textOnPrimary.withValues(
-                          alpha: .3,
+                      _TypeChip(type: lesson.type),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        lesson.title,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              height: 1.25,
+                            ),
+                      ),
+                      if (lesson.description.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          lesson.description,
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                height: 1.55,
+                              ),
+                        ),
+                      ],
+                      if (_feedbackMessage != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        AppStatusBanner(
+                          message: _feedbackMessage!,
+                          tone: _feedbackTone,
+                          icon: _feedbackTone == AppStateTone.success
+                              ? AppIcons.check
+                              : AppIcons.warning,
+                        ),
+                      ],
+                      if (_mediaError != null) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        AppStatusBanner(
+                          message: _mediaError!,
+                          tone: AppStateTone.error,
+                          icon: AppIcons.cloudOff,
+                        ),
+                      ],
+                      if (lesson.mediaAssetId == null &&
+                          (lesson.type == 'video' || lesson.type == 'pdf')) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        AppStatusBanner(
+                          message: _mediaUnavailableMessage(context),
+                          tone: AppStateTone.warning,
+                          icon: AppIcons.warning,
+                        ),
+                      ],
+                      if (lesson.body?.isNotEmpty == true) ...[
+                        const SizedBox(height: AppSpacing.xl),
+                        Semantics(
+                          label: lesson.title,
+                          child: Card(
+                            margin: EdgeInsets.zero,
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              child: SelectableText(
+                                lesson.body!,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.copyWith(height: 1.65),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (lesson.mediaAssetId != null ||
+                          widget.course.enrollmentId != null) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        _LessonActions(
+                          showMedia: lesson.mediaAssetId != null,
+                          openingMedia: _openingMedia,
+                          canComplete: widget.course.enrollmentId != null,
+                          completing: _isCompleting,
+                          completed: _completedLessonIds.contains(lesson.id),
+                          onOpenMedia: () => _openMedia(lesson),
+                          onComplete: () => _completeLesson(lesson),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xxl),
+                      Text(
+                        context.l10n.tr('lesson.courseContent'),
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Text(
-                            _time(_positionSeconds),
-                            style: const TextStyle(
-                              color: AppColors.textOnPrimary,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            _time(totalSeconds),
-                            style: const TextStyle(
-                              color: AppColors.textOnPrimary,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: AppSpacing.sm),
+                      _CourseContentList(
+                        lessons: _lessons,
+                        selectedLessonId: lesson.id,
+                        onSelect: _selectLesson,
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                lesson.type.toUpperCase(),
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                lesson.title,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              if (lesson.description.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(lesson.description),
-              ],
-              if (_mediaError != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  _mediaError!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ],
-              if (lesson.mediaAssetId == null &&
-                  (lesson.type == 'video' || lesson.type == 'pdf')) ...[
-                const SizedBox(height: 10),
-                Text(
-                  context.l10n.tr('lesson.mediaMissing'),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-              if (lesson.body?.isNotEmpty == true) ...[
-                const SizedBox(height: 18),
-                Card(
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Text(lesson.body!),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: lesson.mediaAssetId == null || _openingMedia
-                          ? null
-                          : () => _openMedia(lesson),
-                      icon: _openingMedia
-                          ? const SizedBox.square(
-                              dimension: 17,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.open_in_new_rounded),
-                      label: Text(context.l10n.tr('lesson.openMedia')),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: FilledButton.tonalIcon(
-                      onPressed: widget.course.enrollmentId == null
-                          ? null
-                          : () => _completeLesson(lesson),
-                      icon: const Icon(Icons.task_alt_rounded),
-                      label: Text(context.l10n.tr('lesson.complete')),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 26),
-              Text(
-                context.l10n.tr('lesson.courseContent'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 12),
-              Card(
-                margin: EdgeInsets.zero,
-                child: Column(
-                  children: _lessons.asMap().entries.map((entry) {
-                    final item = entry.value;
-                    return Column(
-                      children: [
-                        if (entry.key > 0) const Divider(height: 1, indent: 58),
-                        ListTile(
-                          selected: item.id == lesson.id,
-                          selectedTileColor: Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer,
-                          onTap: () => _selectLesson(item),
-                          leading: Icon(
-                            _mediaIcon(item.type),
-                            color: AppColors.primary,
-                          ),
-                          title: Text(item.title),
-                          subtitle: Text(item.type.toUpperCase()),
-                          trailing: item.isPreview
-                              ? Text(
-                                  context.l10n.tr('lesson.preview'),
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                )
-                              : null,
-                        ),
-                      ],
-                    );
-                  }).toList(),
                 ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 
   Future<void> _openMedia(CourseLesson lesson) async {
     final repository = context.read<StudentLmsRepository?>();
     final assetId = lesson.mediaAssetId;
-    if (repository == null || assetId == null) return;
-    setState(() => _openingMedia = true);
+    if (repository == null || assetId == null || _openingMedia) return;
+    setState(() {
+      _openingMedia = true;
+      _feedbackMessage = null;
+    });
     try {
       final url = await repository.getMediaAccessUrl(assetId);
       final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (!opened) throw Exception('Media URL open failed');
-    } catch (error) {
-      if (mounted) _message('$error');
+      if (!opened) throw StateError('media launch unavailable');
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _feedbackMessage = _mediaOpenFailureMessage(context);
+          _feedbackTone = AppStateTone.error;
+        });
+      }
     } finally {
       if (mounted) setState(() => _openingMedia = false);
     }
@@ -340,7 +309,16 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
   Future<void> _completeLesson(CourseLesson lesson) async {
     final repository = context.read<StudentLmsRepository?>();
     final enrollmentId = widget.course.enrollmentId;
-    if (repository == null || enrollmentId == null) return;
+    if (repository == null ||
+        enrollmentId == null ||
+        _isCompleting ||
+        _completedLessonIds.contains(lesson.id)) {
+      return;
+    }
+    setState(() {
+      _isCompleting = true;
+      _feedbackMessage = null;
+    });
     try {
       await repository.updateProgress(
         enrollmentId: enrollmentId,
@@ -349,13 +327,27 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
         watchedSecondsDelta: 0,
         manualComplete: true,
       );
-      if (mounted) _message(context.l10n.tr('lesson.completed'));
-    } catch (error) {
-      if (mounted) _message('$error');
+      if (mounted) {
+        setState(() {
+          _completedLessonIds.add(lesson.id);
+          _feedbackMessage = context.l10n.tr('lesson.completed');
+          _feedbackTone = AppStateTone.success;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _feedbackMessage = _completionFailureMessage(context);
+          _feedbackTone = AppStateTone.error;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _isCompleting = false);
     }
   }
 
   Future<void> _selectLesson(CourseLesson lesson) async {
+    if (_selectedLesson?.id == lesson.id) return;
     await _videoController?.pause();
     await _safeReport();
     if (!mounted) return;
@@ -365,6 +357,7 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
       _positionSeconds = 0;
       _isPlaying = false;
       _mediaError = null;
+      _feedbackMessage = null;
     });
     await _prepareVideo(lesson);
   }
@@ -378,19 +371,28 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
     } else {
       await controller.play();
     }
-    if (mounted) setState(() => _isPlaying = controller.value.isPlaying);
+    if (mounted && identical(_videoController, controller)) {
+      setState(() => _isPlaying = controller.value.isPlaying);
+    }
   }
 
   Future<void> _prepareVideo(CourseLesson lesson) async {
+    final request = ++_mediaRequestGeneration;
     final repository = context.read<StudentLmsRepository?>();
     final previous = _videoController;
     _videoController = null;
     await previous?.dispose();
+    if (!_isCurrentMediaRequest(request, lesson)) return;
     if (lesson.type != 'video' || lesson.mediaAssetId == null) {
       if (mounted) setState(() => _preparingVideo = false);
       return;
     }
-    if (repository == null) return;
+    if (repository == null) {
+      if (mounted) {
+        setState(() => _mediaError = _mediaUnavailableMessage(context));
+      }
+      return;
+    }
     setState(() {
       _preparingVideo = true;
       _mediaError = null;
@@ -403,6 +405,10 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
       }
       final controller = VideoPlayerController.networkUrl(url);
       await controller.initialize();
+      if (!_isCurrentMediaRequest(request, lesson)) {
+        await controller.dispose();
+        return;
+      }
       controller.addListener(() {
         if (!mounted || !identical(_videoController, controller)) return;
         final position = controller.value.position.inSeconds;
@@ -414,17 +420,22 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
           });
         }
       });
-      if (!mounted || _selectedLesson?.id != lesson.id) {
-        await controller.dispose();
-        return;
-      }
       setState(() => _videoController = controller);
-    } catch (error) {
-      if (mounted) setState(() => _mediaError = '$error');
+    } catch (_) {
+      if (mounted && _isCurrentMediaRequest(request, lesson)) {
+        setState(() => _mediaError = _mediaLoadFailureMessage(context));
+      }
     } finally {
-      if (mounted) setState(() => _preparingVideo = false);
+      if (mounted && _isCurrentMediaRequest(request, lesson)) {
+        setState(() => _preparingVideo = false);
+      }
     }
   }
+
+  bool _isCurrentMediaRequest(int request, CourseLesson lesson) =>
+      mounted &&
+      request == _mediaRequestGeneration &&
+      _selectedLesson?.id == lesson.id;
 
   Future<void> _safeReport() async {
     try {
@@ -442,24 +453,352 @@ class _LessonPageState extends State<LessonPage> with WidgetsBindingObserver {
     }
   }
 
-  IconData _mediaIcon(String type, {bool playing = false}) => switch (type) {
-    'video' => playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-    'pdf' => Icons.picture_as_pdf_outlined,
-    'quiz' => Icons.quiz_outlined,
-    'assignment' => Icons.assignment_outlined,
-    'live' => Icons.videocam_outlined,
-    _ => Icons.article_outlined,
-  };
-
   String _time(int seconds) {
     final minute = (seconds ~/ 60).toString().padLeft(2, '0');
     final second = (seconds % 60).toString().padLeft(2, '0');
     return '$minute:$second';
   }
+}
 
-  void _message(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+class _LessonStage extends StatelessWidget {
+  const _LessonStage({
+    required this.lesson,
+    required this.video,
+    required this.videoReady,
+    required this.preparing,
+    required this.isPlaying,
+    required this.positionSeconds,
+    required this.totalSeconds,
+    required this.progress,
+    required this.onPlayPause,
+    required this.typeLabel,
+    required this.timeLabel,
+  });
+
+  final CourseLesson lesson;
+  final VideoPlayerController? video;
+  final bool videoReady;
+  final bool preparing;
+  final bool isPlaying;
+  final int positionSeconds;
+  final int totalSeconds;
+  final double progress;
+  final VoidCallback onPlayPause;
+  final String typeLabel;
+  final String Function(int seconds) timeLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isVideo = lesson.type == 'video';
+    return Semantics(
+      label: '$typeLabel: ${lesson.title}',
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ColoredBox(
+          color: colors.inverseSurface,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (videoReady)
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: video!.value.aspectRatio,
+                    child: VideoPlayer(video!),
+                  ),
+                )
+              else
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppIcon(
+                      _lessonIcon(lesson.type),
+                      color: colors.onInverseSurface.withValues(alpha: .9),
+                      size: 54,
+                      strokeWidth: 1.4,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      typeLabel,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: colors.onInverseSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              if (preparing)
+                CircularProgressIndicator(color: colors.onInverseSurface)
+              else if (isVideo)
+                IconButton.filled(
+                  tooltip: isPlaying
+                      ? context.l10n.tr('lesson.pause')
+                      : context.l10n.tr('lesson.play'),
+                  onPressed: videoReady ? onPlayPause : null,
+                  style: IconButton.styleFrom(
+                    backgroundColor: colors.surface,
+                    foregroundColor: colors.primary,
+                    fixedSize: const Size(64, 64),
+                  ),
+                  icon: isPlaying
+                      ? const AppIcon(HugeIcons.strokeRoundedPause, size: 30)
+                      : const AppIcon(AppIcons.play, size: 30),
+                ),
+              if (isVideo)
+                Positioned(
+                  left: AppSpacing.md,
+                  right: AppSpacing.md,
+                  bottom: AppSpacing.sm,
+                  child: Semantics(
+                    label: _progressLabel(context, progress),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 5,
+                            color: colors.onInverseSurface,
+                            backgroundColor: colors.onInverseSurface.withValues(
+                              alpha: .28,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Row(
+                          children: [
+                            Text(
+                              timeLabel(positionSeconds),
+                              style: TextStyle(color: colors.onInverseSurface),
+                            ),
+                            const Spacer(),
+                            Text(
+                              timeLabel(totalSeconds),
+                              style: TextStyle(color: colors.onInverseSurface),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
+
+class _TypeChip extends StatelessWidget {
+  const _TypeChip({required this.type});
+  final String type;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: colors.primaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppIcon(
+            _lessonIcon(type),
+            size: 17,
+            color: colors.onPrimaryContainer,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            _lessonTypeLabel(context, type),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: colors.onPrimaryContainer),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LessonActions extends StatelessWidget {
+  const _LessonActions({
+    required this.showMedia,
+    required this.openingMedia,
+    required this.canComplete,
+    required this.completing,
+    required this.completed,
+    required this.onOpenMedia,
+    required this.onComplete,
+  });
+
+  final bool showMedia;
+  final bool openingMedia;
+  final bool canComplete;
+  final bool completing;
+  final bool completed;
+  final VoidCallback onOpenMedia;
+  final VoidCallback onComplete;
+
+  @override
+  Widget build(BuildContext context) {
+    final openMedia = OutlinedButton.icon(
+      onPressed: openingMedia ? null : onOpenMedia,
+      icon: openingMedia
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const AppIcon(AppIcons.arrowRight, size: 19),
+      label: Text(context.l10n.tr('lesson.openMedia')),
+    );
+    final complete = FilledButton.tonalIcon(
+      onPressed: completing || completed ? null : onComplete,
+      icon: completing
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const AppIcon(AppIcons.check, size: 19),
+      label: Text(
+        completed
+            ? context.l10n.tr('lesson.completed')
+            : context.l10n.tr('lesson.complete'),
+      ),
+    );
+    if (!showMedia) return SizedBox(width: double.infinity, child: complete);
+    if (!canComplete) return SizedBox(width: double.infinity, child: openMedia);
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth < 460
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                openMedia,
+                const SizedBox(height: AppSpacing.sm),
+                complete,
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: openMedia),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(child: complete),
+              ],
+            ),
+    );
+  }
+}
+
+class _CourseContentList extends StatelessWidget {
+  const _CourseContentList({
+    required this.lessons,
+    required this.selectedLessonId,
+    required this.onSelect,
+  });
+
+  final List<CourseLesson> lessons;
+  final String selectedLessonId;
+  final ValueChanged<CourseLesson> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: lessons.asMap().entries.map((entry) {
+          final item = entry.value;
+          final selected = item.id == selectedLessonId;
+          return Column(
+            children: [
+              if (entry.key > 0) const Divider(height: 1, indent: 62),
+              Semantics(
+                selected: selected,
+                button: true,
+                label: '${_lessonTypeLabel(context, item.type)}: ${item.title}',
+                child: ListTile(
+                  selected: selected,
+                  selectedTileColor: colors.primaryContainer,
+                  onTap: () => onSelect(item),
+                  leading: AppIconBadge(
+                    icon: _lessonIcon(item.type),
+                    size: 42,
+                    iconSize: 20,
+                    backgroundColor: selected
+                        ? colors.surface
+                        : colors.surfaceContainerHighest,
+                  ),
+                  title: Text(
+                    item.title,
+                    style: selected
+                        ? Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          )
+                        : null,
+                  ),
+                  subtitle: Text(_lessonTypeLabel(context, item.type)),
+                  trailing: selected
+                      ? AppIcon(AppIcons.check, size: 20, color: colors.primary)
+                      : item.isPreview
+                      ? Text(
+                          context.l10n.tr('lesson.preview'),
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(color: colors.primary),
+                        )
+                      : AppIcon(
+                          AppIcons.arrowRight,
+                          size: 19,
+                          color: colors.onSurfaceVariant,
+                        ),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+List<List<dynamic>> _lessonIcon(String type) => switch (type) {
+  'video' => AppIcons.play,
+  'pdf' => AppIcons.book,
+  'quiz' => AppIcons.quiz,
+  'assignment' => AppIcons.assignment,
+  'live' => AppIcons.live,
+  _ => AppIcons.book,
+};
+
+String _lessonTypeLabel(BuildContext context, String type) {
+  return switch (type) {
+    'video' => context.l10n.tr('lesson.type.video'),
+    'pdf' => context.l10n.tr('lesson.type.pdf'),
+    'quiz' => context.l10n.tr('lesson.type.quiz'),
+    'assignment' => context.l10n.tr('lesson.type.assignment'),
+    'live' => context.l10n.tr('lesson.type.live'),
+    _ => context.l10n.tr('lesson.type.text'),
+  };
+}
+
+String _progressLabel(BuildContext context, double progress) {
+  final percent = context.l10n.percent((progress * 100).round());
+  return context.l10n.tr('lesson.videoProgress', args: {'percent': percent});
+}
+
+String _mediaUnavailableMessage(BuildContext context) =>
+    context.l10n.tr('lesson.mediaUnavailable');
+
+String _mediaLoadFailureMessage(BuildContext context) =>
+    context.l10n.tr('lesson.mediaLoadFailed');
+
+String _mediaOpenFailureMessage(BuildContext context) =>
+    context.l10n.tr('lesson.mediaOpenFailed');
+
+String _completionFailureMessage(BuildContext context) =>
+    context.l10n.tr('lesson.completionFailed');

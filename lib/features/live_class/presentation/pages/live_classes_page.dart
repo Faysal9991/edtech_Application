@@ -1,9 +1,10 @@
 import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/routing/app_routes.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,60 +36,59 @@ class _LiveClassesPageState extends State<LiveClassesPage> {
             onPressed: state.isLoadingLiveClasses
                 ? null
                 : state.loadLiveClasses,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const AppIcon(AppIcons.refresh),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: state.loadLiveClasses,
-        child: _body(context, state),
-      ),
+      body: _body(context, state),
     );
   }
 
   Widget _body(BuildContext context, StudentLmsController state) {
     if (state.isLoadingLiveClasses && state.liveClasses.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: AppLoadingView(label: context.l10n.tr('common.loading')),
+      );
     }
     if (state.liveClassesError != null && state.liveClasses.isEmpty) {
-      return ListView(
-        padding: const EdgeInsets.all(28),
-        children: [
-          const SizedBox(height: 90),
-          const AppIcon(AppIcons.cloudOff, size: 58, color: AppColors.primary),
-          const SizedBox(height: 16),
-          Text(state.liveClassesError!, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          FilledButton.tonal(
-            onPressed: state.loadLiveClasses,
-            child: Text(context.l10n.tr('common.retry')),
-          ),
-        ],
+      return Center(
+        child: AppStateView(
+          icon: AppIcons.cloudOff,
+          title: context.l10n.tr('live.title'),
+          message: context.l10n.tr('common.offline'),
+          actionLabel: context.l10n.tr('common.retry'),
+          onAction: state.loadLiveClasses,
+          tone: AppStateTone.error,
+        ),
       );
     }
     if (state.liveClasses.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(28),
-        children: [
-          const SizedBox(height: 90),
-          const AppIcon(AppIcons.live, size: 62, color: AppColors.primary),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.tr('live.empty'),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ],
+      return Center(
+        child: AppStateView(
+          icon: AppIcons.live,
+          title: context.l10n.tr('live.title'),
+          message: context.l10n.tr('live.empty'),
+          tone: AppStateTone.info,
+        ),
       );
     }
-    return ListView.separated(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-      itemCount: state.liveClasses.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 10),
-      itemBuilder: (context, index) =>
-          _LiveClassCard(item: state.liveClasses[index]),
+    return AppScrollablePage(
+      onRefresh: state.loadLiveClasses,
+      children: [
+        if (state.liveClassesError != null) ...[
+          AppStatusBanner(
+            icon: AppIcons.cloudOff,
+            message: context.l10n.tr('common.offline'),
+            tone: AppStateTone.warning,
+            actionLabel: context.l10n.tr('common.retry'),
+            onAction: state.loadLiveClasses,
+          ),
+          const SizedBox(height: 20),
+        ],
+        ...state.liveClasses.expand(
+          (item) => [_LiveClassCard(item: item), const SizedBox(height: 12)],
+        ),
+      ],
     );
   }
 }
@@ -102,7 +102,13 @@ class _LiveClassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLive = item.status == 'live';
     final start = item.scheduledStartAt.toLocal();
-    final minute = start.minute.toString().padLeft(2, '0');
+    final end = item.scheduledEndAt.toLocal();
+    final localizations = MaterialLocalizations.of(context);
+    final date = localizations.formatMediumDate(start);
+    final startTime = localizations.formatTimeOfDay(
+      TimeOfDay.fromDateTime(start),
+    );
+    final endTime = localizations.formatTimeOfDay(TimeOfDay.fromDateTime(end));
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -115,9 +121,11 @@ class _LiveClassCard extends StatelessWidget {
                 AppIconBadge(
                   icon: AppIcons.live,
                   backgroundColor: isLive
-                      ? AppColors.errorBackground
-                      : AppColors.primaryLight,
-                  foregroundColor: isLive ? AppColors.error : AppColors.primary,
+                      ? Theme.of(context).colorScheme.errorContainer
+                      : Theme.of(context).colorScheme.primaryContainer,
+                  foregroundColor: isLive
+                      ? Theme.of(context).colorScheme.onErrorContainer
+                      : Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -133,21 +141,38 @@ class _LiveClassCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Chip(
-                  label: Text(switch (item.status) {
-                    'live' => context.l10n.tr('live.liveNow'),
-                    'ended' => 'Ended',
-                    'cancelled' => 'Cancelled',
-                    _ => context.l10n.tr('live.scheduled'),
-                  }),
-                ),
+                if (item.status == 'live' || item.status == 'scheduled')
+                  Chip(
+                    label: Text(
+                      isLive
+                          ? context.l10n.tr('live.liveNow')
+                          : context.l10n.tr('live.scheduled'),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 14),
-            Text(
-              '${context.l10n.number(start.day)}/${context.l10n.number(start.month)} • ${context.l10n.number(start.hour)}:${context.l10n.digits(minute)}',
-              style: Theme.of(context).textTheme.bodySmall,
+            Row(
+              children: [
+                const AppIcon(AppIcons.calendar, size: 17),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    '$date • $startTime–$endTime',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
             ),
+            if (item.description.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                item.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
             const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,

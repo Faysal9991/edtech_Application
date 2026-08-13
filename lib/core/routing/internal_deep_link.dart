@@ -1,13 +1,22 @@
 import 'package:edtech_application/core/routing/app_routes.dart';
+import 'package:edtech_application/core/session/app_session.dart';
 
 class InternalDeepLink {
-  const InternalDeepLink({required this.route, this.argument});
+  const InternalDeepLink({
+    required this.route,
+    this.argument,
+    this.organizationId,
+    this.requiredRole,
+  });
 
   final String route;
   final String? argument;
+  final String? organizationId;
+  final MobileRole? requiredRole;
 
   static const _allowedRoutes = <String>{
     AppRoutes.home,
+    AppRoutes.guardianInvitation,
     AppRoutes.courseDetails,
     AppRoutes.lesson,
     AppRoutes.studentServices,
@@ -42,6 +51,27 @@ class InternalDeepLink {
         uri.queryParameters['id'] ??
         uri.queryParameters['token'] ??
         uri.queryParameters['number'];
-    return InternalDeepLink(route: uri.path, argument: argument);
+    return InternalDeepLink(
+      route: uri.path,
+      argument: argument,
+      organizationId: uri.queryParameters['organization_id'],
+      requiredRole: _requiredRole(uri.path),
+    );
   }
+
+  static MobileRole? _requiredRole(String route) => switch (route) {
+    AppRoutes.courseDetails ||
+    AppRoutes.lesson ||
+    AppRoutes.studentServices ||
+    AppRoutes.assessments ||
+    AppRoutes.quiz ||
+    AppRoutes.exam ||
+    AppRoutes.assignment ||
+    AppRoutes.liveClasses ||
+    AppRoutes.liveRoom ||
+    AppRoutes.payments ||
+    AppRoutes.results ||
+    AppRoutes.certificates => MobileRole.student,
+    _ => null,
+  };
 }

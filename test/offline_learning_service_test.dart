@@ -99,6 +99,42 @@ void main() {
     expect(gateway.answerBatches.map((batch) => batch.length), [100, 1]);
   });
 
+  test('offline outbox is isolated by user organization and role', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final service = OfflineLearningService(
+      repository: _FakeOfflineGateway(),
+      preferences: preferences,
+    );
+
+    await service.activateNamespace(
+      userId: 'user-0001',
+      organizationId: 'organization-0001',
+      role: 'teacher',
+    );
+    await service.queueProgress(
+      enrollmentId: 'enrollment-1',
+      lessonId: 'lesson-1',
+      positionSeconds: 30,
+      watchedSecondsDelta: 30,
+    );
+    expect(service.pendingOperationCount, 1);
+
+    await service.activateNamespace(
+      userId: 'user-0001',
+      organizationId: 'organization-0002',
+      role: 'guardian',
+    );
+    expect(service.pendingOperationCount, 0);
+
+    await service.activateNamespace(
+      userId: 'user-0001',
+      organizationId: 'organization-0001',
+      role: 'teacher',
+    );
+    expect(service.pendingOperationCount, 1);
+  });
+
   test('checksum mismatch deletes the partial offline file', () async {
     SharedPreferences.setMockInitialValues({});
     final preferences = await SharedPreferences.getInstance();

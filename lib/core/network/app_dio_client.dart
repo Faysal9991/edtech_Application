@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:edtech_application/core/auth/secure_token_storage.dart';
 import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/api_constants.dart';
+import 'package:edtech_application/core/session/organization_context.dart';
 import 'package:flutter/foundation.dart';
 
 typedef TokenRefreshCallback =
@@ -11,9 +12,11 @@ typedef SessionExpiredCallback = Future<void> Function();
 class AppDioClient {
   AppDioClient({
     required SecureTokenStorage tokenStorage,
+    OrganizationContext? organizationContext,
     TokenRefreshCallback? refreshToken,
     SessionExpiredCallback? onSessionExpired,
   }) : _tokenStorage = tokenStorage,
+       _organizationContext = organizationContext ?? OrganizationContext(),
        _refreshToken = refreshToken,
        _onSessionExpired = onSessionExpired {
     _dio = Dio(
@@ -71,6 +74,7 @@ class AppDioClient {
   };
 
   final SecureTokenStorage _tokenStorage;
+  final OrganizationContext _organizationContext;
   final TokenRefreshCallback? _refreshToken;
   final SessionExpiredCallback? _onSessionExpired;
   late final Dio _dio;
@@ -89,6 +93,12 @@ class AppDioClient {
     final token = _tokenStorage.accessToken;
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
+    }
+    if (_isOrganizationScoped(options)) {
+      final organizationId = _organizationContext.organizationId;
+      if (organizationId != null && organizationId.isNotEmpty) {
+        options.headers['X-Organization-ID'] = organizationId;
+      }
     }
     handler.next(options);
   }
@@ -187,6 +197,15 @@ class AppDioClient {
     // Course reads are public; POST /courses/{id}/enroll is authenticated.
     return request.method.toUpperCase() == 'GET' &&
         (path == '/api/v1/courses' || path.startsWith('/api/v1/courses/'));
+  }
+
+  static bool _isOrganizationScoped(RequestOptions request) {
+    final path = request.uri.path;
+    if (_isPublicRequest(request) || path.startsWith('/api/v1/auth/')) {
+      return false;
+    }
+    if (path == '/api/v1/guardian/invitations/accept') return false;
+    return path.startsWith('/api/v1/');
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/network/mobile_api_dto.dart';
 import 'package:edtech_application/core/network/phase_one_dto.dart';
 import 'package:edtech_application/core/routing/internal_deep_link.dart';
+import 'package:edtech_application/core/session/app_session.dart';
 import 'package:edtech_application/features/authentication/data/models/auth_dto.dart';
 import 'package:edtech_application/features/learning/data/services/lesson_progress_tracker.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -281,9 +282,13 @@ void main() {
 
   group('notification deep-link allowlist', () {
     test('accepts registered internal app routes', () {
-      final link = InternalDeepLink.tryParse('/exam?id=exam-1');
+      final link = InternalDeepLink.tryParse(
+        '/exam?id=exam-1&organization_id=organization-1',
+      );
       expect(link?.route, '/exam');
       expect(link?.argument, 'exam-1');
+      expect(link?.organizationId, 'organization-1');
+      expect(link?.requiredRole, MobileRole.student);
     });
 
     test('rejects external and protocol-relative URLs', () {

@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:edtech_application/core/network/phase_one_dto.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -65,11 +67,11 @@ class _QuizPageState extends State<QuizPage> {
         _loading = false;
       });
       _startTimer(attempt.expiresAt);
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = '$error';
+        _error = context.l10n.tr('common.offline');
       });
     }
   }
@@ -95,30 +97,24 @@ class _QuizPageState extends State<QuizPage> {
     if (_loading) {
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.tr('quiz.title'))),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: AppLoadingView(label: context.l10n.tr('common.loading')),
+        ),
       );
     }
     if (_error != null || _attempt == null || _attempt!.questions.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.tr('quiz.title'))),
         body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.quiz_outlined,
-                  size: 58,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  _error ?? context.l10n.tr('quiz.noQuestions'),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+          child: AppStateView(
+            icon: AppIcons.quiz,
+            title: context.l10n.tr('quiz.title'),
+            message: _error ?? context.l10n.tr('quiz.noQuestions'),
+            actionLabel: _error == null
+                ? null
+                : context.l10n.tr('common.retry'),
+            onAction: _error == null ? null : _start,
+            tone: _error == null ? AppStateTone.info : AppStateTone.error,
           ),
         ),
       );
@@ -160,8 +156,8 @@ class _QuizPageState extends State<QuizPage> {
                 ).colorScheme.secondaryContainer,
               ),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(20),
+                child: AppScrollablePage(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                   children: [
                     Row(
                       children: [
@@ -176,7 +172,9 @@ class _QuizPageState extends State<QuizPage> {
                             },
                           ),
                           style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(color: AppColors.primary),
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                         const Spacer(),
                         Text(
@@ -322,14 +320,10 @@ class _QuizPageState extends State<QuizPage> {
             ? _textAnswers[question.id]
             : null,
       );
-    } catch (error) {
+    } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.l10n.tr('quiz.saveFailed', args: {'error': error}),
-            ),
-          ),
+          SnackBar(content: Text(context.l10n.tr('common.offline'))),
         );
       }
     } finally {
@@ -375,11 +369,9 @@ class _QuizPageState extends State<QuizPage> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          icon: Icon(
-            result.passed == true
-                ? Icons.emoji_events_rounded
-                : Icons.insights_rounded,
-            color: AppColors.primary,
+          icon: AppIcon(
+            result.passed == true ? AppIcons.certificate : AppIcons.analytics,
+            color: Theme.of(context).colorScheme.primary,
             size: 52,
           ),
           title: Text(
@@ -405,11 +397,11 @@ class _QuizPageState extends State<QuizPage> {
           ],
         ),
       );
-    } catch (error) {
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.tr('common.offline'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -452,7 +444,7 @@ class _TimerBadge extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16),
       child: Chip(
-        avatar: const Icon(Icons.timer_outlined, size: 17),
+        avatar: const AppIcon(AppIcons.clock, size: 17),
         label: Text(context.l10n.digits('$minute:$second')),
       ),
     );
@@ -504,7 +496,7 @@ class _AnswerOption extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(child: Text(text)),
               if (selected)
-                Icon(Icons.check_circle_rounded, color: colors.primary),
+                AppIcon(AppIcons.check, color: colors.primary, size: 20),
             ],
           ),
         ),

@@ -10,12 +10,17 @@ class LocalStorage {
   static const _languageCodeKey = 'language_code';
   static const _examAttemptPrefix = 'exam_attempt_v1_';
   static const _examDraftPrefix = 'exam_draft_v1_';
+  static const _organizationKey = 'last_organization_id_v1';
+  static const _roleKey = 'last_mobile_role_v1';
 
   final SharedPreferences _preferences;
 
   bool get isDarkMode => _preferences.getBool(_themeModeKey) ?? false;
   String? get rememberedEmail => _preferences.getString(_rememberEmailKey);
   String get languageCode => _preferences.getString(_languageCodeKey) ?? 'bn';
+  String? get selectedOrganizationId =>
+      _preferences.getString(_organizationKey);
+  String? get selectedMobileRole => _preferences.getString(_roleKey);
 
   Future<void> saveThemeMode({required bool isDark}) async {
     await _preferences.setBool(_themeModeKey, isDark);
@@ -31,6 +36,22 @@ class LocalStorage {
 
   Future<void> saveLanguageCode(String languageCode) async {
     await _preferences.setString(_languageCodeKey, languageCode);
+  }
+
+  Future<void> saveSessionSelection({
+    required String? organizationId,
+    required String? role,
+  }) async {
+    if (organizationId == null) {
+      await _preferences.remove(_organizationKey);
+    } else {
+      await _preferences.setString(_organizationKey, organizationId);
+    }
+    if (role == null) {
+      await _preferences.remove(_roleKey);
+    } else {
+      await _preferences.setString(_roleKey, role);
+    }
   }
 
   String? examAttemptId(String examId) =>
@@ -61,7 +82,9 @@ class LocalStorage {
           (key) =>
               key.startsWith(_examAttemptPrefix) ||
               key.startsWith(_examDraftPrefix) ||
-              key.startsWith('offline_'),
+              key.startsWith('offline_') ||
+              key == _organizationKey ||
+              key == _roleKey,
         )
         .toList();
     for (final key in sessionKeys) {

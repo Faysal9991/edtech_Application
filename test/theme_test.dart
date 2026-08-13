@@ -1,5 +1,6 @@
 import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/core/theme/app_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -13,6 +14,18 @@ void main() {
     expect(AppColors.warning.toARGB32(), 0xFFF59E0B);
     expect(AppColors.error.toARGB32(), 0xFFDC2626);
     expect(AppColors.primary, isNot(AppColors.success));
+    expect(
+      _contrast(AppColors.warningForeground, AppColors.warningBackground),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      _contrast(AppColors.successForeground, AppColors.secondaryLight),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      _contrast(AppColors.infoForeground, AppColors.infoBackground),
+      greaterThanOrEqualTo(4.5),
+    );
   });
 
   test('theme assigns blue to action and green to progress', () {
@@ -28,4 +41,15 @@ void main() {
     expect(dark.colorScheme.secondary, AppColors.darkSecondary);
     expect(dark.scaffoldBackgroundColor, AppColors.darkBackground);
   });
+}
+
+double _contrast(Color first, Color second) {
+  final firstLuminance = first.computeLuminance();
+  final secondLuminance = second.computeLuminance();
+  return (firstLuminance > secondLuminance
+          ? firstLuminance + .05
+          : secondLuminance + .05) /
+      (firstLuminance > secondLuminance
+          ? secondLuminance + .05
+          : firstLuminance + .05);
 }

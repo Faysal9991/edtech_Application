@@ -1,7 +1,11 @@
 import 'package:edtech_application/core/network/phase_one_dto.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
+import 'package:edtech_application/shared/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,9 +17,10 @@ class VerifyCertificatePage extends StatefulWidget {
 }
 
 class _VerifyCertificatePageState extends State<VerifyCertificatePage> {
+  final _formKey = GlobalKey<FormState>();
   final _number = TextEditingController();
   CertificateVerificationDto? _result;
-  String? _error;
+  bool _failed = false;
   bool _loading = false;
 
   @override
@@ -25,63 +30,81 @@ class _VerifyCertificatePageState extends State<VerifyCertificatePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.tr('profile.verifyCertificate'))),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          TextField(
-            controller: _number,
-            decoration: InputDecoration(
-              labelText: context.l10n.tr('certificates.number'),
-              prefixIcon: const Icon(Icons.workspace_premium_outlined),
-            ),
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(context.l10n.tr('profile.verifyCertificate'))),
+    body: AppScrollablePage(
+      maxWidth: 620,
+      children: [
+        Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppTextField(
+                controller: _number,
+                label: context.l10n.tr('certificates.number'),
+                hint: context.l10n.tr('certificates.number'),
+                prefixAppIcon: AppIcons.certificate,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _verify(),
+                validator: (value) => (value?.trim().isEmpty ?? true)
+                    ? context.l10n.tr('certificates.number')
+                    : null,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton.icon(
+                onPressed: _loading ? null : _verify,
+                icon: _loading
+                    ? const SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.4,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const AppIcon(AppIcons.verified, color: Colors.white),
+                label: Text(context.l10n.tr('certificates.verify')),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _loading ? null : _verify,
-            child: _loading
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.4,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(context.l10n.tr('certificates.verify')),
+        ),
+        if (_failed) ...[
+          const SizedBox(height: AppSpacing.lg),
+          AppStateView(
+            icon: AppIcons.cloudOff,
+            title: context.l10n.tr('certificates.title'),
+            message: context.l10n.tr('certificates.verifyFailed'),
+            actionLabel: context.l10n.tr('common.retry'),
+            onAction: _verify,
+            compact: true,
+            tone: AppStateTone.error,
           ),
-          if (_error != null) ...[
-            const SizedBox(height: 18),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ],
-          if (_result != null) ...[
-            const SizedBox(height: 24),
-            _VerificationCard(result: _result!),
-          ],
         ],
-      ),
-    );
-  }
+        if (_result != null) ...[
+          const SizedBox(height: AppSpacing.xl),
+          _VerificationCard(result: _result!),
+        ],
+      ],
+    ),
+  );
 
   Future<void> _verify() async {
-    final number = _number.text.trim();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     final repository = context.read<StudentLmsRepository?>();
-    if (number.isEmpty || repository == null) return;
+    if (repository == null) {
+      setState(() => _failed = true);
+      return;
+    }
     setState(() {
       _loading = true;
-      _error = null;
+      _failed = false;
       _result = null;
     });
     try {
-      final result = await repository.verifyCertificate(number);
+      final result = await repository.verifyCertificate(_number.text.trim());
       if (mounted) setState(() => _result = result);
-    } catch (error) {
-      if (mounted) setState(() => _error = '$error');
+    } catch (_) {
+      if (mounted) setState(() => _failed = true);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -90,60 +113,80 @@ class _VerifyCertificatePageState extends State<VerifyCertificatePage> {
 
 class _VerificationCard extends StatelessWidget {
   const _VerificationCard({required this.result});
-
   final CertificateVerificationDto result;
 
   @override
   Widget build(BuildContext context) {
+    final icon = result.valid ? AppIcons.verified : AppIcons.error;
+    final title = result.valid
+        ? context.l10n.tr('certificates.valid')
+        : context.l10n.tr('certificates.invalid');
     return Card(
       color: result.valid
-          ? Theme.of(context).brightness == Brightness.dark
-                ? AppColors.darkSuccessBackground
-                : AppColors.successBackground
-          : null,
+          ? Theme.of(context).colorScheme.secondaryContainer
+          : Theme.of(context).colorScheme.errorContainer,
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
-            Icon(
-              result.valid ? Icons.verified_rounded : Icons.gpp_bad_outlined,
-              size: 58,
-              color: result.valid
-                  ? Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.darkSuccess
-                        : AppColors.success
+            AppIconBadge(
+              icon: icon,
+              size: 64,
+              iconSize: 31,
+              backgroundColor: result.valid
+                  ? Theme.of(context).colorScheme.secondaryContainer
+                  : Theme.of(context).colorScheme.errorContainer,
+              foregroundColor: result.valid
+                  ? Theme.of(context).colorScheme.secondary
                   : Theme.of(context).colorScheme.error,
             ),
-            const SizedBox(height: 12),
-            Text(
-              result.valid
-                  ? context.l10n.tr('certificates.valid')
-                  : context.l10n.tr('certificates.invalid'),
-              style: Theme.of(context).textTheme.titleLarge,
+            const SizedBox(height: AppSpacing.sm),
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.lg),
+            _DetailRow(
+              label: context.l10n.tr('certificates.student'),
+              value: result.studentName,
             ),
-            const Divider(height: 28),
-            _row(context.l10n.tr('certificates.student'), result.studentName),
-            _row(context.l10n.tr('certificates.course'), result.courseTitle),
-            _row(
-              context.l10n.tr('certificates.organization'),
-              result.organizationName,
+            _DetailRow(
+              label: context.l10n.tr('certificates.course'),
+              value: result.courseTitle,
             ),
-            _row(
-              context.l10n.tr('certificates.number'),
-              result.certificateNumber,
+            _DetailRow(
+              label: context.l10n.tr('certificates.organization'),
+              value: result.organizationName,
+            ),
+            _DetailRow(
+              label: context.l10n.tr('certificates.number'),
+              value: result.certificateNumber,
+              isLast: true,
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _row(String label, String value) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    this.isLast = false,
+  });
+  final String label;
+  final String value;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(width: 100, child: Text(label)),
+        SizedBox(
+          width: 112,
+          child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+        ),
         Expanded(
           child: Text(
             value,

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/network/mobile_api_dto.dart';
 import 'package:edtech_application/core/network/phase_one_dto.dart';
+import 'package:edtech_application/core/network/role_api_dto.dart';
 import 'package:edtech_application/features/authentication/data/models/auth_dto.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -101,6 +102,65 @@ abstract class ApiService {
   @GET('/api/v1/academic/sessions')
   Future<ListResponseDto> listAcademicSessions();
 
+  // Guardian invitation and linked-student workspace.
+  @POST('/api/v1/guardian/invitations/accept')
+  Future<StudentGuardianDto> acceptGuardianInvitation(
+    @Body() GuardianInvitationAcceptRequest request,
+  );
+
+  @GET('/api/v1/guardian/dashboard')
+  Future<GuardianDashboardDto> guardianDashboard();
+
+  @GET('/api/v1/guardian/students')
+  Future<GuardianStudentListDto> guardianListStudents(
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/guardian/students/{id}')
+  Future<GuardianStudentSummaryDto> guardianGetStudent(
+    @Path('id') String studentId,
+  );
+
+  @GET('/api/v1/guardian/students/{id}/attendance')
+  Future<GuardianAttendanceListDto> guardianGetStudentAttendance(
+    @Path('id') String studentId,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/guardian/students/{id}/progress')
+  Future<GuardianProgressListDto> guardianGetStudentProgress(
+    @Path('id') String studentId,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/guardian/students/{id}/results')
+  Future<GuardianResultListDto> guardianGetStudentResults(
+    @Path('id') String studentId,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/guardian/students/{id}/calendar')
+  Future<StudentCalendarDto> guardianGetStudentCalendar(
+    @Path('id') String studentId,
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/guardian/students/{id}/learning-summary')
+  Future<GuardianLearningSummaryDto> guardianStudentLearningSummary(
+    @Path('id') String studentId,
+  );
+
+  @POST('/api/v1/guardian/notices/{id}/acknowledge')
+  Future<GuardianNoticeAcknowledgementDto> guardianAcknowledgeNotice(
+    @Path('id') String noticeId,
+  );
+
   // Users and profiles.
   @GET('/api/v1/users/me')
   Future<RawJsonMap> getCurrentProfile();
@@ -118,6 +178,44 @@ abstract class ApiService {
   Future<RawJsonMap> replaceAcademicPreferences(
     @Body() AcademicPreferencesWriteRequest request,
   );
+
+  // Teacher workspace dashboard, sessions, availability, and students.
+  @GET('/api/v1/teacher/dashboard')
+  Future<TeacherDashboardDto> teacherDashboard();
+
+  @GET('/api/v1/teacher/class-sessions')
+  Future<TeacherClassSessionListDto> teacherListClassSessions(
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/availability')
+  Future<TeacherAvailabilityListDto> teacherListAvailability(
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
+  );
+
+  @POST('/api/v1/teacher/availability')
+  Future<TeacherAvailabilityDto> teacherCreateAvailability(
+    @Body() TeacherAvailabilityWriteRequest request,
+  );
+
+  @DELETE('/api/v1/teacher/availability/{id}')
+  Future<void> teacherDeleteAvailability(@Path('id') String availabilityId);
+
+  @GET('/api/v1/teacher/students/{id}')
+  Future<RawJsonMap> teacherGetStudentOverview(@Path('id') String studentId);
+
+  @GET('/api/v1/teacher/students/{id}/progress')
+  Future<RawJsonMap> teacherGetStudentProgress(@Path('id') String studentId);
+
+  @GET('/api/v1/teacher/students/{id}/results')
+  Future<RawJsonMap> teacherGetStudentResults(@Path('id') String studentId);
+
+  @GET('/api/v1/teacher/students/{id}/attendance')
+  Future<RawJsonMap> teacherGetStudentAttendance(@Path('id') String studentId);
 
   // Public and managed courses.
   @GET('/api/v1/courses')
@@ -239,6 +337,21 @@ abstract class ApiService {
     @Query('limit') int limit,
     @Query('from') DateTime? from,
     @Query('to') DateTime? to,
+  );
+
+  @GET('/api/v1/teacher/batches/{id}/syllabus')
+  Future<RawJsonMap> teacherGetBatchSyllabus(@Path('id') String batchId);
+
+  @GET('/api/v1/teacher/batches/{id}/syllabus-coverage')
+  Future<SyllabusCoverageListDto> teacherGetSyllabusCoverage(
+    @Path('id') String batchId,
+  );
+
+  @PUT('/api/v1/teacher/batches/{id}/syllabus-coverage/{unitId}')
+  Future<SyllabusCoverageDto> teacherUpdateSyllabusCoverage(
+    @Path('id') String batchId,
+    @Path('unitId') String unitId,
+    @Body() SyllabusCoverageWriteRequest request,
   );
 
   // Private media.
@@ -368,6 +481,37 @@ abstract class ApiService {
   );
 
   // Physical attendance.
+  @POST('/api/v1/teacher/attendance-sessions')
+  Future<TeacherAttendanceSessionDto> teacherCreateAttendanceSession(
+    @Body() AttendanceSessionCreateRequest request,
+  );
+
+  @GET('/api/v1/teacher/attendance-sessions/{id}')
+  Future<TeacherAttendanceSessionDto> teacherGetAttendanceSession(
+    @Path('id') String attendanceSessionId,
+  );
+
+  @POST('/api/v1/teacher/attendance-sessions/{id}/open')
+  Future<AttendanceOpenResponseDto> teacherOpenAttendanceSession(
+    @Path('id') String attendanceSessionId,
+  );
+
+  @POST('/api/v1/teacher/attendance-sessions/{id}/close')
+  Future<TeacherAttendanceSessionDto> teacherCloseAttendanceSession(
+    @Path('id') String attendanceSessionId,
+  );
+
+  @GET('/api/v1/teacher/attendance-sessions/{id}/roster')
+  Future<AttendanceRosterDto> teacherGetAttendanceRoster(
+    @Path('id') String attendanceSessionId,
+  );
+
+  @PUT('/api/v1/teacher/attendance-sessions/{id}/records')
+  Future<PhysicalAttendanceListDto> teacherMarkAttendanceRecords(
+    @Path('id') String attendanceSessionId,
+    @Body() AttendanceRecordBatchWriteRequest request,
+  );
+
   @POST('/api/v1/student/attendance-sessions/{id}/check-in')
   Future<PhysicalAttendanceRecordDto> studentPhysicalAttendanceCheckIn(
     @Path('id') String attendanceSessionId,
@@ -389,7 +533,7 @@ abstract class ApiService {
   // Quizzes.
   @GET('/api/v1/teacher/quizzes')
   Future<ListResponseDto> teacherListQuizzes(
-    @Query('course_id') String courseId,
+    @Query('course_id') String? courseId,
     @Query('cursor') String? cursor,
     @Query('limit') int limit,
   );
@@ -497,11 +641,76 @@ abstract class ApiService {
   @POST('/api/v1/teacher/question-bank')
   Future<RawJsonMap> teacherCreateQuestionBankItem(@Body() RawJsonMap request);
 
+  @GET('/api/v1/teacher/question-bank/{id}')
+  Future<RawJsonMap> teacherGetQuestionBankItem(@Path('id') String id);
+
   @PATCH('/api/v1/teacher/question-bank/{id}')
   Future<RawJsonMap> teacherUpdateQuestionBankItem(
     @Path('id') String id,
     @Body() RawJsonMap request,
   );
+
+  @DELETE('/api/v1/teacher/question-bank/{id}')
+  Future<void> teacherDeleteQuestionBankItem(@Path('id') String id);
+
+  @POST('/api/v1/teacher/question-bank/import')
+  Future<RawJsonMap> teacherCreateQuestionImport(@Body() RawJsonMap request);
+
+  @GET('/api/v1/teacher/question-bank/imports/{id}')
+  Future<RawJsonMap> teacherGetQuestionImport(@Path('id') String id);
+
+  @POST('/api/v1/teacher/questions/{id}/parts')
+  Future<RawJsonMap> teacherCreateQuestionPart(
+    @Path('id') String questionId,
+    @Body() RawJsonMap request,
+  );
+
+  @PATCH('/api/v1/teacher/question-parts/{id}')
+  Future<RawJsonMap> teacherUpdateQuestionPart(
+    @Path('id') String partId,
+    @Body() RawJsonMap request,
+  );
+
+  @GET('/api/v1/teacher/rubrics')
+  Future<RawJsonMap> teacherListRubrics(
+    @Query('course_id') String? courseId,
+    @Query('status') String? status,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @POST('/api/v1/teacher/rubrics')
+  Future<RawJsonMap> teacherCreateRubric(@Body() RawJsonMap request);
+
+  @GET('/api/v1/teacher/rubrics/{id}')
+  Future<RawJsonMap> teacherGetRubric(@Path('id') String rubricId);
+
+  @PATCH('/api/v1/teacher/rubrics/{id}')
+  Future<RawJsonMap> teacherUpdateRubric(
+    @Path('id') String rubricId,
+    @Body() RawJsonMap request,
+  );
+
+  @GET('/api/v1/teacher/exams')
+  Future<ListResponseDto> teacherListExams(
+    @Query('course_id') String? courseId,
+    @Query('batch_id') String? batchId,
+    @Query('status') String? status,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/exams/{id}')
+  Future<ExamDto> teacherGetExam(@Path('id') String examId);
+
+  @PATCH('/api/v1/teacher/exams/{id}')
+  Future<ExamDto> teacherUpdateExam(
+    @Path('id') String examId,
+    @Body() RawJsonMap request,
+  );
+
+  @DELETE('/api/v1/teacher/exams/{id}')
+  Future<void> teacherDeleteExam(@Path('id') String examId);
 
   @POST('/api/v1/teacher/exams')
   Future<ExamDto> teacherCreateExam(@Body() RawJsonMap request);
@@ -515,11 +724,47 @@ abstract class ApiService {
     @Body() RawJsonMap request,
   );
 
+  @GET('/api/v1/teacher/exams/{id}/sections')
+  Future<RawJsonMap> teacherListExamSections(@Path('id') String examId);
+
+  @PATCH('/api/v1/teacher/exam-sections/{id}')
+  Future<RawJsonMap> teacherUpdateExamSection(
+    @Path('id') String sectionId,
+    @Body() RawJsonMap request,
+  );
+
+  @DELETE('/api/v1/teacher/exam-sections/{id}')
+  Future<void> teacherDeleteExamSection(@Path('id') String sectionId);
+
+  @GET('/api/v1/teacher/exams/{id}/questions')
+  Future<RawJsonMap> teacherListExamQuestions(@Path('id') String examId);
+
   @POST('/api/v1/teacher/exams/{id}/questions/from-bank')
   Future<RawJsonMap> teacherAttachExamBankQuestion(
     @Path('id') String examId,
     @Body() RawJsonMap request,
   );
+
+  @PATCH('/api/v1/teacher/exam-questions/{id}')
+  Future<RawJsonMap> teacherUpdateExamQuestion(
+    @Path('id') String questionId,
+    @Body() RawJsonMap request,
+  );
+
+  @DELETE('/api/v1/teacher/exam-questions/{id}')
+  Future<void> teacherDeleteExamQuestion(@Path('id') String questionId);
+
+  @PUT('/api/v1/teacher/exams/{id}/question-order')
+  Future<RawJsonMap> teacherReorderExamQuestions(
+    @Path('id') String examId,
+    @Body() RawJsonMap request,
+  );
+
+  @POST('/api/v1/teacher/exams/{id}/archive')
+  Future<ExamDto> teacherArchiveExam(@Path('id') String examId);
+
+  @POST('/api/v1/teacher/exams/{id}/publish-results')
+  Future<ExamDto> teacherPublishExamResults(@Path('id') String examId);
 
   @GET('/api/v1/teacher/exams/{id}/attempts')
   Future<ListResponseDto> teacherListExamAttempts(
@@ -550,7 +795,7 @@ abstract class ApiService {
   // Assignments.
   @GET('/api/v1/teacher/assignments')
   Future<ListResponseDto> teacherListAssignments(
-    @Query('course_id') String courseId,
+    @Query('course_id') String? courseId,
     @Query('cursor') String? cursor,
     @Query('limit') int limit,
   );
@@ -572,6 +817,12 @@ abstract class ApiService {
 
   @DELETE('/api/v1/teacher/assignments/{id}')
   Future<void> teacherDeleteAssignment(@Path('id') String id);
+
+  @POST('/api/v1/teacher/assignments/{id}/publish')
+  Future<RawJsonMap> teacherPublishAssignment(@Path('id') String id);
+
+  @POST('/api/v1/teacher/assignments/{id}/archive')
+  Future<RawJsonMap> teacherArchiveAssignment(@Path('id') String id);
 
   @POST('/api/v1/student/assignments/{id}/submissions')
   Future<RawJsonMap> createAssignmentSubmission(
@@ -605,6 +856,35 @@ abstract class ApiService {
     @Query('to') DateTime? to,
     @Query('cursor') String? cursor,
     @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/submissions/{id}')
+  Future<RawJsonMap> teacherGetSubmission(@Path('id') String submissionId);
+
+  @GET('/api/v1/teacher/written-submissions')
+  Future<RawJsonMap> teacherListWrittenSubmissions(
+    @Query('course_id') String? courseId,
+    @Query('assignment_id') String? assignmentId,
+    @Query('status') String? status,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/written-submissions/{id}')
+  Future<RawJsonMap> teacherGetWrittenSubmission(
+    @Path('id') String submissionId,
+  );
+
+  @POST('/api/v1/teacher/written-submissions/{id}/grade')
+  Future<RawJsonMap> teacherGradeWrittenSubmission(
+    @Path('id') String submissionId,
+    @Body() RawJsonMap request,
+  );
+
+  @POST('/api/v1/teacher/written-submissions/{id}/moderate')
+  Future<RawJsonMap> teacherModerateWrittenSubmission(
+    @Path('id') String submissionId,
+    @Body() RawJsonMap request,
   );
 
   // Live classes.
@@ -881,4 +1161,135 @@ abstract class ApiService {
     @Query('from') DateTime? from,
     @Query('to') DateTime? to,
   );
+
+  @GET('/api/v1/teacher/reports/courses/{id}')
+  Future<RawJsonMap> teacherCourseReport(
+    @Path('id') String courseId,
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
+  );
+
+  @GET('/api/v1/teacher/reports/batches/{id}')
+  Future<RawJsonMap> teacherBatchReport(
+    @Path('id') String batchId,
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
+  );
+
+  @GET('/api/v1/teacher/reports/exams/{id}')
+  Future<RawJsonMap> teacherExamReport(@Path('id') String examId);
+
+  @GET('/api/v1/teacher/reports/assignments/{id}')
+  Future<RawJsonMap> teacherAssignmentReport(
+    @Path('id') String assignmentId,
+  );
+
+  @GET('/api/v1/teacher/reports/attendance')
+  Future<RawJsonMap> teacherAttendanceReport(
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
+  );
+
+  @GET('/api/v1/teacher/announcements')
+  Future<RawJsonMap> teacherListAnnouncements(
+    @Query('course_id') String? courseId,
+    @Query('batch_id') String? batchId,
+    @Query('status') String? status,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @POST('/api/v1/teacher/announcements')
+  Future<RawJsonMap> teacherCreateAnnouncement(@Body() RawJsonMap request);
+
+  @GET('/api/v1/teacher/announcements/{id}')
+  Future<RawJsonMap> teacherGetAnnouncement(@Path('id') String announcementId);
+
+  @PATCH('/api/v1/teacher/announcements/{id}')
+  Future<RawJsonMap> teacherUpdateAnnouncement(
+    @Path('id') String announcementId,
+    @Body() RawJsonMap request,
+  );
+
+  @DELETE('/api/v1/teacher/announcements/{id}')
+  Future<void> teacherDeleteAnnouncement(@Path('id') String announcementId);
+
+  @POST('/api/v1/teacher/announcements/{id}/publish')
+  Future<RawJsonMap> teacherPublishAnnouncement(
+    @Path('id') String announcementId,
+  );
+
+  @GET('/api/v1/teacher/media')
+  Future<RawJsonMap> teacherListMedia(
+    @Query('kind') String? kind,
+    @Query('status') String? status,
+    @Query('from') DateTime? from,
+    @Query('to') DateTime? to,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/media/{id}')
+  Future<RawJsonMap> teacherGetMedia(@Path('id') String mediaId);
+
+  @DELETE('/api/v1/teacher/media/{id}')
+  Future<void> teacherDeleteMedia(@Path('id') String mediaId);
+
+  @POST('/api/v1/teacher/media/{id}/renditions')
+  Future<RawJsonMap> teacherRequestMediaRendition(
+    @Path('id') String mediaId,
+    @Body() RawJsonMap request,
+  );
+
+  @POST('/api/v1/teacher/courses/{id}/offline-manifest')
+  Future<OfflineManifestDto> teacherBuildOfflineManifest(
+    @Path('id') String courseId,
+  );
+
+  @GET('/api/v1/teacher/batches/{id}/mastery')
+  Future<RawJsonMap> teacherBatchMastery(
+    @Path('id') String batchId,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/students/{id}/mastery')
+  Future<MasterySummaryDto> teacherStudentMastery(
+    @Path('id') String studentId,
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/interventions')
+  Future<RawJsonMap> teacherListInterventions(
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @POST('/api/v1/teacher/interventions')
+  Future<RawJsonMap> teacherCreateIntervention(@Body() RawJsonMap request);
+
+  @PATCH('/api/v1/teacher/interventions/{id}')
+  Future<RawJsonMap> teacherUpdateIntervention(
+    @Path('id') String interventionId,
+    @Body() RawJsonMap request,
+  );
+
+  @GET('/api/v1/teacher/doubts')
+  Future<DoubtThreadListDto> teacherListDoubts(
+    @Query('cursor') String? cursor,
+    @Query('limit') int limit,
+  );
+
+  @GET('/api/v1/teacher/doubts/{id}')
+  Future<DoubtThreadDetailDto> teacherGetDoubt(@Path('id') String doubtId);
+
+  @POST('/api/v1/teacher/doubts/{id}/messages')
+  Future<DoubtMessageDto> teacherReplyToDoubt(
+    @Path('id') String doubtId,
+    @Body() DoubtMessageWriteRequest request,
+  );
+
+  @POST('/api/v1/teacher/study-plans')
+  Future<StudyPlanDto> teacherCreateStudyPlan(@Body() RawJsonMap request);
 }

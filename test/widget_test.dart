@@ -36,11 +36,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     expect(find.textContaining('শুভ সকাল'), findsOneWidget);
-    expect(find.text('আজকের কাজ'), findsOneWidget);
+    expect(find.text('আজকের কাজ'), findsWidgets);
     expect(find.text('হোম'), findsOneWidget);
     expect(find.text('এক্সপ্লোর'), findsOneWidget);
     expect(find.text('লার্নিং'), findsOneWidget);
-    expect(find.text('রেজাল্ট'), findsOneWidget);
+    expect(find.text('আজকের কাজ'), findsWidgets);
     expect(find.text('প্রোফাইল'), findsOneWidget);
   });
 

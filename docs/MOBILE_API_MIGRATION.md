@@ -1,5 +1,11 @@
 # Mobile API migration matrix
 
+> Historical Student-only migration snapshot. The updated three-role contract
+> and current implementation status are authoritative in
+> `MOBILE_API_COVERAGE.md`, `MOBILE_INFORMATION_ARCHITECTURE.md`, and
+> `STAGING_RUNTIME_VERIFICATION.md`. Statements below that Guardian roles or
+> memberships are absent describe the previous contract and are superseded.
+
 Contract: LMS Service API 1.0.0, OpenAPI 3.1.0, supplied 2026-08-13.  
 Production origin: `https://lmsservice.maxlived.net` (overridable with
 `--dart-define=API_BASE_URL=...`).

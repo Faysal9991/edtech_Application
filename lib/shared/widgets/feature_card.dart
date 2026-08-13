@@ -1,11 +1,13 @@
 import 'package:edtech_application/shared/animations/pressable_scale.dart';
 import 'package:flutter/material.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
 
 class FeatureCard extends StatelessWidget {
   const FeatureCard({
     required this.title,
     required this.subtitle,
-    required this.icon,
+    this.icon,
+    this.appIcon,
     required this.color,
     required this.onTap,
     super.key,
@@ -13,7 +15,8 @@ class FeatureCard extends StatelessWidget {
 
   final String title;
   final String subtitle;
-  final IconData icon;
+  final IconData? icon;
+  final List<List<dynamic>>? appIcon;
   final Color color;
   final VoidCallback onTap;
 
@@ -35,7 +38,9 @@ class FeatureCard extends StatelessWidget {
                     color: color.withValues(alpha: .12),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(icon, color: color),
+                  child: appIcon == null
+                      ? Icon(icon, color: color)
+                      : AppIcon(appIcon!, color: color),
                 ),
                 const Spacer(),
                 Text(title, style: Theme.of(context).textTheme.titleMedium),

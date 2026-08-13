@@ -1,16 +1,20 @@
+import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/routing/app_routes.dart';
 import 'package:edtech_application/core/theme/app_colors.dart';
-import 'package:edtech_application/core/network/expanded_api_dto.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
 import 'package:edtech_application/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
 import 'package:edtech_application/shared/animations/app_animations.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:edtech_application/shared/models/course.dart';
 import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:edtech_application/shared/widgets/section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// Student dashboard: every card is backed by the current LMS response.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -72,172 +76,234 @@ class HomePage extends StatelessWidget {
               .toList()
         : lms.courses;
 
-    return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: _HomeHeader(
-              firstName: firstName,
-              unreadCount: lms.unreadNotifications,
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-            sliver: SliverList.list(
-              children: [
-                AppEntrance.fadeInLeft(
-                  delay: const Duration(milliseconds: 70),
-                  child: TextField(
-                    readOnly: true,
-                    onTap: () => _message(
-                      context,
-                      context.l10n.tr('home.searchMessage'),
-                    ),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.tr('home.searchHint'),
-                      prefixIcon: const Center(
-                        widthFactor: 1,
-                        child: AppIcon(AppIcons.search, size: 21),
-                      ),
-                      suffixIcon: const Center(
-                        widthFactor: 1,
-                        child: AppIcon(AppIcons.filter, size: 21),
+    return AppPage(
+      padding: EdgeInsets.zero,
+      child: RefreshIndicator(
+        onRefresh: lms.loadInitialData,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverPadding(
+              padding: AppLayout.pagePadding(context),
+              sliver: SliverList.list(
+                children: [
+                  _HomeHeader(
+                    firstName: firstName,
+                    unreadCount: lms.unreadNotifications,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Semantics(
+                    button: true,
+                    label: context.l10n.tr('home.searchHint'),
+                    child: TextField(
+                      readOnly: true,
+                      onTap: () => _showCourseBrowser(context, displayCourses),
+                      decoration: InputDecoration(
+                        hintText: context.l10n.tr('home.searchHint'),
+                        prefixIcon: const Center(
+                          widthFactor: 1,
+                          child: AppIcon(AppIcons.search, size: 21),
+                        ),
+                        suffixIcon: const Center(
+                          widthFactor: 1,
+                          child: AppIcon(AppIcons.filter, size: 21),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                if (continueCourse != null)
-                  AppEntrance.fadeInUp(
-                    delay: const Duration(milliseconds: 120),
-                    child: _ContinueLearningCard(
+                  const SizedBox(height: AppSpacing.lg),
+                  if (continueCourse != null)
+                    _ContinueLearningCard(
                       course: continueCourse,
+                      onTap: () => _openCourse(context, continueCourse),
+                    )
+                  else
+                    _HomeEmptyCard(
+                      icon: AppIcons.learning,
+                      title: context.l10n.tr('home.startJourney'),
+                      subtitle: context.l10n.tr('home.startJourneySubtitle'),
+                      onTap: () => _showCourseBrowser(context, displayCourses),
+                    ),
+                  const SizedBox(height: AppSpacing.md),
+                  if (upcomingLive == null)
+                    _HomeEmptyCard(
+                      icon: AppIcons.live,
+                      title: context.l10n.tr('home.upcomingLive'),
+                      subtitle: context.l10n.tr('home.liveApiMissing'),
+                    )
+                  else
+                    _UpcomingLiveCard(
+                      title: upcomingLive.title,
+                      courseTitle: upcomingLive.courseTitle,
+                      startsAt: upcomingLive.scheduledStartAt,
                       onTap: () => Navigator.pushNamed(
                         context,
-                        AppRoutes.courseDetails,
-                        arguments: continueCourse,
+                        AppRoutes.liveRoom,
+                        arguments: upcomingLive.id,
                       ),
                     ),
-                  )
-                else
-                  _HomeEmptyCard(
-                    icon: AppIcons.learning,
-                    title: context.l10n.tr('home.startJourney'),
-                    subtitle: context.l10n.tr('home.startJourneySubtitle'),
+                  const SizedBox(height: AppSpacing.xxl),
+                  SectionHeader(
+                    title: context.l10n.tr('home.todayTasks'),
+                    subtitle: context.l10n.tr('home.todayTasksSubtitle'),
+                    actionLabel: context.l10n.tr('common.viewAll'),
+                    onAction: () =>
+                        Navigator.pushNamed(context, AppRoutes.assessments),
                   ),
-                const SizedBox(height: 16),
-                AppEntrance(
-                  type: EntranceType.fadeInUp,
-                  delay: const Duration(milliseconds: 170),
-                  child: upcomingLive == null
-                      ? _HomeEmptyCard(
-                          icon: AppIcons.live,
-                          title: context.l10n.tr('home.upcomingLive'),
-                          subtitle: context.l10n.tr('home.liveApiMissing'),
-                        )
-                      : _UpcomingLiveCard(
-                          title: upcomingLive.title,
-                          courseTitle: upcomingLive.courseTitle,
-                          startsAt: upcomingLive.scheduledStartAt,
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            AppRoutes.liveRoom,
-                            arguments: upcomingLive.id,
-                          ),
-                        ),
-                ),
-                const SizedBox(height: 28),
-                SectionHeader(
-                  title: context.l10n.tr('home.todayTasks'),
-                  subtitle: context.l10n.tr('home.todayTasksSubtitle'),
-                ),
-                const SizedBox(height: 12),
-                if (dashboard != null &&
-                    (dashboard.dueAssignments.isNotEmpty ||
-                        dashboard.availableQuizzes.isNotEmpty))
-                  _TodayTaskCard(
-                    assignment: dashboard.dueAssignments.isEmpty
-                        ? null
-                        : dashboard.dueAssignments.first,
-                    quiz: dashboard.availableQuizzes.isEmpty
-                        ? null
-                        : dashboard.availableQuizzes.first,
-                  )
-                else
-                  _HomeEmptyCard(
-                    icon: AppIcons.task,
-                    title: context.l10n.tr('home.noTasks'),
-                    subtitle: context.l10n.tr('home.tasksApiMissing'),
-                  ),
-                const SizedBox(height: 18),
-                SectionHeader(
-                  title: context.l10n.tr('home.popularCourses'),
-                  subtitle: context.l10n.tr('home.popularSubtitle'),
-                  actionLabel: context.l10n.tr('common.viewAll'),
-                  onAction: () => _message(
-                    context,
-                    context.l10n.tr('home.allCoursesMessage'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (lms.isLoadingCourses && displayCourses.isEmpty)
-                  Container(
-                    height: 190,
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(20),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (dashboard != null &&
+                      (dashboard.dueAssignments.isNotEmpty ||
+                          dashboard.availableQuizzes.isNotEmpty))
+                    _TodayTaskCard(
+                      assignment: dashboard.dueAssignments.isEmpty
+                          ? null
+                          : dashboard.dueAssignments.first,
+                      quiz: dashboard.availableQuizzes.isEmpty
+                          ? null
+                          : dashboard.availableQuizzes.first,
+                    )
+                  else
+                    _HomeEmptyCard(
+                      icon: AppIcons.task,
+                      title: context.l10n.tr('home.noTasks'),
+                      subtitle: context.l10n.tr('home.tasksApiMissing'),
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.assessments),
                     ),
-                  )
-                else if (lms.coursesError != null && displayCourses.isEmpty)
-                  _HomeEmptyCard(
-                    icon: AppIcons.cloudOff,
-                    title: context.l10n.tr('home.courseLoadFailed'),
-                    subtitle: lms.coursesError!,
-                  )
-                else if (displayCourses.isEmpty)
-                  _HomeEmptyCard(
-                    icon: AppIcons.empty,
-                    title: context.l10n.tr('home.noPublishedCourse'),
-                    subtitle: context.l10n.tr('home.noPublishedSubtitle'),
-                  )
-                else
-                  SizedBox(
-                    height: 240,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: displayCourses.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        final course = displayCourses[index];
-                        return StaggeredAnimation(
-                          index: index,
-                          type: EntranceType.fadeInRight,
-                          child: _PopularCourseCard(
-                            course: course,
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.courseDetails,
-                              arguments: course,
+                  const SizedBox(height: AppSpacing.xl),
+                  SectionHeader(
+                    title: context.l10n.tr('home.popularCourses'),
+                    subtitle: context.l10n.tr('home.popularSubtitle'),
+                    actionLabel: context.l10n.tr('common.viewAll'),
+                    onAction: () => _showCourseBrowser(context, displayCourses),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  if (lms.isLoadingCourses && displayCourses.isEmpty)
+                    const AppLoadingView(compact: true)
+                  else if (lms.coursesError != null && displayCourses.isEmpty)
+                    AppStateView(
+                      icon: AppIcons.cloudOff,
+                      title: context.l10n.tr('home.courseLoadFailed'),
+                      message: lms.coursesError!,
+                      actionLabel: context.l10n.tr('notifications.retry'),
+                      onAction: lms.loadCourses,
+                      compact: true,
+                      tone: AppStateTone.error,
+                    )
+                  else if (displayCourses.isEmpty)
+                    AppStateView(
+                      icon: AppIcons.empty,
+                      title: context.l10n.tr('home.noPublishedCourse'),
+                      message: context.l10n.tr('home.noPublishedSubtitle'),
+                      compact: true,
+                    )
+                  else
+                    SizedBox(
+                      height: 244,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: displayCourses.length,
+                        padding: const EdgeInsets.only(right: AppSpacing.xs),
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(width: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final course = displayCourses[index];
+                          return StaggeredAnimation(
+                            index: index,
+                            type: EntranceType.fadeInRight,
+                            child: _PopularCourseCard(
+                              course: course,
+                              onTap: () => _openCourse(context, course),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  void _message(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  void _openCourse(BuildContext context, Course course) {
+    Navigator.pushNamed(context, AppRoutes.courseDetails, arguments: course);
+  }
+
+  Future<void> _showCourseBrowser(
+    BuildContext context,
+    List<Course> courses,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: .62,
+          minChildSize: .35,
+          maxChildSize: .9,
+          builder: (context, controller) => ListView.separated(
+            controller: controller,
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.xs,
+              AppSpacing.lg,
+              AppSpacing.xxl,
+            ),
+            itemCount: courses.isEmpty ? 2 : courses.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Text(
+                    context.l10n.tr('home.popularCourses'),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                );
+              }
+              if (courses.isEmpty) {
+                return AppStateView(
+                  icon: AppIcons.empty,
+                  title: context.l10n.tr('home.noPublishedCourse'),
+                  message: context.l10n.tr('home.noPublishedSubtitle'),
+                  compact: true,
+                );
+              }
+              final course = courses[index - 1];
+              return Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  leading: const AppIconBadge(icon: AppIcons.book),
+                  title: Text(
+                    course.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Text(
+                    course.category,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: const AppIcon(AppIcons.arrowRight, size: 20),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _openCourse(context, course);
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -251,44 +317,41 @@ class _HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppEntrance.fadeInDown(
       distance: 14,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.tr('home.greeting', args: {'name': firstName}),
-                    style: Theme.of(context).textTheme.titleLarge,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.tr('home.greeting', args: {'name': firstName}),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  context.l10n.tr('home.subtitle'),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.tr('home.subtitle'),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Badge(
-              isLabelVisible: unreadCount > 0,
-              label: Text(
-                unreadCount > 99
-                    ? '${context.l10n.number(99)}+'
-                    : context.l10n.number(unreadCount),
-              ),
-              child: IconButton.filledTonal(
-                tooltip: context.l10n.tr('home.notifications'),
-                onPressed: () =>
-                    Navigator.pushNamed(context, AppRoutes.notifications),
-                icon: const AppIcon(AppIcons.notification),
-              ),
+          ),
+          Badge(
+            isLabelVisible: unreadCount > 0,
+            label: Text(
+              unreadCount > 99
+                  ? '${context.l10n.number(99)}+'
+                  : context.l10n.number(unreadCount),
             ),
-          ],
-        ),
+            child: IconButton.filledTonal(
+              tooltip: context.l10n.tr('home.notifications'),
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.notifications),
+              icon: const AppIcon(AppIcons.notification),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -305,82 +368,93 @@ class _ContinueLearningCard extends StatelessWidget {
     final progress = course.lessons == 0
         ? 0.0
         : (course.completedLessons / course.lessons).clamp(0.0, 1.0);
-    return PressableScale(
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: AppColors.shadow,
-              blurRadius: 18,
-              offset: Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.tr('home.continueLearning').toUpperCase(),
-              style: const TextStyle(
-                color: AppColors.primaryLight,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
-                letterSpacing: .9,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              course.subject,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: AppColors.textOnPrimary),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: AnimatedProgressBar(
-                    value: progress,
-                    height: 7,
-                    backgroundColor: AppColors.textOnPrimary.withValues(
-                      alpha: .20,
-                    ),
-                    color: AppColors.secondaryLight,
-                  ),
+    return Semantics(
+      button: true,
+      label: '${context.l10n.tr('home.continueLearning')}: ${course.title}',
+      child: PressableScale(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          child: Ink(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
                 ),
-                SizedBox(width: 10),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  context.l10n.percent((progress * 100).round()),
-                  style: TextStyle(
+                  context.l10n.tr('home.continueLearning').toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.primaryLight,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: .9,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  course.subject,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AppColors.textOnPrimary,
-                    fontWeight: FontWeight.w700,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AnimatedProgressBar(
+                        value: progress,
+                        height: 7,
+                        backgroundColor: AppColors.textOnPrimary.withValues(
+                          alpha: .20,
+                        ),
+                        color: AppColors.secondaryLight,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      context.l10n.percent((progress * 100).round()),
+                      style: const TextStyle(
+                        color: AppColors.textOnPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        course.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: AppColors.textOnPrimary),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    IconButton.filled(
+                      onPressed: onTap,
+                      style: IconButton.styleFrom(
+                        backgroundColor: AppColors.surface,
+                        foregroundColor: AppColors.primary,
+                      ),
+                      icon: const AppIcon(AppIcons.play),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    course.title,
-                    style: TextStyle(color: AppColors.textOnPrimary),
-                  ),
-                ),
-                IconButton.filled(
-                  onPressed: onTap,
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.surface,
-                    foregroundColor: AppColors.primary,
-                  ),
-                  icon: const AppIcon(AppIcons.play),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -403,10 +477,13 @@ class _UpcomingLiveCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localStart = startsAt.toLocal();
-    final minute = localStart.minute.toString().padLeft(2, '0');
+    final localizations = MaterialLocalizations.of(context);
+    final when =
+        '${localizations.formatMediumDate(localStart)} • '
+        '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(localStart))}';
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
             const AppIconBadge(
@@ -414,7 +491,7 @@ class _UpcomingLiveCard extends StatelessWidget {
               backgroundColor: AppColors.errorBackground,
               foregroundColor: AppColors.error,
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,17 +502,26 @@ class _UpcomingLiveCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
-                    '$courseTitle • ${context.l10n.number(localStart.hour)}:${context.l10n.digits(minute)}',
+                    courseTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  const SizedBox(height: AppSpacing.xxs),
+                  Text(
+                    when,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             FilledButton.tonal(
               onPressed: onTap,
               child: Text(context.l10n.tr('live.joinNow')),
@@ -454,48 +540,54 @@ class _TodayTaskCard extends StatelessWidget {
   final DashboardQuizDto? quiz;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          if (quiz != null)
-            ListTile(
-              leading: const AppIconBadge(icon: AppIcons.task, size: 44),
-              title: Text(
-                quiz!.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(quiz!.courseTitle),
-              trailing: const AppIcon(AppIcons.arrowRight, size: 19),
-              onTap: () => Navigator.pushNamed(
-                context,
-                AppRoutes.quiz,
-                arguments: quiz!.id,
-              ),
+  Widget build(BuildContext context) => Card(
+    child: Column(
+      children: [
+        if (quiz != null)
+          ListTile(
+            leading: const AppIconBadge(icon: AppIcons.quiz, size: 44),
+            title: Text(
+              quiz!.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          if (quiz != null && assignment != null)
-            const Divider(height: 1, indent: 72),
-          if (assignment != null)
-            ListTile(
-              leading: const AppIconBadge(icon: AppIcons.learning, size: 44),
-              title: Text(
-                assignment!.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(assignment!.courseTitle),
-              trailing: const AppIcon(AppIcons.arrowRight, size: 19),
-              onTap: () => Navigator.pushNamed(
-                context,
-                AppRoutes.assignment,
-                arguments: assignment!.id,
-              ),
+            subtitle: Text(
+              quiz!.courseTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-        ],
-      ),
-    );
-  }
+            trailing: const AppIcon(AppIcons.arrowRight, size: 19),
+            onTap: () => Navigator.pushNamed(
+              context,
+              AppRoutes.quiz,
+              arguments: quiz!.id,
+            ),
+          ),
+        if (quiz != null && assignment != null)
+          const Divider(height: 1, indent: 72),
+        if (assignment != null)
+          ListTile(
+            leading: const AppIconBadge(icon: AppIcons.assignment, size: 44),
+            title: Text(
+              assignment!.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              assignment!.courseTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: const AppIcon(AppIcons.arrowRight, size: 19),
+            onTap: () => Navigator.pushNamed(
+              context,
+              AppRoutes.assignment,
+              arguments: assignment!.id,
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _HomeEmptyCard extends StatelessWidget {
@@ -503,29 +595,31 @@ class _HomeEmptyCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   final List<List<dynamic>> icon;
   final String title;
   final String subtitle;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: AppIconBadge(
-          icon: icon,
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(subtitle),
-        ),
+  Widget build(BuildContext context) => Card(
+    child: ListTile(
+      contentPadding: const EdgeInsets.all(AppSpacing.md),
+      leading: AppIconBadge(
+        icon: icon,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
-    );
-  }
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.xxs),
+        child: Text(subtitle),
+      ),
+      trailing: onTap == null ? null : const AppIcon(AppIcons.arrowRight),
+      onTap: onTap,
+    ),
+  );
 }
 
 class _PopularCourseCard extends StatelessWidget {
@@ -537,10 +631,8 @@ class _PopularCourseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final thumbnailColor = colors.primaryContainer;
-    final thumbnailForeground = colors.onPrimaryContainer;
     return SizedBox(
-      width: 238,
+      width: 250,
       child: PressableScale(
         child: Card(
           clipBehavior: Clip.antiAlias,
@@ -552,35 +644,43 @@ class _PopularCourseCard extends StatelessWidget {
                 AspectRatio(
                   aspectRatio: 16 / 7.5,
                   child: ColoredBox(
-                    color: thumbnailColor,
+                    color: colors.primaryContainer,
                     child: Center(
                       child: AppIcon(
                         AppIcons.book,
                         size: 42,
-                        color: thumbnailForeground,
+                        color: colors.onPrimaryContainer,
                       ),
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Chip(label: Text(course.educationLevel)),
-                          const Spacer(),
-                          const Icon(
-                            Icons.star_rounded,
-                            size: 17,
-                            color: AppColors.warning,
+                          Expanded(
+                            child: Text(
+                              course.educationLevel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
                           ),
-                          const SizedBox(width: 3),
-                          Text(course.rating.toStringAsFixed(1)),
+                          if (course.rating > 0) ...[
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 17,
+                              color: AppColors.warning,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(course.rating.toStringAsFixed(1)),
+                          ],
                         ],
                       ),
-                      const SizedBox(height: 7),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         course.title,
                         maxLines: 2,

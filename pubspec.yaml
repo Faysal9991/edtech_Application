@@ -23,7 +23,6 @@ dependencies:
   # 10.3.1 retains the same storage API and shares device_info_plus' Win32
   # dependency range; 11.x currently conflicts with the Xcode-compatible pin.
   flutter_secure_storage: ^10.3.1
-  google_fonts: ^6.3.3
   hugeicons: ^1.1.7
   json_annotation: ^4.12.0
   livekit_client: ^2.9.0
@@ -31,7 +30,6 @@ dependencies:
   path_provider: ^2.1.6
   retrofit: ^4.9.2
   shared_preferences: ^2.5.3
-  animate_do: ^5.1.0
   url_launcher: ^6.3.2
   file_selector: ^1.1.0
   video_player: ^2.11.1
@@ -49,3 +47,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+        - asset: assets/fonts/Inter-Italic-Variable.ttf
+          style: italic
+    - family: NotoSansBengali
+      fonts:
+        - asset: assets/fonts/NotoSansBengali-Variable.ttf

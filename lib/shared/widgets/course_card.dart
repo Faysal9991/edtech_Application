@@ -2,6 +2,7 @@ import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/shared/models/course.dart';
 import 'package:edtech_application/shared/animations/app_animations.dart';
 import 'package:flutter/material.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
 
 class CourseCard extends StatelessWidget {
   const CourseCard({
@@ -38,7 +39,7 @@ class CourseCard extends StatelessWidget {
                     color: colors.primaryContainer,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Icon(
+                  child: AppIcon(
                     _categoryIcon(course.category),
                     color: colors.onPrimaryContainer,
                     size: compact ? 28 : 34,
@@ -63,8 +64,8 @@ class CourseCard extends StatelessWidget {
                             ),
                           ),
                           if (course.isBookmarked)
-                            Icon(
-                              Icons.bookmark_rounded,
+                            AppIcon(
+                              AppIcons.bookmark,
                               size: 18,
                               color: AppColors.primary,
                             ),
@@ -80,7 +81,7 @@ class CourseCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.schedule_rounded, size: 15),
+                          const AppIcon(AppIcons.clock, size: 15),
                           const SizedBox(width: 4),
                           Text(course.duration),
                           const SizedBox(width: 12),
@@ -121,13 +122,13 @@ class CourseCard extends StatelessWidget {
     );
   }
 
-  IconData _categoryIcon(String category) {
+  List<List<dynamic>> _categoryIcon(String category) {
     return switch (category.toLowerCase()) {
-      'physics' => Icons.science_rounded,
-      'chemistry' => Icons.biotech_rounded,
-      'biology' => Icons.eco_rounded,
-      'english' => Icons.translate_rounded,
-      _ => Icons.school_rounded,
+      'physics' => AppIcons.physics,
+      'chemistry' => AppIcons.chemistry,
+      'biology' => AppIcons.biology,
+      'english' => AppIcons.translate,
+      _ => AppIcons.school,
     };
   }
 }

@@ -3,13 +3,17 @@ import 'package:edtech_application/core/routing/app_routes.dart';
 import 'package:edtech_application/core/auth/auth_repository.dart';
 import 'package:edtech_application/core/network/app_dependencies.dart';
 import 'package:edtech_application/core/storage/local_storage.dart';
+import 'package:edtech_application/core/session/app_session.dart';
+import 'package:edtech_application/core/session/organization_context.dart';
 import 'package:edtech_application/core/theme/app_theme.dart';
 import 'package:edtech_application/core/theme/theme_controller.dart';
 import 'package:edtech_application/features/authentication/data/repositories/mock_auth_repository.dart';
 import 'package:edtech_application/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
-import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
+import 'package:edtech_application/features/guardian/data/guardian_repository.dart';
 import 'package:edtech_application/features/learning/data/services/offline_learning_service.dart';
+import 'package:edtech_application/features/notifications/data/notification_repository.dart';
+import 'package:edtech_application/features/teacher/data/teacher_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:edtech_application/shared/localization/locale_controller.dart';
 import 'package:flutter/material.dart';
@@ -26,24 +30,39 @@ Future<void> main() async {
       storage: LocalStorage(preferences),
       authRepository: dependencies.authRepository,
       studentRepository: dependencies.studentRepository,
+      teacherRepository: dependencies.teacherRepository,
+      guardianRepository: dependencies.guardianRepository,
+      notificationRepository: dependencies.notificationRepository,
+      organizationContext: dependencies.organizationContext,
       offlineLearningService: dependencies.offlineLearningService,
+      onSessionChanged: dependencies.applySession,
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({
+  MyApp({
     required this.storage,
     this.authRepository,
     this.studentRepository,
+    this.teacherRepository,
+    this.guardianRepository,
+    this.notificationRepository,
+    OrganizationContext? organizationContext,
     this.offlineLearningService,
+    this.onSessionChanged,
     super.key,
-  });
+  }) : organizationContext = organizationContext ?? OrganizationContext();
 
   final LocalStorage storage;
   final AuthRepository? authRepository;
   final StudentLmsRepository? studentRepository;
+  final TeacherRepository? teacherRepository;
+  final GuardianRepository? guardianRepository;
+  final NotificationRepository? notificationRepository;
+  final OrganizationContext organizationContext;
   final OfflineLearningService? offlineLearningService;
+  final Future<void> Function(AppSession? session)? onSessionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -52,17 +71,22 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeController(storage)),
         ChangeNotifierProvider(create: (_) => LocaleController(storage)),
         Provider<LocalStorage>.value(value: storage),
+        ChangeNotifierProvider<OrganizationContext>.value(
+          value: organizationContext,
+        ),
         ChangeNotifierProvider(
           create: (_) => AuthController(
             repository: authRepository ?? const MockAuthRepository(),
             storage: storage,
+            organizationContext: organizationContext,
+            onSessionChanged: onSessionChanged,
           ),
         ),
         Provider<StudentLmsRepository?>.value(value: studentRepository),
+        Provider<TeacherRepository?>.value(value: teacherRepository),
+        Provider<GuardianRepository?>.value(value: guardianRepository),
+        Provider<NotificationRepository?>.value(value: notificationRepository),
         Provider<OfflineLearningService?>.value(value: offlineLearningService),
-        ChangeNotifierProvider(
-          create: (_) => StudentLmsController(repository: studentRepository),
-        ),
       ],
       child: _AppView(offlineLearningService: offlineLearningService),
     );
@@ -120,7 +144,6 @@ class _OfflineSyncLifecycleState extends State<_OfflineSyncLifecycle>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    widget.service.startConnectivityMonitoring();
     WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
   }
 

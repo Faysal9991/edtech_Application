@@ -44,8 +44,33 @@ class OfflineLearningService {
   final OfflineRootProvider? _offlineRootProvider;
   final Random _random = Random.secure();
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  String _namespace = 'unscoped';
+  bool _studentContextActive = true;
+
+  Future<void> activateNamespace({
+    required String userId,
+    required String organizationId,
+    required String role,
+  }) async {
+    await stopConnectivityMonitoring();
+    if (!const {'student', 'teacher', 'guardian'}.contains(role)) {
+      throw const AppException('Unsupported offline role context।');
+    }
+    _namespace =
+        '${_safeIdentifier(userId)}_'
+        '${_safeIdentifier(organizationId)}_$role';
+    _studentContextActive = role == 'student';
+    if (_studentContextActive) startConnectivityMonitoring();
+  }
+
+  Future<void> deactivateNamespace() async {
+    await stopConnectivityMonitoring();
+    _studentContextActive = false;
+    _namespace = 'unscoped';
+  }
 
   void startConnectivityMonitoring() {
+    if (!_studentContextActive) return;
     _connectivitySubscription ??= Connectivity().onConnectivityChanged.listen((
       results,
     ) {
@@ -107,13 +132,13 @@ class OfflineLearningService {
   }
 
   Future<OfflineChangeListDto> fetchIncrementalChanges() async {
-    final cursor = _preferences.getString(_changesCursorKey);
+    final cursor = _preferences.getString(_scopedKey(_changesCursorKey));
     final changes = await _repository.listOfflineChanges(cursor: cursor);
     final next = changes.nextCursor;
     if (next == null || next.isEmpty) {
-      await _preferences.remove(_changesCursorKey);
+      await _preferences.remove(_scopedKey(_changesCursorKey));
     } else {
-      await _preferences.setString(_changesCursorKey, next);
+      await _preferences.setString(_scopedKey(_changesCursorKey), next);
     }
     return changes;
   }
@@ -221,15 +246,15 @@ class OfflineLearningService {
   Future<void> deleteEnrollment(String enrollmentId) async {
     final directory = await _enrollmentDirectory(enrollmentId);
     if (await directory.exists()) await directory.delete(recursive: true);
-    await _preferences.remove('$_manifestPrefix$enrollmentId');
-    await _preferences.remove('$_entitlementPrefix$enrollmentId');
+    await _preferences.remove(_enrollmentKey(_manifestPrefix, enrollmentId));
+    await _preferences.remove(_enrollmentKey(_entitlementPrefix, enrollmentId));
   }
 
   Future<void> removeExpiredOrRevokedContent() async {
     final now = DateTime.now().toUtc();
     final keys = _preferences
         .getKeys()
-        .where((key) => key.startsWith(_entitlementPrefix))
+        .where((key) => key.startsWith(_scopedKey(_entitlementPrefix)))
         .toList();
     for (final key in keys) {
       final raw = _preferences.getString(key);
@@ -240,7 +265,9 @@ class OfflineLearningService {
       final status = value['status'];
       final expiresAt = DateTime.tryParse('${value['expires_at']}')?.toUtc();
       if (status != 'active' || expiresAt == null || !expiresAt.isAfter(now)) {
-        await deleteEnrollment(key.substring(_entitlementPrefix.length));
+        await deleteEnrollment(
+          key.substring(_scopedKey(_entitlementPrefix).length),
+        );
       }
     }
   }
@@ -304,7 +331,7 @@ class OfflineLearningService {
 
   Future<void> _saveEntitlement(OfflineEntitlementDto entitlement) =>
       _preferences.setString(
-        '$_entitlementPrefix${entitlement.enrollmentId}',
+        _enrollmentKey(_entitlementPrefix, entitlement.enrollmentId),
         jsonEncode({
           'id': entitlement.id,
           'status': entitlement.status,
@@ -317,7 +344,7 @@ class OfflineLearningService {
 
   Future<void> _saveManifestMetadata(OfflineManifestDto manifest) =>
       _preferences.setString(
-        '$_manifestPrefix${manifest.enrollmentId}',
+        _enrollmentKey(_manifestPrefix, manifest.enrollmentId),
         jsonEncode({
           'id': manifest.id,
           'course_id': manifest.courseId,
@@ -370,12 +397,15 @@ class OfflineLearningService {
     while (ledger.length > _maxLedgerEntries) {
       ledger.remove(ledger.keys.first);
     }
-    await _preferences.setString(_operationLedgerKey, jsonEncode(ledger));
+    await _preferences.setString(
+      _scopedKey(_operationLedgerKey),
+      jsonEncode(ledger),
+    );
     await _writeOutbox(outbox);
   }
 
   List<_OutboxEntry> _readOutbox() {
-    final raw = _preferences.getString(_outboxKey);
+    final raw = _preferences.getString(_scopedKey(_outboxKey));
     if (raw == null) return [];
     final decoded = jsonDecode(raw);
     if (decoded is! List) return [];
@@ -387,12 +417,12 @@ class OfflineLearningService {
 
   Future<void> _writeOutbox(List<_OutboxEntry> entries) =>
       _preferences.setString(
-        _outboxKey,
+        _scopedKey(_outboxKey),
         jsonEncode(entries.map((entry) => entry.toJson()).toList()),
       );
 
   Map<String, String> _readLedger() {
-    final raw = _preferences.getString(_operationLedgerKey);
+    final raw = _preferences.getString(_scopedKey(_operationLedgerKey));
     if (raw == null) return {};
     final decoded = jsonDecode(raw);
     if (decoded is! Map) return {};
@@ -415,8 +445,14 @@ class OfflineLearningService {
 
   Future<Directory> _enrollmentDirectory(String enrollmentId) async =>
       Directory(
-        '${(await _offlineRoot()).path}/${_safeIdentifier(enrollmentId)}',
+        '${(await _offlineRoot()).path}/${_safeIdentifier(_namespace)}/'
+        '${_safeIdentifier(enrollmentId)}',
       );
+
+  String _scopedKey(String base) => '${base}_${_namespace}_';
+
+  String _enrollmentKey(String base, String enrollmentId) =>
+      '${_scopedKey(base)}${_safeIdentifier(enrollmentId)}';
 
   static String _safeIdentifier(String value) {
     if (!RegExp(r'^[A-Za-z0-9_-]{8,128}$').hasMatch(value)) {

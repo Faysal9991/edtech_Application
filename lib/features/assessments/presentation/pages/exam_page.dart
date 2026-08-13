@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/storage/local_storage.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -81,11 +83,11 @@ class _ExamPageState extends State<ExamPage> {
         _loading = false;
       });
       _startTimer(attempt.submitBefore ?? attempt.expiresAt);
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = '$error';
+        _error = context.l10n.tr('common.offline');
       });
     }
   }
@@ -112,7 +114,9 @@ class _ExamPageState extends State<ExamPage> {
     if (_loading) {
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.tr('exam.title'))),
-        body: const Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: AppLoadingView(label: context.l10n.tr('common.loading')),
+        ),
       );
     }
     final attempt = _attempt;
@@ -120,12 +124,15 @@ class _ExamPageState extends State<ExamPage> {
       return Scaffold(
         appBar: AppBar(title: Text(context.l10n.tr('exam.title'))),
         body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Text(
-              _error ?? context.l10n.tr('quiz.noQuestions'),
-              textAlign: TextAlign.center,
-            ),
+          child: AppStateView(
+            icon: AppIcons.analytics,
+            title: context.l10n.tr('exam.title'),
+            message: _error ?? context.l10n.tr('quiz.noQuestions'),
+            actionLabel: _error == null
+                ? null
+                : context.l10n.tr('common.retry'),
+            onAction: _error == null ? null : _start,
+            tone: _error == null ? AppStateTone.info : AppStateTone.error,
           ),
         ),
       );
@@ -160,8 +167,8 @@ class _ExamPageState extends State<ExamPage> {
                 value: (_index + 1) / attempt.questions.length,
               ),
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.all(20),
+                child: AppScrollablePage(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
                   children: [
                     Row(
                       children: [
@@ -175,10 +182,11 @@ class _ExamPageState extends State<ExamPage> {
                               ),
                             },
                           ),
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                         const Spacer(),
                         Text(
@@ -325,11 +333,11 @@ class _ExamPageState extends State<ExamPage> {
             : null,
       );
       await _removeAcknowledgedDraft(question.id);
-    } catch (error) {
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.tr('common.offline'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -379,9 +387,9 @@ class _ExamPageState extends State<ExamPage> {
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          icon: const Icon(
-            Icons.emoji_events_rounded,
-            color: AppColors.primary,
+          icon: AppIcon(
+            AppIcons.certificate,
+            color: Theme.of(context).colorScheme.primary,
             size: 52,
           ),
           title: Text(context.l10n.tr('exam.submitted')),
@@ -403,11 +411,11 @@ class _ExamPageState extends State<ExamPage> {
           ],
         ),
       );
-    } catch (error) {
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.tr('common.offline'))),
+        );
       }
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -441,7 +449,7 @@ class _ExamPageState extends State<ExamPage> {
     final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
     final remainder = (seconds % 60).toString().padLeft(2, '0');
     return Chip(
-      avatar: const Icon(Icons.timer_outlined, size: 18),
+      avatar: const AppIcon(AppIcons.clock, size: 18),
       label: Text(context.l10n.digits('$minutes:$remainder')),
     );
   }
@@ -532,6 +540,8 @@ class _ExamOption extends StatelessWidget {
               ),
               const SizedBox(width: 14),
               Expanded(child: Text(text)),
+              if (selected)
+                AppIcon(AppIcons.check, color: colors.primary, size: 20),
             ],
           ),
         ),

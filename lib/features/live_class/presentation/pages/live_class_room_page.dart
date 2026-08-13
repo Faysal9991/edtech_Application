@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:provider/provider.dart';
@@ -41,12 +43,18 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
       });
       return;
     }
+    if (mounted) {
+      setState(() {
+        _connecting = true;
+        _error = null;
+      });
+    }
     try {
       final credential = await repository.getLiveClassToken(id);
       if (credential.expiresAt.toUtc().isBefore(
         DateTime.now().toUtc().add(const Duration(seconds: 5)),
       )) {
-        throw StateError('Live-class token expired before connection.');
+        throw StateError('expired');
       }
 
       final room = Room(
@@ -92,12 +100,12 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
         _reconnecting = false;
         _error = null;
       });
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _connecting = false;
         _reconnecting = false;
-        _error = '$error';
+        _error = context.l10n.tr('live.unavailable');
       });
     }
   }
@@ -156,8 +164,8 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
 
   Widget _body() {
     if (_connecting) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.darkSecondary),
+      return Center(
+        child: AppLoadingView(label: context.l10n.tr('common.loading')),
       );
     }
     if (_error != null || _room == null) {
@@ -188,13 +196,14 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
               _ParticipantTile(participant: participants[index]),
         ),
         if (_reconnecting)
-          const Positioned(
+          Positioned(
             left: 16,
             right: 16,
             top: 10,
-            child: MaterialBanner(
-              content: Text('Reconnecting with a fresh secure token…'),
-              actions: [SizedBox.shrink()],
+            child: AppStatusBanner(
+              icon: AppIcons.refresh,
+              message: context.l10n.tr('common.loading'),
+              tone: AppStateTone.info,
             ),
           ),
       ],
@@ -214,44 +223,61 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              IconButton.filledTonal(
-                onPressed: participant == null
-                    ? null
-                    : () async {
-                        try {
-                          await participant.setMicrophoneEnabled(
-                            !microphoneEnabled,
-                          );
-                        } catch (error) {
-                          _showError(error);
-                        }
-                      },
-                icon: Icon(
-                  microphoneEnabled ? Icons.mic : Icons.mic_off_outlined,
+              Tooltip(
+                message: context.l10n.tr(
+                  microphoneEnabled
+                      ? 'live.muteMicrophone'
+                      : 'live.unmuteMicrophone',
+                ),
+                child: IconButton.filledTonal(
+                  onPressed: participant == null
+                      ? null
+                      : () async {
+                          try {
+                            await participant.setMicrophoneEnabled(
+                              !microphoneEnabled,
+                            );
+                          } catch (_) {
+                            _showError();
+                          }
+                        },
+                  icon: AppIcon(
+                    microphoneEnabled
+                        ? AppIcons.microphone
+                        : AppIcons.microphoneOff,
+                  ),
                 ),
               ),
-              IconButton.filledTonal(
-                onPressed: participant == null
-                    ? null
-                    : () async {
-                        try {
-                          await participant.setCameraEnabled(!cameraEnabled);
-                        } catch (error) {
-                          _showError(error);
-                        }
-                      },
-                icon: Icon(
-                  cameraEnabled ? Icons.videocam : Icons.videocam_off_outlined,
+              Tooltip(
+                message: context.l10n.tr(
+                  cameraEnabled ? 'live.turnOffCamera' : 'live.turnOnCamera',
+                ),
+                child: IconButton.filledTonal(
+                  onPressed: participant == null
+                      ? null
+                      : () async {
+                          try {
+                            await participant.setCameraEnabled(!cameraEnabled);
+                          } catch (_) {
+                            _showError();
+                          }
+                        },
+                  icon: AppIcon(
+                    cameraEnabled ? AppIcons.video : AppIcons.videoOff,
+                  ),
                 ),
               ),
-              IconButton.filled(
-                style: IconButton.styleFrom(backgroundColor: AppColors.error),
-                onPressed: () async {
-                  _leaving = true;
-                  await _room?.disconnect();
-                  if (mounted) Navigator.pop(context);
-                },
-                icon: const Icon(Icons.call_end_rounded),
+              Tooltip(
+                message: context.l10n.tr('live.leaveClass'),
+                child: IconButton.filled(
+                  style: IconButton.styleFrom(backgroundColor: AppColors.error),
+                  onPressed: () async {
+                    _leaving = true;
+                    await _room?.disconnect();
+                    if (mounted) Navigator.pop(context);
+                  },
+                  icon: const AppIcon(AppIcons.callEnd),
+                ),
               ),
             ],
           ),
@@ -260,11 +286,11 @@ class _LiveClassRoomPageState extends State<LiveClassRoomPage> {
     );
   }
 
-  void _showError(Object error) {
+  void _showError() {
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('$error')));
+    ).showSnackBar(SnackBar(content: Text(context.l10n.tr('live.joinFailed'))));
   }
 }
 
@@ -314,7 +340,7 @@ class _ParticipantTileState extends State<_ParticipantTile> {
     final participant = widget.participant;
     final name = participant.name.isNotEmpty
         ? participant.name
-        : participant.identity.toString();
+        : context.l10n.tr('common.students');
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: ColoredBox(
@@ -325,10 +351,10 @@ class _ParticipantTileState extends State<_ParticipantTile> {
             if (track != null)
               VideoTrackRenderer(track)
             else
-              const Icon(
-                Icons.account_circle_rounded,
+              const AppIcon(
+                AppIcons.profile,
                 color: AppColors.darkTextSecondary,
-                size: 86,
+                size: 62,
               ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -346,10 +372,17 @@ class _ParticipantTileState extends State<_ParticipantTile> {
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
-                      Icon(
-                        participant.isSpeaking ? Icons.graphic_eq : Icons.mic,
+                      AppIcon(
+                        participant.isSpeaking
+                            ? AppIcons.audioWave
+                            : AppIcons.microphone,
                         color: Colors.white,
                         size: 18,
+                        semanticLabel: context.l10n.tr(
+                          participant.isSpeaking
+                              ? 'live.speaking'
+                              : 'live.microphoneOn',
+                        ),
                       ),
                     ],
                   ),
@@ -377,33 +410,13 @@ class _RoomStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.videocam_off_outlined,
-              color: AppColors.error,
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.darkTextPrimary,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.darkTextSecondary),
-            ),
-            const SizedBox(height: 18),
-            FilledButton.tonal(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
+      child: AppStateView(
+        icon: AppIcons.live,
+        title: title,
+        message: message,
+        actionLabel: context.l10n.tr('common.retry'),
+        onAction: onRetry,
+        tone: AppStateTone.error,
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:edtech_application/core/auth/secure_token_storage.dart';
 import 'package:edtech_application/core/network/app_dio_client.dart';
+import 'package:edtech_application/core/session/organization_context.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -107,6 +108,65 @@ void main() {
     expect(await storage.refreshToken, isNull);
     expect(forcedLogouts, 1);
   });
+
+  test(
+    'organization header is scoped and excluded from public/auth calls',
+    () async {
+      final storage = SecureTokenStorage.inMemory();
+      await storage.save(
+        const AuthTokenPair(accessToken: 'access', refreshToken: 'refresh'),
+      );
+      final organization = OrganizationContext()..select('organization-1');
+      final client = AppDioClient(
+        tokenStorage: storage,
+        organizationContext: organization,
+      );
+      final adapter = _HeaderCaptureAdapter();
+      client.dio.httpClientAdapter = adapter;
+
+      await client.dio.get<Map<String, dynamic>>('/api/v1/teacher/dashboard');
+      await client.dio.get<Map<String, dynamic>>('/api/v1/auth/me');
+      await client.dio.get<Map<String, dynamic>>('/api/v1/courses');
+      await client.dio.post<Map<String, dynamic>>(
+        '/api/v1/guardian/invitations/accept',
+        data: {'token': 'redacted-in-test'},
+      );
+
+      expect(
+        adapter.requests[0].headers['X-Organization-ID'],
+        'organization-1',
+      );
+      expect(adapter.requests[0].headers['Authorization'], 'Bearer access');
+      expect(adapter.requests[1].headers, isNot(contains('X-Organization-ID')));
+      expect(adapter.requests[2].headers, isNot(contains('X-Organization-ID')));
+      expect(adapter.requests[2].headers, isNot(contains('Authorization')));
+      expect(adapter.requests[3].headers, isNot(contains('X-Organization-ID')));
+      expect(adapter.requests[3].headers['Authorization'], 'Bearer access');
+    },
+  );
+}
+
+class _HeaderCaptureAdapter implements HttpClientAdapter {
+  final List<RequestOptions> requests = [];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options);
+    return ResponseBody.fromString(
+      '{"ok":true}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: ['application/json'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
 }
 
 class _AuthAdapter implements HttpClientAdapter {

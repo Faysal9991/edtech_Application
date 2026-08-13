@@ -31,12 +31,16 @@ class RemoteAuthRepository implements AuthRepository {
       await _tokenStorage.save(tokens);
       return (await _api.me()).toDomain();
     } on AppException catch (error) {
-      await _tokenStorage.clear();
-      if (error.statusCode == 401) return null;
+      if (error.statusCode == 401) {
+        await _tokenStorage.clear();
+        return null;
+      }
       rethrow;
     } on DioException catch (error) {
-      await _tokenStorage.clear();
-      if (error.response?.statusCode == 401) return null;
+      if (error.response?.statusCode == 401) {
+        await _tokenStorage.clear();
+        return null;
+      }
       throw AppException.fromDioException(error);
     }
   }
@@ -63,6 +67,15 @@ class RemoteAuthRepository implements AuthRepository {
     } on FormatException {
       await _tokenStorage.clear();
       throw const AppException('Login response বোঝা যায়নি।');
+    }
+  }
+
+  @override
+  Future<AppUser> refreshCurrentUser() async {
+    try {
+      return (await _api.me()).toDomain();
+    } on DioException catch (error) {
+      throw AppException.fromDioException(error);
     }
   }
 

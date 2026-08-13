@@ -2,6 +2,7 @@ import 'package:edtech_application/core/routing/app_routes.dart';
 import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -51,6 +52,18 @@ class _SplashPageState extends State<SplashPage> {
               context.l10n.tr('appTagline'),
               style: const TextStyle(color: AppColors.primaryLight),
             ),
+            const SizedBox(height: 24),
+            Semantics(
+              liveRegion: true,
+              label: context.l10n.tr('common.loading'),
+              child: const SizedBox.square(
+                dimension: 22,
+                child: CircularProgressIndicator(
+                  color: AppColors.textOnPrimary,
+                  strokeWidth: 2.2,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -70,11 +83,7 @@ class _LogoMark extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
       ),
-      child: const Icon(
-        Icons.auto_stories_rounded,
-        color: AppColors.primary,
-        size: 42,
-      ),
+      child: const AppIcon(AppIcons.book, color: AppColors.primary, size: 42),
     );
   }
 }

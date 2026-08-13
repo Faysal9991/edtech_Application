@@ -92,20 +92,18 @@ bugs and from external/backend dependencies.
 
 ## 4. Role scope gap
 
-The shared client retains historical teacher operations for:
+The updated client now has isolated Student, Teacher, and Guardian shells driven
+by `/auth/me` memberships. Teacher dashboard, schedule, availability, roster,
+physical attendance, core work lists, Guardian invitation, linked-child
+overview, progress, attendance, results, calendar, and learning summary are
+wired to repositories. Admin-only identities remain restricted to the web
+portal, and no `/api/v1/admin/**` method is declared by the Flutter client.
 
-- Courses, modules, lessons, and students.
-- Batches, schedules, instructors, enrollments, and attendance.
-- Quizzes, questions, assignments, grading, exams, question bank, and analytics.
-- Live-class lifecycle.
-
-None has a role-specific shell, screen, controller, authorization UX, or test
-suite. Every `/api/v1/admin/**` operation was removed from the mobile client;
-admin APIs must remain server/web-console concerns.
-
-If a teacher app is planned, decide first whether it belongs in this mobile
-project or a separate Flutter flavor/app. Guardian work is contract-blocked by
-the missing guardian role and organization memberships in `AuthUser`.
+Advanced Teacher authoring, moderation, reports, media, interventions and
+notice-detail acknowledgement are still transport/repository coverage rather
+than finished production UI. The exact per-operation status is maintained in
+`MOBILE_API_COVERAGE.md`. All three roles still require real staging account and
+PostgreSQL verification.
 
 ## 5. Architecture and technical debt
 
@@ -145,9 +143,10 @@ operations support can cause an avoidable outage.
 
 ## 7. Quality gaps
 
-Current automated coverage is 29 tests covering selected contracts, concurrent
+Current automated coverage is 37 tests covering selected contracts, concurrent
 refresh, offline replay/checksums, theme tokens, localization parity, and a
-happy-path widget flow. Missing categories:
+happy-path widget flow, plus role eligibility, organization selection,
+Admin-only restriction and namespace isolation. Missing categories:
 
 - Auth failure/restore/logout widget and integration tests.
 - Loading, partial-error, empty, pagination, and retry UI tests.
@@ -195,7 +194,7 @@ happy-path widget flow. Missing categories:
 1. Incremental pagination and full offline lesson-player integration.
 2. Upload progress/background transfer and richer media controls.
 3. Analytics/leaderboard experiences.
-4. Teacher/guardian product strategy and role-specific application architecture.
+4. Complete advanced Teacher and Guardian workflows and their staging E2E tests.
 5. Broader accessibility, performance, and observability automation.
 
 ## 10. Definition of “production ready” for this app

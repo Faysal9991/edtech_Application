@@ -18,8 +18,21 @@ class MockAuthRepository implements AuthRepository {
       name: _nameFromEmail(email),
       email: email,
       roles: const ['student'],
+      memberships: const [
+        OrganizationMembership(
+          id: 'preview-membership',
+          organizationId: 'preview-organization',
+          organizationName: 'Shikhon Preview',
+          status: 'active',
+          roles: ['student'],
+        ),
+      ],
     );
   }
+
+  @override
+  Future<AppUser> refreshCurrentUser() =>
+      signIn(email: 'preview@learnly.app', password: 'preview-only');
 
   @override
   Future<RegistrationResult> signUp({
@@ -35,6 +48,15 @@ class MockAuthRepository implements AuthRepository {
         email: email,
         status: 'pending',
         roles: const ['student'],
+        memberships: const [
+          OrganizationMembership(
+            id: 'preview-membership',
+            organizationId: 'preview-organization',
+            organizationName: 'Shikhon Preview',
+            status: 'active',
+            roles: ['student'],
+          ),
+        ],
       ),
       message: 'Verification required',
       verificationToken: 'preview-verification-token-0000000000000000',
@@ -82,6 +104,15 @@ class MockAuthRepository implements AuthRepository {
     name: displayName,
     email: 'preview@learnly.app',
     roles: const ['student'],
+    memberships: const [
+      OrganizationMembership(
+        id: 'preview-membership',
+        organizationId: 'preview-organization',
+        organizationName: 'Shikhon Preview',
+        status: 'active',
+        roles: ['student'],
+      ),
+    ],
   );
 
   String _nameFromEmail(String email) {

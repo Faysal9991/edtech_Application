@@ -4,6 +4,11 @@ import 'package:edtech_application/core/network/mobile_api_dto.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
 import 'package:edtech_application/features/learning/data/services/offline_learning_service.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
+import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -43,7 +48,7 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     if (repository == null) {
       setState(() {
         _loading = false;
-        _error = 'Live API is unavailable in preview mode.';
+        _error = context.l10n.tr('studentServices.previewUnavailable');
       });
       return;
     }
@@ -91,7 +96,9 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     if (!mounted) return;
     setState(() {
       _loading = false;
-      _error = errors.isEmpty ? null : '${errors.first}';
+      _error = errors.isEmpty
+          ? null
+          : context.l10n.tr('studentServices.partialFailure');
     });
   }
 
@@ -101,34 +108,35 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Student services'),
-          bottom: const TabBar(
+          title: Text(context.l10n.tr('studentServices.title')),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Attendance'),
-              Tab(text: 'Study'),
-              Tab(text: 'Access'),
+              Tab(text: context.l10n.tr('studentServices.tabAttendance')),
+              Tab(text: context.l10n.tr('studentServices.tabStudy')),
+              Tab(text: context.l10n.tr('studentServices.tabAccess')),
             ],
           ),
           actions: [
             IconButton(
               onPressed: _loading ? null : _reload,
-              icon: const Icon(Icons.refresh),
+              icon: const AppIcon(AppIcons.refresh),
             ),
           ],
         ),
         body: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: AppLoadingView())
             : Column(
                 children: [
                   if (_error != null)
-                    MaterialBanner(
-                      content: Text('Some sections could not load: $_error'),
-                      actions: [
-                        TextButton(
-                          onPressed: _reload,
-                          child: const Text('Retry'),
-                        ),
-                      ],
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      child: AppStatusBanner(
+                        icon: AppIcons.warning,
+                        message: _error!,
+                        tone: AppStateTone.warning,
+                        actionLabel: context.l10n.tr('studentServices.retry'),
+                        onAction: _reload,
+                      ),
                     ),
                   Expanded(
                     child: TabBarView(
@@ -141,209 +149,277 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     );
   }
 
-  Widget _attendanceTab() => RefreshIndicator(
-    onRefresh: _reload,
-    child: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        FilledButton.icon(
-          onPressed: _checkIn,
-          icon: const Icon(Icons.qr_code_scanner_rounded),
-          label: const Text('Enter attendance code'),
-        ),
-        const SizedBox(height: 12),
-        if (_attendance.isEmpty)
-          const _EmptyCard('No physical attendance records yet.')
-        else
-          ..._attendance.map(
-            (record) => Card(
-              child: ListTile(
-                leading: Icon(
-                  record.status == 'present'
-                      ? Icons.check_circle_outline
-                      : Icons.event_busy_outlined,
-                ),
-                title: Text(record.status),
-                subtitle: Text(
-                  '${record.markedAt.toLocal()} • ${record.source}',
-                ),
-                trailing: TextButton(
-                  onPressed: () => _requestCorrection(record),
-                  child: const Text('Correct'),
+  Widget _attendanceTab() => AppPage(
+    padding: EdgeInsets.zero,
+    child: RefreshIndicator(
+      onRefresh: _reload,
+      child: ListView(
+        padding: AppLayout.pagePadding(context),
+        children: [
+          FilledButton.icon(
+            onPressed: _checkIn,
+            icon: const AppIcon(AppIcons.checklist, color: Colors.white),
+            label: Text(context.l10n.tr('studentServices.enterAttendanceCode')),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            context.l10n.tr('studentServices.attendanceHint'),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          if (_attendance.isEmpty)
+            _EmptyCard(
+              icon: AppIcons.attendance,
+              message: context.l10n.tr('studentServices.noAttendance'),
+            )
+          else
+            ..._attendance.map(
+              (record) => Card(
+                child: ListTile(
+                  leading: AppIconBadge(
+                    icon: record.status == 'present'
+                        ? AppIcons.check
+                        : AppIcons.attendance,
+                  ),
+                  title: Text(_attendanceLabel(record.status)),
+                  subtitle: Text(_dateTime(record.markedAt)),
+                  trailing: TextButton(
+                    onPressed: () => _requestCorrection(record),
+                    child: Text(context.l10n.tr('studentServices.correct')),
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     ),
   );
 
-  Widget _studyTab() => RefreshIndicator(
-    onRefresh: _reload,
-    child: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _SectionHeader(
-          title: 'Weak topics',
-          trailing: '${_mastery.length} mastery records',
-        ),
-        if (_weakTopics.isEmpty)
-          const _EmptyCard('No weak topics identified.')
-        else
-          ..._weakTopics.map(
-            (topic) => Card(
-              child: ListTile(
-                title: Text(topic.topicName ?? topic.topicId),
-                subtitle: Text(
-                  [
-                    topic.subjectName,
-                    topic.chapterName,
-                  ].whereType<String>().join(' • '),
-                ),
-                trailing: Text(topic.score.canonical),
-              ),
+  Widget _studyTab() => AppPage(
+    padding: EdgeInsets.zero,
+    child: RefreshIndicator(
+      onRefresh: _reload,
+      child: ListView(
+        padding: AppLayout.pagePadding(context),
+        children: [
+          _SectionHeader(
+            title: context.l10n.tr('studentServices.weakTopics'),
+            trailing: context.l10n.tr(
+              'studentServices.masteryRecords',
+              args: {'count': context.l10n.number(_mastery.length)},
             ),
           ),
-        _SectionHeader(title: 'Study tasks', trailing: '🔥 $_streak days'),
-        if (_tasks.isEmpty)
-          const _EmptyCard('No study-plan tasks.')
-        else
-          ..._tasks.map(
-            (task) => Card(
-              child: ListTile(
-                title: Text(task.title),
-                subtitle: Text('${task.dueAt.toLocal()} • ${task.status}'),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (value) => value == 'complete'
-                      ? _completeTask(task)
-                      : _rescheduleTask(task),
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'complete', child: Text('Complete')),
-                    PopupMenuItem(
-                      value: 'reschedule',
-                      child: Text('Reschedule'),
-                    ),
-                  ],
+          if (_weakTopics.isEmpty)
+            _EmptyCard(
+              icon: AppIcons.analytics,
+              message: context.l10n.tr('studentServices.noWeakTopics'),
+            )
+          else
+            ..._weakTopics.map(
+              (topic) => Card(
+                child: ListTile(
+                  title: Text(topic.topicName ?? topic.topicId),
+                  subtitle: Text(
+                    [
+                      topic.subjectName,
+                      topic.chapterName,
+                    ].whereType<String>().join(' • '),
+                  ),
+                  trailing: Text(topic.score.canonical),
                 ),
               ),
             ),
-          ),
-        _SectionHeader(
-          title: 'Goals',
-          action: IconButton(
-            onPressed: _createGoal,
-            icon: const Icon(Icons.add),
-          ),
-        ),
-        if (_goals.isEmpty)
-          const _EmptyCard('No active goals.')
-        else
-          ..._goals.map(
-            (goal) => Card(
-              child: ListTile(
-                title: Text(goal.title),
-                subtitle: Text('${goal.targetType} • ${goal.status}'),
-                trailing: Text(goal.targetValue.canonical),
-              ),
+          _SectionHeader(
+            title: context.l10n.tr('studentServices.studyTasks'),
+            trailing: context.l10n.tr(
+              'studentServices.streakDays',
+              args: {'count': context.l10n.number(_streak)},
             ),
           ),
-        _SectionHeader(
-          title: 'Doubts',
-          action: IconButton(
-            onPressed: _createDoubt,
-            icon: const Icon(Icons.add_comment_outlined),
-          ),
-        ),
-        if (_doubts.isEmpty)
-          const _EmptyCard('No doubt threads.')
-        else
-          ..._doubts.map(
-            (doubt) => Card(
-              child: ListTile(
-                onTap: () => _openDoubt(doubt),
-                title: Text(doubt.title),
-                subtitle: Text('${doubt.status} • ${doubt.priority}'),
-                trailing: const Icon(Icons.chevron_right),
+          if (_tasks.isEmpty)
+            _EmptyCard(
+              icon: AppIcons.task,
+              message: context.l10n.tr('studentServices.noTasks'),
+            )
+          else
+            ..._tasks.map(
+              (task) => Card(
+                child: ListTile(
+                  title: Text(task.title),
+                  subtitle: Text(_dateTime(task.dueAt)),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) => value == 'complete'
+                        ? _completeTask(task)
+                        : _rescheduleTask(task),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'complete',
+                        child: Text(
+                          context.l10n.tr('studentServices.complete'),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'reschedule',
+                        child: Text(
+                          context.l10n.tr('studentServices.reschedule'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
+          _SectionHeader(
+            title: context.l10n.tr('studentServices.goals'),
+            action: IconButton(
+              onPressed: _createGoal,
+              icon: const AppIcon(AppIcons.add),
+            ),
           ),
-      ],
+          if (_goals.isEmpty)
+            _EmptyCard(
+              icon: AppIcons.progress,
+              message: context.l10n.tr('studentServices.noGoals'),
+            )
+          else
+            ..._goals.map(
+              (goal) => Card(
+                child: ListTile(
+                  title: Text(goal.title),
+                  subtitle: Text(
+                    context.l10n.tr('studentServices.weeklyTarget'),
+                  ),
+                  trailing: Text(goal.targetValue.canonical),
+                ),
+              ),
+            ),
+          _SectionHeader(
+            title: context.l10n.tr('studentServices.doubts'),
+            action: IconButton(
+              onPressed: _createDoubt,
+              icon: const AppIcon(AppIcons.add),
+            ),
+          ),
+          if (_doubts.isEmpty)
+            _EmptyCard(
+              icon: AppIcons.help,
+              message: context.l10n.tr('studentServices.noDoubts'),
+            )
+          else
+            ..._doubts.map(
+              (doubt) => Card(
+                child: ListTile(
+                  onTap: () => _openDoubt(doubt),
+                  title: Text(doubt.title),
+                  subtitle: Text(_doubtLabel(doubt.status)),
+                  trailing: const AppIcon(AppIcons.arrowRight),
+                ),
+              ),
+            ),
+        ],
+      ),
     ),
   );
 
   Widget _accessTab() {
     final enrollments = context.watch<StudentLmsController>().enrollments;
-    return RefreshIndicator(
-      onRefresh: _reload,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const _SectionHeader(title: 'Offline learning & syllabus'),
-          if (_offlineStatus != null)
-            Card(child: ListTile(title: Text(_offlineStatus!))),
-          ...enrollments
-              .where((course) => course.enrollmentId != null)
-              .map(
-                (course) => Card(
+    return AppPage(
+      padding: EdgeInsets.zero,
+      child: RefreshIndicator(
+        onRefresh: _reload,
+        child: ListView(
+          padding: AppLayout.pagePadding(context),
+          children: [
+            _SectionHeader(
+              title: context.l10n.tr('studentServices.offlineAndSyllabus'),
+            ),
+            if (_offlineStatus != null)
+              Card(child: ListTile(title: Text(_offlineStatus!))),
+            ...enrollments
+                .where((course) => course.enrollmentId != null)
+                .map(
+                  (course) => Card(
+                    child: ListTile(
+                      title: Text(course.title),
+                      subtitle: Text(
+                        context.l10n.tr(
+                          'studentServices.availableLearningPlan',
+                        ),
+                      ),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (value) => value == 'download'
+                            ? _downloadCourse(course.enrollmentId!)
+                            : _showSyllabus(course.enrollmentId!),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: 'download',
+                            child: Text(
+                              context.l10n.tr(
+                                'studentServices.downloadOffline',
+                              ),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'syllabus',
+                            child: Text(
+                              context.l10n.tr(
+                                'studentServices.syllabusProgress',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            _SectionHeader(
+              title: context.l10n.tr('studentServices.admitCards'),
+            ),
+            if (_admitCards.isEmpty)
+              _EmptyCard(
+                icon: AppIcons.certificate,
+                message: context.l10n.tr('studentServices.noAdmitCards'),
+              )
+            else
+              ..._admitCards.map(
+                (card) => Card(
                   child: ListTile(
-                    title: Text(course.title),
-                    subtitle: Text(course.status),
-                    trailing: PopupMenuButton<String>(
-                      onSelected: (value) => value == 'download'
-                          ? _downloadCourse(course.enrollmentId!)
-                          : _showSyllabus(course.enrollmentId!),
-                      itemBuilder: (_) => const [
-                        PopupMenuItem(
-                          value: 'download',
-                          child: Text('Download offline'),
-                        ),
-                        PopupMenuItem(
-                          value: 'syllabus',
-                          child: Text('Syllabus progress'),
-                        ),
-                      ],
+                    title: Text(card.examTitle),
+                    subtitle: Text(
+                      '${card.venueName} • ${card.roomName} • ${card.seatLabel}',
+                    ),
+                    trailing: IconButton(
+                      onPressed: () => _downloadAdmitCard(card.id),
+                      icon: const AppIcon(AppIcons.arrowDown),
                     ),
                   ),
                 ),
               ),
-          const _SectionHeader(title: 'Admit cards'),
-          if (_admitCards.isEmpty)
-            const _EmptyCard('No ready admit cards.')
-          else
-            ..._admitCards.map(
-              (card) => Card(
+            OutlinedButton.icon(
+              onPressed: _verifyPublicRecord,
+              icon: const AppIcon(AppIcons.verified),
+              label: Text(context.l10n.tr('studentServices.verifyRecord')),
+            ),
+            _SectionHeader(
+              title: context.l10n.tr('studentServices.smsContacts'),
+            ),
+            ..._smsContacts.map(
+              (contact) => Card(
                 child: ListTile(
-                  title: Text(card.examTitle),
-                  subtitle: Text(
-                    '${card.venueName} • ${card.roomName} • ${card.seatLabel}',
+                  title: Text(
+                    '${contact.countryCode} •••• ${contact.lastFour}',
                   ),
-                  trailing: IconButton(
-                    onPressed: () => _downloadAdmitCard(card.id),
-                    icon: const Icon(Icons.download_outlined),
-                  ),
+                  subtitle: Text(_smsStatusLabel(contact.status)),
                 ),
               ),
             ),
-          OutlinedButton.icon(
-            onPressed: _verifyPublicRecord,
-            icon: const Icon(Icons.verified_outlined),
-            label: const Text('Verify admit card or student ID'),
-          ),
-          const _SectionHeader(title: 'SMS contacts'),
-          ..._smsContacts.map(
-            (contact) => Card(
-              child: ListTile(
-                title: Text('${contact.countryCode} •••• ${contact.lastFour}'),
-                subtitle: Text(contact.status),
-              ),
+            OutlinedButton.icon(
+              onPressed: _addSmsContact,
+              icon: const AppIcon(AppIcons.notification),
+              label: Text(context.l10n.tr('studentServices.addSmsContact')),
             ),
-          ),
-          OutlinedButton.icon(
-            onPressed: _addSmsContact,
-            icon: const Icon(Icons.sms_outlined),
-            label: const Text('Add / verify SMS contact'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -352,15 +428,21 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     final session = TextEditingController();
     final code = TextEditingController();
     final accepted = await _formDialog(
-      title: 'Attendance check-in',
+      title: context.l10n.tr('studentServices.attendanceCheckIn'),
       fields: [
         TextField(
           controller: session,
-          decoration: const InputDecoration(labelText: 'Session ID'),
+          textInputAction: TextInputAction.next,
+          decoration: InputDecoration(
+            labelText: context.l10n.tr('studentServices.sessionReference'),
+          ),
         ),
         TextField(
           controller: code,
-          decoration: const InputDecoration(labelText: 'Server-issued code'),
+          textInputAction: TextInputAction.done,
+          decoration: InputDecoration(
+            labelText: context.l10n.tr('studentServices.attendanceCode'),
+          ),
         ),
       ],
     );
@@ -382,22 +464,28 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
           context: context,
           builder: (context) => StatefulBuilder(
             builder: (context, setDialogState) => AlertDialog(
-              title: const Text('Request correction'),
+              title: Text(context.l10n.tr('studentServices.requestCorrection')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: requestedStatus,
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'present',
-                        child: Text('Present'),
+                        child: Text(context.l10n.tr('studentServices.present')),
                       ),
-                      DropdownMenuItem(value: 'absent', child: Text('Absent')),
-                      DropdownMenuItem(value: 'late', child: Text('Late')),
+                      DropdownMenuItem(
+                        value: 'absent',
+                        child: Text(context.l10n.tr('studentServices.absent')),
+                      ),
+                      DropdownMenuItem(
+                        value: 'late',
+                        child: Text(context.l10n.tr('studentServices.late')),
+                      ),
                       DropdownMenuItem(
                         value: 'excused',
-                        child: Text('Excused'),
+                        child: Text(context.l10n.tr('studentServices.excused')),
                       ),
                     ],
                     onChanged: (value) =>
@@ -405,18 +493,20 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
                   ),
                   TextField(
                     controller: reason,
-                    decoration: const InputDecoration(labelText: 'Reason'),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.tr('studentServices.reason'),
+                    ),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
+                  child: Text(context.l10n.tr('common.cancel')),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Send'),
+                  child: Text(context.l10n.tr('studentServices.send')),
                 ),
               ],
             ),
@@ -462,16 +552,20 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     final title = TextEditingController();
     final target = TextEditingController(text: '7');
     final accepted = await _formDialog(
-      title: 'Create goal',
+      title: context.l10n.tr('studentServices.createGoal'),
       fields: [
         TextField(
           controller: title,
-          decoration: const InputDecoration(labelText: 'Title'),
+          decoration: InputDecoration(
+            labelText: context.l10n.tr('studentServices.goalTitle'),
+          ),
         ),
         TextField(
           controller: target,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Task target'),
+          decoration: InputDecoration(
+            labelText: context.l10n.tr('studentServices.taskTarget'),
+          ),
         ),
       ],
     );
@@ -492,33 +586,76 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
   }
 
   Future<void> _createDoubt() async {
-    final course = TextEditingController();
+    final courses = context.read<StudentLmsController>().enrollments;
+    if (courses.isEmpty) {
+      _message(context.l10n.tr('studentServices.joinCourseFirst'));
+      return;
+    }
+    var courseId = courses.first.id;
     final title = TextEditingController();
     final body = TextEditingController();
-    final accepted = await _formDialog(
-      title: 'Ask a doubt',
-      fields: [
-        TextField(
-          controller: course,
-          decoration: const InputDecoration(labelText: 'Course ID'),
-        ),
-        TextField(
-          controller: title,
-          decoration: const InputDecoration(labelText: 'Title'),
-        ),
-        TextField(
-          controller: body,
-          minLines: 3,
-          maxLines: 6,
-          decoration: const InputDecoration(labelText: 'Question'),
-        ),
-      ],
-    );
+    final accepted =
+        await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => StatefulBuilder(
+            builder: (context, setDialogState) => AlertDialog(
+              title: Text(context.l10n.tr('studentServices.askDoubt')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      initialValue: courseId,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.tr('studentServices.course'),
+                      ),
+                      items: courses
+                          .map(
+                            (course) => DropdownMenuItem(
+                              value: course.id,
+                              child: Text(course.title),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) =>
+                          setDialogState(() => courseId = value ?? courseId),
+                    ),
+                    TextField(
+                      controller: title,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.tr('studentServices.goalTitle'),
+                      ),
+                    ),
+                    TextField(
+                      controller: body,
+                      minLines: 3,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.tr('studentServices.question'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(context.l10n.tr('common.cancel')),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(context.l10n.tr('studentServices.continue')),
+                ),
+              ],
+            ),
+          ),
+        ) ??
+        false;
     if (!accepted) return;
     await _run(() async {
       await _repository!.createDoubt(
         DoubtWriteRequest(
-          courseId: course.text.trim(),
+          courseId: courseId,
           title: title.text.trim(),
           body: body.text.trim(),
         ),
@@ -547,9 +684,7 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
               ...detail.messages.map(
                 (message) => ListTile(
                   title: Text(message.body),
-                  subtitle: Text(
-                    '${message.authorRole} • ${message.createdAt.toLocal()}',
-                  ),
+                  subtitle: Text(_dateTime(message.createdAt)),
                 ),
               ),
               FilledButton(
@@ -557,7 +692,7 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
                   Navigator.pop(context);
                   _replyToDoubt(doubt.id);
                 },
-                child: const Text('Reply'),
+                child: Text(context.l10n.tr('studentServices.reply')),
               ),
               TextButton(
                 onPressed: () async {
@@ -571,7 +706,11 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
                     await _reload();
                   });
                 },
-                child: Text(doubt.status == 'resolved' ? 'Reopen' : 'Resolve'),
+                child: Text(
+                  doubt.status == 'resolved'
+                      ? context.l10n.tr('studentServices.reopen')
+                      : context.l10n.tr('studentServices.resolve'),
+                ),
               ),
             ],
           ),
@@ -583,7 +722,7 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
   Future<void> _replyToDoubt(String doubtId) async {
     final body = TextEditingController();
     if (!await _formDialog(
-      title: 'Reply',
+      title: context.l10n.tr('studentServices.reply'),
       fields: [TextField(controller: body, minLines: 3, maxLines: 6)],
     )) {
       return;
@@ -597,7 +736,10 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
   Future<void> _downloadCourse(String enrollmentId) async {
     final service = context.read<OfflineLearningService?>();
     if (service == null) return;
-    setState(() => _offlineStatus = 'Preparing secure offline download…');
+    setState(
+      () =>
+          _offlineStatus = context.l10n.tr('studentServices.preparingDownload'),
+    );
     await _run(() async {
       final result = await service.downloadEnrollment(
         enrollmentId,
@@ -605,16 +747,25 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
           if (mounted) {
             setState(
               () => _offlineStatus = total == 0
-                  ? 'Downloading…'
-                  : 'Downloading ${(received * 100 / total).clamp(0, 100).round()}%',
+                  ? context.l10n.tr('studentServices.downloading')
+                  : context.l10n.tr(
+                      'studentServices.downloadingPercent',
+                      args: {
+                        'percent': context.l10n.percent(
+                          (received * 100 / total).clamp(0, 100).round(),
+                        ),
+                      },
+                    ),
             );
           }
         },
       );
       if (mounted) {
         setState(
-          () =>
-              _offlineStatus = '${result.downloadedFiles} files ready offline.',
+          () => _offlineStatus = context.l10n.tr(
+            'studentServices.filesReady',
+            args: {'count': context.l10n.number(result.downloadedFiles)},
+          ),
         );
       }
     });
@@ -626,7 +777,7 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Syllabus progress'),
+        title: Text(context.l10n.tr('studentServices.syllabusProgress')),
         content: SizedBox(
           width: 420,
           child: ListView(
@@ -636,9 +787,18 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
                   (item) => ListTile(
                     title: Text(item.title),
                     subtitle: Text(
-                      '${item.completedUnits}/${item.totalUnits} units • ${item.delayedUnits} delayed',
+                      context.l10n.tr(
+                        'studentServices.syllabusSummary',
+                        args: {
+                          'completed': context.l10n.number(item.completedUnits),
+                          'total': context.l10n.number(item.totalUnits),
+                          'delayed': context.l10n.number(item.delayedUnits),
+                        },
+                      ),
                     ),
-                    trailing: Text('${item.completionPercentage.round()}%'),
+                    trailing: Text(
+                      context.l10n.percent(item.completionPercentage.round()),
+                    ),
                   ),
                 )
                 .toList(),
@@ -648,43 +808,56 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
     );
   });
 
-  Future<void> _downloadAdmitCard(String id) async => _run(() async {
-    final url = await _repository!.admitCardDownloadUrl(id);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw StateError('Could not open the signed admit-card URL.');
-    }
-  });
+  Future<void> _downloadAdmitCard(String id) async {
+    final unavailable = context.l10n.tr('certificates.downloadUnavailable');
+    await _run(() async {
+      final url = await _repository!.admitCardDownloadUrl(id);
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw StateError(unavailable);
+      }
+    });
+  }
 
   Future<void> _verifyPublicRecord() async {
     final token = TextEditingController();
     var kind = 'admit';
+    final noMatch = context.l10n.tr('studentServices.noMatchingRecord');
+    final verified = context.l10n.tr('studentServices.recordVerified');
     final accepted =
         await showDialog<bool>(
           context: context,
           builder: (context) => StatefulBuilder(
             builder: (context, setDialogState) => AlertDialog(
-              title: const Text('Public verification'),
+              title: Text(
+                context.l10n.tr('studentServices.publicVerification'),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: kind,
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'admit',
-                        child: Text('Admit card'),
+                        child: Text(
+                          context.l10n.tr('studentServices.admitCard'),
+                        ),
                       ),
                       DropdownMenuItem(
                         value: 'student',
-                        child: Text('Student identifier'),
+                        child: Text(
+                          context.l10n.tr('studentServices.studentIdentifier'),
+                        ),
                       ),
                     ],
                     onChanged: (value) => setDialogState(() => kind = value!),
                   ),
                   TextField(
                     controller: token,
-                    decoration: const InputDecoration(
-                      labelText: 'Verification token',
+                    decoration: InputDecoration(
+                      labelText: context.l10n.tr(
+                        'studentServices.verificationToken',
+                      ),
                     ),
                   ),
                 ],
@@ -692,11 +865,11 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
+                  child: Text(context.l10n.tr('common.cancel')),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Verify'),
+                  child: Text(context.l10n.tr('studentServices.verify')),
                 ),
               ],
             ),
@@ -710,14 +883,14 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
           : (await _repository!.verifyStudentIdentifier(
               token.text,
             )).displayName;
-      _message('Verified: $result');
+      _message(result.isEmpty ? noMatch : verified);
     });
   }
 
   Future<void> _addSmsContact() async {
     final phone = TextEditingController(text: '+880');
     if (!await _formDialog(
-      title: 'Add SMS contact',
+      title: context.l10n.tr('studentServices.addSms'),
       fields: [TextField(controller: phone, keyboardType: TextInputType.phone)],
     )) {
       return;
@@ -727,16 +900,19 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
       if (!mounted) return;
       final token = TextEditingController();
       if (await _formDialog(
-        title: 'Verify SMS contact',
+        title: context.l10n.tr('studentServices.verifySms'),
         fields: [
           TextField(
             controller: token,
-            decoration: const InputDecoration(labelText: 'Verification token'),
+            decoration: InputDecoration(
+              labelText: context.l10n.tr('studentServices.verificationToken'),
+            ),
           ),
         ],
       )) {
         await _repository!.verifySmsContact(token.text.trim());
       }
+      if (!mounted) return;
       await _reload();
     });
   }
@@ -755,11 +931,11 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(context.l10n.tr('common.cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Continue'),
+              child: Text(context.l10n.tr('studentServices.continue')),
             ),
           ],
         ),
@@ -769,8 +945,9 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
   Future<void> _run(Future<void> Function() operation) async {
     try {
       await operation();
-    } catch (error) {
-      _message('$error');
+    } catch (_) {
+      if (!mounted) return;
+      _message(context.l10n.tr('studentServices.operationFailed'));
     }
   }
 
@@ -780,6 +957,34 @@ class _StudentServicesPageState extends State<StudentServicesPage> {
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
+
+  String _dateTime(DateTime value) {
+    final local = value.toLocal();
+    final material = MaterialLocalizations.of(context);
+    return '${material.formatMediumDate(local)} • '
+        '${material.formatTimeOfDay(TimeOfDay.fromDateTime(local))}';
+  }
+
+  String _attendanceLabel(String status) => switch (status.toLowerCase()) {
+    'present' => context.l10n.tr('studentServices.present'),
+    'absent' => context.l10n.tr('studentServices.absent'),
+    'late' => context.l10n.tr('studentServices.late'),
+    'excused' => context.l10n.tr('studentServices.excused'),
+    _ => context.l10n.tr('studentServices.attendanceUpdated'),
+  };
+
+  String _doubtLabel(String status) => switch (status.toLowerCase()) {
+    'resolved' => context.l10n.tr('studentServices.resolved'),
+    'open' => context.l10n.tr('studentServices.open'),
+    _ => context.l10n.tr('studentServices.inProgress'),
+  };
+
+  String _smsStatusLabel(String status) => switch (status.toLowerCase()) {
+    'verified' ||
+    'active' => context.l10n.tr('studentServices.contactVerified'),
+    'pending' => context.l10n.tr('studentServices.verificationPending'),
+    _ => context.l10n.tr('studentServices.contactUnavailable'),
+  };
 }
 
 class _SectionHeader extends StatelessWidget {
@@ -804,10 +1009,20 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _EmptyCard extends StatelessWidget {
-  const _EmptyCard(this.message);
+  const _EmptyCard({required this.icon, required this.message});
+  final List<List<dynamic>> icon;
   final String message;
   @override
   Widget build(BuildContext context) => Card(
-    child: Padding(padding: const EdgeInsets.all(18), child: Text(message)),
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(
+        children: [
+          AppIconBadge(icon: icon),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(message)),
+        ],
+      ),
+    ),
   );
 }
