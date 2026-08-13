@@ -34,12 +34,16 @@ abstract final class AppColors {
   // Semantic colors — never used as brand decoration.
   static const Color success = Color(0xFF16A34A);
   static const Color successBackground = Color(0xFFECFDF3);
+  static const Color successForeground = Color(0xFF087A63);
   static const Color warning = Color(0xFFF59E0B);
   static const Color warningBackground = Color(0xFFFFF7E6);
+  static const Color warningForeground = Color(0xFF92400E);
   static const Color error = Color(0xFFDC2626);
   static const Color errorBackground = Color(0xFFFEF2F2);
+  static const Color errorForeground = Color(0xFFB91C1C);
   static const Color info = Color(0xFF0284C7);
   static const Color infoBackground = Color(0xFFEFF8FF);
+  static const Color infoForeground = Color(0xFF075985);
 
   // Overlay and shadow.
   static const Color overlay = Color(0x660F172A);
@@ -63,10 +67,14 @@ abstract final class AppColors {
   static const Color darkBorder = Color(0xFF334155);
   static const Color darkSuccess = Color(0xFF4ADE80);
   static const Color darkSuccessBackground = Color(0xFF052E1A);
+  static const Color darkSuccessForeground = Color(0xFF5ED9BE);
   static const Color darkWarning = Color(0xFFFBBF24);
   static const Color darkWarningBackground = Color(0xFF422006);
+  static const Color darkWarningForeground = Color(0xFFFDE68A);
   static const Color darkError = Color(0xFFF87171);
   static const Color darkErrorBackground = Color(0xFF450A0A);
+  static const Color darkErrorForeground = Color(0xFFFCA5A5);
   static const Color darkInfo = Color(0xFF38BDF8);
   static const Color darkInfoBackground = Color(0xFF082F49);
+  static const Color darkInfoForeground = Color(0xFF7DD3FC);
 }

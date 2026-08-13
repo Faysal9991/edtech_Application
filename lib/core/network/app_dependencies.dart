@@ -4,9 +4,17 @@ import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/api_constants.dart';
 import 'package:edtech_application/core/network/api_service.dart';
 import 'package:edtech_application/core/network/app_dio_client.dart';
+import 'package:edtech_application/core/routing/app_router.dart';
+import 'package:edtech_application/core/session/app_session.dart';
+import 'package:edtech_application/core/session/organization_context.dart';
 import 'package:edtech_application/features/authentication/data/models/auth_dto.dart';
 import 'package:edtech_application/features/authentication/data/repositories/remote_auth_repository.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
+import 'package:edtech_application/features/guardian/data/guardian_repository.dart';
+import 'package:edtech_application/features/learning/data/services/offline_learning_service.dart';
+import 'package:edtech_application/features/notifications/data/notification_repository.dart';
+import 'package:edtech_application/features/teacher/data/teacher_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Owns the live API graph. The refresh client is intentionally separate so a
 /// failed access token can never recursively trigger another refresh request.
@@ -14,13 +22,38 @@ class AppDependencies {
   AppDependencies._({
     required this.authRepository,
     required this.studentRepository,
+    required this.teacherRepository,
+    required this.guardianRepository,
+    required this.organizationContext,
+    required this.notificationRepository,
+    required this.offlineLearningService,
   });
 
   final RemoteAuthRepository authRepository;
   final StudentLmsRepository studentRepository;
+  final TeacherRepository teacherRepository;
+  final GuardianRepository guardianRepository;
+  final OrganizationContext organizationContext;
+  final NotificationRepository notificationRepository;
+  final OfflineLearningService offlineLearningService;
 
-  factory AppDependencies.live() {
+  Future<void> applySession(AppSession? session) async {
+    if (session == null) {
+      organizationContext.clear();
+      await offlineLearningService.deactivateNamespace();
+      return;
+    }
+    organizationContext.select(session.activeMembership.organizationId);
+    await offlineLearningService.activateNamespace(
+      userId: session.user.id,
+      organizationId: session.activeMembership.organizationId,
+      role: session.activeRole.wireName,
+    );
+  }
+
+  factory AppDependencies.live(SharedPreferences preferences) {
     final tokenStorage = SecureTokenStorage();
+    final organizationContext = OrganizationContext();
     final refreshDio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -57,9 +90,21 @@ class AppDependencies {
 
     final client = AppDioClient(
       tokenStorage: tokenStorage,
+      organizationContext: organizationContext,
       refreshToken: refreshTokens,
+      onSessionExpired: AppRouter.handleSessionExpired,
     );
     final api = ApiService(client.dio);
+
+    final studentRepository = StudentLmsRepository(
+      api: api,
+      uploadDio: Dio(
+        BaseOptions(
+          connectTimeout: ApiConstants.connectTimeout,
+          receiveTimeout: ApiConstants.receiveTimeout,
+        ),
+      ),
+    );
 
     return AppDependencies._(
       authRepository: RemoteAuthRepository(
@@ -67,14 +112,14 @@ class AppDependencies {
         tokenStorage: tokenStorage,
         refreshTokens: refreshTokens,
       ),
-      studentRepository: StudentLmsRepository(
-        api: api,
-        uploadDio: Dio(
-          BaseOptions(
-            connectTimeout: ApiConstants.connectTimeout,
-            receiveTimeout: ApiConstants.receiveTimeout,
-          ),
-        ),
+      studentRepository: studentRepository,
+      teacherRepository: TeacherRepository(api: api),
+      guardianRepository: GuardianRepository(api: api),
+      organizationContext: organizationContext,
+      notificationRepository: NotificationRepository(api: api),
+      offlineLearningService: OfflineLearningService(
+        repository: studentRepository,
+        preferences: preferences,
       ),
     );
   }

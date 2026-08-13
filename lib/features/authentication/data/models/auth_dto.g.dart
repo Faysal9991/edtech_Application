@@ -102,6 +102,13 @@ _AuthUserDto _$AuthUserDtoFromJson(Map<String, dynamic> json) => _AuthUserDto(
   roles:
       (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
+  memberships:
+      (json['memberships'] as List<dynamic>?)
+          ?.map(
+            (e) => OrganizationMembership.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const <OrganizationMembership>[],
   emailVerifiedAt: json['email_verified_at'] == null
       ? null
       : DateTime.parse(json['email_verified_at'] as String),
@@ -114,6 +121,7 @@ Map<String, dynamic> _$AuthUserDtoToJson(_AuthUserDto instance) =>
       'display_name': instance.displayName,
       'status': instance.status,
       'roles': instance.roles,
+      'memberships': instance.memberships,
       'email_verified_at': instance.emailVerifiedAt?.toIso8601String(),
     };
 

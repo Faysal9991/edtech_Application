@@ -29,16 +29,18 @@ class RemoteAuthRepository implements AuthRepository {
     try {
       final tokens = await _refreshTokens(refreshToken);
       await _tokenStorage.save(tokens);
-      return AuthUserDto.fromJson(
-        (await _api.getCurrentProfile()).value,
-      ).toDomain();
+      return (await _api.me()).toDomain();
     } on AppException catch (error) {
-      await _tokenStorage.clear();
-      if (error.statusCode == 401) return null;
+      if (error.statusCode == 401) {
+        await _tokenStorage.clear();
+        return null;
+      }
       rethrow;
     } on DioException catch (error) {
-      await _tokenStorage.clear();
-      if (error.response?.statusCode == 401) return null;
+      if (error.response?.statusCode == 401) {
+        await _tokenStorage.clear();
+        return null;
+      }
       throw AppException.fromDioException(error);
     }
   }
@@ -69,6 +71,15 @@ class RemoteAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AppUser> refreshCurrentUser() async {
+    try {
+      return (await _api.me()).toDomain();
+    } on DioException catch (error) {
+      throw AppException.fromDioException(error);
+    }
+  }
+
+  @override
   Future<RegistrationResult> signUp({
     required String name,
     required String email,
@@ -95,6 +106,19 @@ class RemoteAuthRepository implements AuthRepository {
       if (refreshToken != null && refreshToken.isNotEmpty) {
         await _api.logout(RefreshTokenRequest(refreshToken: refreshToken));
       }
+    } on DioException catch (error) {
+      if (error.response?.statusCode != 401) {
+        throw AppException.fromDioException(error);
+      }
+    } finally {
+      await _tokenStorage.clear();
+    }
+  }
+
+  @override
+  Future<void> signOutAll() async {
+    try {
+      await _api.logoutAll();
     } on DioException catch (error) {
       if (error.response?.statusCode != 401) {
         throw AppException.fromDioException(error);

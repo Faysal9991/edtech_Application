@@ -9,12 +9,14 @@ class PageHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.showNotification = true,
+    this.unreadCount,
     super.key,
   });
 
   final String title;
   final String subtitle;
   final bool showNotification;
+  final int? unreadCount;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +48,10 @@ class PageHeader extends StatelessWidget {
             ),
             if (showNotification)
               Badge(
-                smallSize: 9,
+                isLabelVisible: (unreadCount ?? 0) > 0,
+                label: Text(
+                  (unreadCount ?? 0) > 99 ? '99+' : '${unreadCount ?? 0}',
+                ),
                 child: IconButton.filledTonal(
                   tooltip: context.l10n.tr('home.notifications'),
                   onPressed: () =>

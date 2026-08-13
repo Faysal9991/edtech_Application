@@ -1,9 +1,10 @@
 import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/routing/app_routes.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -33,14 +34,11 @@ class _AssessmentsPageState extends State<AssessmentsPage> {
           IconButton(
             tooltip: context.l10n.tr('common.retry'),
             onPressed: state.isLoadingActivities ? null : state.loadAssessments,
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const AppIcon(AppIcons.refresh),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: state.loadAssessments,
-        child: _body(context, state),
-      ),
+      body: _body(context, state),
     );
   }
 
@@ -49,32 +47,39 @@ class _AssessmentsPageState extends State<AssessmentsPage> {
         state.quizzes.isEmpty &&
         state.assignments.isEmpty &&
         state.exams.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: AppLoadingView(label: context.l10n.tr('common.loading')),
+      );
     }
     if (state.activitiesError != null &&
         state.quizzes.isEmpty &&
         state.assignments.isEmpty &&
         state.exams.isEmpty) {
-      return ListView(
-        padding: const EdgeInsets.all(28),
-        children: [
-          const SizedBox(height: 90),
-          const AppIcon(AppIcons.cloudOff, size: 58, color: AppColors.primary),
-          const SizedBox(height: 16),
-          Text(state.activitiesError!, textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          FilledButton.tonal(
-            onPressed: state.loadAssessments,
-            child: Text(context.l10n.tr('common.retry')),
-          ),
-        ],
+      return Center(
+        child: AppStateView(
+          icon: AppIcons.cloudOff,
+          title: context.l10n.tr('assessments.title'),
+          message: context.l10n.tr('common.offline'),
+          actionLabel: context.l10n.tr('common.retry'),
+          onAction: state.loadAssessments,
+          tone: AppStateTone.error,
+        ),
       );
     }
 
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+    return AppScrollablePage(
+      onRefresh: state.loadAssessments,
       children: [
+        if (state.activitiesError != null) ...[
+          AppStatusBanner(
+            icon: AppIcons.cloudOff,
+            message: context.l10n.tr('common.offline'),
+            tone: AppStateTone.warning,
+            actionLabel: context.l10n.tr('common.retry'),
+            onAction: state.loadAssessments,
+          ),
+          const SizedBox(height: 20),
+        ],
         _SectionTitle(
           title: context.l10n.tr('assessments.availableQuizzes'),
           count: state.quizzes.length,
@@ -182,9 +187,17 @@ class _ActivityTile extends StatelessWidget {
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 5),
-          child: Text('$subtitle • $badge'),
+          child: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
         ),
-        trailing: const AppIcon(AppIcons.arrowRight, size: 20),
+        trailing: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(badge, style: Theme.of(context).textTheme.labelSmall),
+            const SizedBox(height: 4),
+            const AppIcon(AppIcons.arrowRight, size: 18),
+          ],
+        ),
         onTap: onTap,
       ),
     );
@@ -202,7 +215,7 @@ class _ExamTile extends StatelessWidget {
       icon: AppIcons.analytics,
       title: exam.title,
       subtitle: exam.courseTitle ?? context.l10n.tr('assessments.modelTest'),
-      badge: '${exam.durationSeconds ~/ 60} min',
+      badge: '${context.l10n.number(exam.durationSeconds ~/ 60)} min',
       onTap: () =>
           Navigator.pushNamed(context, AppRoutes.exam, arguments: exam.id),
     );
@@ -216,14 +229,17 @@ class _EmptyActivity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Semantics(
+      container: true,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
       ),

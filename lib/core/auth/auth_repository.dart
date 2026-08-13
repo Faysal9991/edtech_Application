@@ -17,6 +17,8 @@ abstract interface class AuthRepository {
 
   Future<AppUser> signIn({required String email, required String password});
 
+  Future<AppUser> refreshCurrentUser();
+
   Future<RegistrationResult> signUp({
     required String name,
     required String email,
@@ -24,6 +26,8 @@ abstract interface class AuthRepository {
   });
 
   Future<void> signOut();
+
+  Future<void> signOutAll();
 
   Future<void> forgotPassword(String email);
 

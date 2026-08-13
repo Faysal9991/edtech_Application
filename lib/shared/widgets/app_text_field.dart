@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
 
 class AppTextField extends StatefulWidget {
   const AppTextField({
     required this.controller,
     required this.label,
     required this.hint,
-    required this.prefixIcon,
+    this.prefixIcon,
+    this.prefixAppIcon,
     this.validator,
     this.keyboardType,
     this.textInputAction,
@@ -19,7 +21,8 @@ class AppTextField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final String hint;
-  final IconData prefixIcon;
+  final IconData? prefixIcon;
+  final List<List<dynamic>>? prefixAppIcon;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
@@ -51,17 +54,21 @@ class _AppTextFieldState extends State<AppTextField> {
           onFieldSubmitted: widget.onSubmitted,
           decoration: InputDecoration(
             hintText: widget.hint,
-            prefixIcon: Icon(widget.prefixIcon, size: 21),
+            prefixIcon: widget.prefixAppIcon == null
+                ? Icon(widget.prefixIcon, size: 21)
+                : Center(
+                    widthFactor: 1,
+                    child: AppIcon(widget.prefixAppIcon!, size: 21),
+                  ),
             suffixIcon: widget.obscureText
                 ? IconButton(
                     tooltip: _isObscured
                         ? context.l10n.tr('auth.showPassword')
                         : context.l10n.tr('auth.hidePassword'),
                     onPressed: () => setState(() => _isObscured = !_isObscured),
-                    icon: Icon(
-                      _isObscured
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                    icon: AppIcon(
+                      _isObscured ? AppIcons.visible : AppIcons.hidden,
+                      size: 21,
                     ),
                   )
                 : null,

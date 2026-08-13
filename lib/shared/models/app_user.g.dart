@@ -14,7 +14,14 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   roles:
       (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
-  role: json['role'] as String? ?? 'student',
+  memberships:
+      (json['memberships'] as List<dynamic>?)
+          ?.map(
+            (e) => OrganizationMembership.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const <OrganizationMembership>[],
+  role: json['role'] as String? ?? 'unknown',
   emailVerifiedAt: json['emailVerifiedAt'] == null
       ? null
       : DateTime.parse(json['emailVerifiedAt'] as String),
@@ -26,6 +33,29 @@ Map<String, dynamic> _$AppUserToJson(_AppUser instance) => <String, dynamic>{
   'email': instance.email,
   'status': instance.status,
   'roles': instance.roles,
+  'memberships': instance.memberships,
   'role': instance.role,
   'emailVerifiedAt': instance.emailVerifiedAt?.toIso8601String(),
+};
+
+_OrganizationMembership _$OrganizationMembershipFromJson(
+  Map<String, dynamic> json,
+) => _OrganizationMembership(
+  id: json['id'] as String,
+  organizationId: json['organization_id'] as String,
+  organizationName: json['organization_name'] as String,
+  status: json['status'] as String,
+  roles:
+      (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const <String>[],
+);
+
+Map<String, dynamic> _$OrganizationMembershipToJson(
+  _OrganizationMembership instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'organization_id': instance.organizationId,
+  'organization_name': instance.organizationName,
+  'status': instance.status,
+  'roles': instance.roles,
 };

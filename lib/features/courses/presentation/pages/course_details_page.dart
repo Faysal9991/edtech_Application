@@ -1,10 +1,14 @@
 import 'package:edtech_application/core/routing/app_routes.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
+import 'package:edtech_application/features/learning/presentation/pages/lesson_page.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:edtech_application/shared/models/course.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:provider/provider.dart';
 
 class CourseDetailsPage extends StatefulWidget {
@@ -32,32 +36,22 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
         if (snapshot.connectionState != ConnectionState.done) {
           return Scaffold(
             appBar: AppBar(title: Text(context.l10n.tr('course.details'))),
-            body: const Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: AppLoadingView(label: context.l10n.tr('common.loading')),
+            ),
           );
         }
         if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(title: Text(context.l10n.tr('course.details'))),
             body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.cloud_off_rounded, size: 56),
-                    const SizedBox(height: 12),
-                    Text('${snapshot.error}', textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    FilledButton.tonal(
-                      onPressed: () => setState(() {
-                        _courseFuture = context
-                            .read<StudentLmsController>()
-                            .getCourse(widget.course);
-                      }),
-                      child: Text(context.l10n.tr('common.retry')),
-                    ),
-                  ],
-                ),
+              child: AppStateView(
+                icon: AppIcons.cloudOff,
+                title: context.l10n.tr('course.details'),
+                message: _loadFailureMessage(context),
+                tone: AppStateTone.error,
+                actionLabel: context.l10n.tr('common.retry'),
+                onAction: _reload,
               ),
             ),
           );
@@ -67,9 +61,20 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
     );
   }
 
+  void _reload() {
+    setState(() {
+      _courseFuture = context.read<StudentLmsController>().getCourse(
+        widget.course,
+      );
+    });
+  }
+
   Widget _details(Course course) {
     final enrolled =
         course.enrollmentId?.isNotEmpty == true || course.completedLessons > 0;
+    final progress = course.lessons > 0
+        ? (course.completedLessons / course.lessons).clamp(0.0, 1.0)
+        : 0.0;
 
     return Scaffold(
       appBar: AppBar(
@@ -81,173 +86,153 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
               await Clipboard.setData(ClipboardData(text: course.slug));
               if (mounted) _message(context.l10n.tr('course.slugCopied'));
             },
-            icon: const Icon(Icons.ios_share_rounded),
+            icon: const AppIcon(HugeIcons.strokeRoundedShare01, size: 22),
           ),
           IconButton(
             tooltip: context.l10n.tr('course.save'),
             onPressed: () =>
                 _message(context.l10n.tr('course.bookmarkMissing')),
-            icon: Icon(
-              course.isBookmarked
-                  ? Icons.bookmark_rounded
-                  : Icons.bookmark_border_rounded,
+            icon: AppIcon(
+              AppIcons.bookmark,
+              size: 22,
+              strokeWidth: course.isBookmarked ? 2.4 : 1.8,
             ),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 116),
-        children: [
-          _CourseThumbnail(course: course),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxContentWidth,
+            ),
+            child: ListView(
+              padding: const EdgeInsets.only(bottom: 128),
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _Tag(course.educationLevel),
-                    _Tag(course.subject),
-                    _Tag(course.language),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  course.title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    height: 1.35,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _Instructor(name: course.instructor),
-                const SizedBox(height: 18),
-                _CourseStats(course: course),
-                const SizedBox(height: 24),
-                _SectionTitle(title: context.l10n.tr('course.about')),
-                const SizedBox(height: 10),
-                Text(
-                  course.overview,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.6,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _SectionTitle(
-                        title: context.l10n.tr('course.curriculum'),
+                _CourseThumbnail(course: course),
+                Padding(
+                  padding: AppLayout.pagePadding(context),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
+                        children: [
+                          if (course.educationLevel.isNotEmpty)
+                            _Tag(course.educationLevel),
+                          if (course.subject.isNotEmpty) _Tag(course.subject),
+                          if (course.language.isNotEmpty) _Tag(course.language),
+                        ],
                       ),
-                    ),
-                    Text(
-                      context.l10n.tr(
-                        'course.lessonCount',
-                        args: {'count': context.l10n.number(course.lessons)},
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        course.title,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              height: 1.25,
+                              fontWeight: FontWeight.w800,
+                            ),
                       ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (course.modules.isEmpty)
-                  Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.menu_book_outlined),
-                      title: Text(context.l10n.tr('course.curriculumEmpty')),
-                    ),
-                  )
-                else
-                  ...course.modules.asMap().entries.map((entry) {
-                    final module = entry.value;
-                    final expanded = _expandedModuleId == null
-                        ? entry.key == 0
-                        : _expandedModuleId == module.id;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _CurriculumModule(
-                        module: module,
-                        expanded: expanded,
-                        enrolled: enrolled,
-                        onToggle: () => setState(
-                          () => _expandedModuleId = expanded ? '' : module.id,
-                        ),
-                        onLesson: (lesson) =>
-                            _openLesson(course, lesson, enrolled),
-                      ),
-                    );
-                  }),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomSheet: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            border: Border(
-              top: BorderSide(color: Theme.of(context).dividerColor),
-            ),
-          ),
-          child: Row(
-            children: [
-              if (!enrolled) ...[
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.tr('course.price'),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    Text(
-                      course.displayPrice,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 18),
-              ],
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _isEnrolling
-                      ? null
-                      : () => _primaryAction(course, enrolled),
-                  icon: Icon(
-                    enrolled
-                        ? Icons.play_arrow_rounded
-                        : Icons.lock_open_rounded,
-                  ),
-                  label: _isEnrolling
-                      ? const SizedBox.square(
-                          dimension: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
+                      const SizedBox(height: AppSpacing.lg),
+                      _Instructor(name: course.instructor),
+                      const SizedBox(height: AppSpacing.lg),
+                      _CourseStats(course: course),
+                      if (enrolled && course.lessons > 0) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        Semantics(
+                          label: _courseProgressLabel(
+                            context,
+                            course,
+                            progress,
                           ),
-                        )
-                      : Text(
-                          enrolled
-                              ? context.l10n.tr('course.continue')
-                              : course.isFree
-                              ? context.l10n.tr('course.enrollFree')
-                              : context.l10n.tr('course.buy'),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 8,
+                            ),
+                          ),
                         ),
+                      ],
+                      const SizedBox(height: AppSpacing.xl),
+                      _SectionTitle(title: context.l10n.tr('course.about')),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        course.overview.isEmpty
+                            ? _overviewUnavailableMessage(context)
+                            : course.overview,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.6,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SectionTitle(
+                              title: context.l10n.tr('course.curriculum'),
+                            ),
+                          ),
+                          Text(
+                            context.l10n.tr(
+                              'course.lessonCount',
+                              args: {
+                                'count': context.l10n.number(course.lessons),
+                              },
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      if (course.modules.isEmpty)
+                        _CurriculumEmpty()
+                      else
+                        ...course.modules.asMap().entries.map((entry) {
+                          final module = entry.value;
+                          final expanded = _expandedModuleId == null
+                              ? entry.key == 0
+                              : _expandedModuleId == module.id;
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.sm,
+                            ),
+                            child: _CurriculumModule(
+                              module: module,
+                              expanded: expanded,
+                              enrolled: enrolled,
+                              onToggle: () => setState(
+                                () => _expandedModuleId = expanded
+                                    ? ''
+                                    : module.id,
+                              ),
+                              onLesson: (lesson) =>
+                                  _openLesson(course, lesson, enrolled),
+                            ),
+                          );
+                        }),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+      bottomSheet: _CourseActionBar(
+        course: course,
+        enrolled: enrolled,
+        loading: _isEnrolling,
+        onPressed: () => _primaryAction(course, enrolled),
       ),
     );
   }
@@ -268,14 +253,18 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
       if (!mounted) return;
       _message(context.l10n.tr('course.enrolled'));
       Navigator.pushNamed(context, AppRoutes.lesson, arguments: enrolledCourse);
-    } catch (error) {
-      if (mounted) _message('$error');
+    } catch (_) {
+      if (mounted) _message(_enrollmentFailureMessage(context));
     } finally {
       if (mounted) setState(() => _isEnrolling = false);
     }
   }
 
   void _openLesson(Course course, CourseLesson lesson, bool enrolled) {
+    if (!lesson.isPublished) {
+      _message(_lessonUnavailableMessage(context));
+      return;
+    }
     if (!enrolled && !lesson.isPreview) {
       _message(context.l10n.tr('course.enrollFirst'));
       return;
@@ -286,7 +275,14 @@ class _CourseDetailsPageState extends State<CourseDetailsPage> {
       );
       return;
     }
-    Navigator.pushNamed(context, AppRoutes.lesson, arguments: course);
+    Navigator.pushNamed(
+      context,
+      AppRoutes.lesson,
+      arguments: LessonRouteArguments(
+        course: course,
+        initialLessonId: lesson.id,
+      ),
+    );
   }
 
   void _message(String message) {
@@ -304,67 +300,66 @@ class _CourseThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final color = colors.primaryContainer;
-    final foreground = colors.onPrimaryContainer;
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        color: color,
-        child: Stack(
-          children: [
-            Center(
-              child: Icon(
-                _subjectIcon(course.subject),
-                color: foreground.withValues(alpha: .9),
-                size: 92,
-              ),
-            ),
-            Positioned(
-              left: 18,
-              bottom: 18,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.play_circle_outline_rounded,
-                      size: 19,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      context.l10n.tr('course.previewLesson'),
-                      style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+    return Semantics(
+      label: course.title,
+      image: true,
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Container(
+          color: colors.primaryContainer,
+          child: Stack(
+            children: [
+              Center(
+                child: AppIcon(
+                  _subjectIcon(course.subject),
+                  color: colors.onPrimaryContainer.withValues(alpha: .88),
+                  size: 88,
+                  strokeWidth: 1.3,
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                left: AppSpacing.lg,
+                bottom: AppSpacing.lg,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AppIcon(AppIcons.play, size: 19, color: colors.primary),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          context.l10n.tr('course.previewLesson'),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(color: colors.primary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  IconData _subjectIcon(String subject) {
-    return switch (subject.toLowerCase()) {
-      'physics' => Icons.science_rounded,
-      'chemistry' => Icons.biotech_rounded,
-      'biology' => Icons.eco_rounded,
-      'english 1st paper' => Icons.translate_rounded,
-      _ => Icons.auto_stories_rounded,
-    };
-  }
+  List<List<dynamic>> _subjectIcon(String subject) =>
+      switch (subject.toLowerCase()) {
+        'physics' => AppIcons.physics,
+        'chemistry' => AppIcons.chemistry,
+        'biology' => AppIcons.biology,
+        'english 1st paper' => AppIcons.translate,
+        _ => AppIcons.book,
+      };
 }
 
 class _Tag extends StatelessWidget {
@@ -374,19 +369,21 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(9),
+        color: colors.secondaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.labelMedium?.copyWith(color: colors.onSecondaryContainer),
       ),
     );
   }
@@ -399,36 +396,36 @@ class _Instructor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 22,
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-          child: Text(name.substring(0, 1)),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.tr('course.teacher'),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 12,
-                ),
-              ),
-              Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
-            ],
+    final initial = name.trim().isEmpty ? '?' : name.trim().substring(0, 1);
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: '${context.l10n.tr('course.teacher')}: $name',
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 23,
+            backgroundColor: colors.primaryContainer,
+            foregroundColor: colors.onPrimaryContainer,
+            child: Text(initial),
           ),
-        ),
-        Icon(
-          Icons.verified_rounded,
-          color: Theme.of(context).colorScheme.secondary,
-          size: 20,
-        ),
-      ],
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.tr('course.teacher'),
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                Text(name, style: Theme.of(context).textTheme.titleSmall),
+              ],
+            ),
+          ),
+          AppIcon(AppIcons.verified, color: colors.secondary, size: 21),
+        ],
+      ),
     );
   }
 }
@@ -440,28 +437,30 @@ class _CourseStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
-        borderRadius: BorderRadius.circular(16),
+        color: colors.surfaceContainerLow,
+        border: Border.all(color: colors.outlineVariant),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Row(
         children: [
           _Stat(
-            icon: Icons.groups_2_outlined,
+            icon: AppIcons.students,
             value: '${context.l10n.number(course.studentCount)}+',
             label: context.l10n.tr('course.students'),
           ),
-          const SizedBox(height: 42, child: VerticalDivider(width: 1)),
+          const SizedBox(height: 46, child: VerticalDivider(width: 1)),
           _Stat(
-            icon: Icons.schedule_outlined,
+            icon: AppIcons.clock,
             value: course.duration,
             label: context.l10n.tr('course.duration'),
           ),
-          const SizedBox(height: 42, child: VerticalDivider(width: 1)),
+          const SizedBox(height: 46, child: VerticalDivider(width: 1)),
           _Stat(
-            icon: Icons.star_rounded,
+            icon: AppIcons.analytics,
             value: context.l10n.number(course.rating),
             label: context.l10n.tr('course.rating'),
           ),
@@ -474,31 +473,36 @@ class _CourseStats extends StatelessWidget {
 class _Stat extends StatelessWidget {
   const _Stat({required this.icon, required this.value, required this.label});
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String value;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, size: 20, color: AppColors.primary),
-          const SizedBox(height: 5),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 11,
+      child: Semantics(
+        label: '$label: $value',
+        child: Column(
+          children: [
+            AppIcon(icon, size: 20, color: colors.primary),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelLarge,
             ),
-          ),
-        ],
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: colors.onSurfaceVariant),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -510,9 +514,29 @@ class _SectionTitle extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
-    return Text(title, style: Theme.of(context).textTheme.titleLarge);
-  }
+  Widget build(BuildContext context) => Text(
+    title,
+    style: Theme.of(
+      context,
+    ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+  );
+}
+
+class _CurriculumEmpty extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(
+        children: [
+          AppIconBadge(icon: AppIcons.book, size: 44, iconSize: 21),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(context.l10n.tr('course.curriculumEmpty'))),
+        ],
+      ),
+    ),
+  );
 }
 
 class _CurriculumModule extends StatelessWidget {
@@ -532,26 +556,40 @@ class _CurriculumModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Card(
       margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          ListTile(
-            onTap: onToggle,
-            title: Text(
-              module.title,
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-            subtitle: Text(
-              context.l10n.tr(
-                'course.lessonCount',
-                args: {'count': context.l10n.number(module.lessons.length)},
+          Semantics(
+            button: true,
+            expanded: expanded,
+            child: ListTile(
+              minVerticalPadding: AppSpacing.sm,
+              onTap: onToggle,
+              leading: AppIconBadge(
+                icon: AppIcons.book,
+                size: 42,
+                iconSize: 20,
               ),
-            ),
-            trailing: Icon(
-              expanded
-                  ? Icons.keyboard_arrow_up_rounded
-                  : Icons.keyboard_arrow_down_rounded,
+              title: Text(
+                module.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              subtitle: Text(
+                context.l10n.tr(
+                  'course.lessonCount',
+                  args: {'count': context.l10n.number(module.lessons.length)},
+                ),
+              ),
+              trailing: AppIcon(
+                expanded ? AppIcons.arrowDown : AppIcons.arrowRight,
+                color: colors.onSurfaceVariant,
+                size: 21,
+              ),
             ),
           ),
           if (expanded) ...[
@@ -563,6 +601,7 @@ class _CurriculumModule extends StatelessWidget {
                 meta: _lessonMeta(context, lesson),
                 preview: lesson.isPreview,
                 unlocked: enrolled || lesson.isPreview,
+                published: lesson.isPublished,
                 onTap: () => onLesson(lesson),
               ),
             ),
@@ -572,13 +611,13 @@ class _CurriculumModule extends StatelessWidget {
     );
   }
 
-  IconData _lessonIcon(String type) => switch (type) {
-    'video' => Icons.play_circle_outline_rounded,
-    'pdf' => Icons.picture_as_pdf_outlined,
-    'quiz' => Icons.quiz_outlined,
-    'assignment' => Icons.assignment_outlined,
-    'live' => Icons.videocam_outlined,
-    _ => Icons.article_outlined,
+  List<List<dynamic>> _lessonIcon(String type) => switch (type) {
+    'video' => AppIcons.play,
+    'pdf' => AppIcons.book,
+    'quiz' => AppIcons.quiz,
+    'assignment' => AppIcons.assignment,
+    'live' => AppIcons.live,
+    _ => AppIcons.book,
   };
 
   String _lessonMeta(BuildContext context, CourseLesson lesson) {
@@ -586,8 +625,8 @@ class _CurriculumModule extends StatelessWidget {
     final minutes = duration == null ? null : (duration / 60).ceil();
     final durationLabel = minutes == null
         ? ''
-        : ' • ${context.l10n.tr('course.minutes', args: {'count': context.l10n.number(minutes)})}';
-    return '${lesson.type.toUpperCase()}$durationLabel';
+        : ' · ${context.l10n.tr('course.minutes', args: {'count': context.l10n.number(minutes)})}';
+    return '${_lessonTypeLabel(context, lesson.type)}$durationLabel';
   }
 }
 
@@ -596,36 +635,203 @@ class _LessonTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.meta,
+    required this.published,
     this.preview = false,
     this.unlocked = false,
     this.onTap,
   });
 
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final String title;
   final String meta;
   final bool preview;
   final bool unlocked;
+  final bool published;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(title),
-      subtitle: Text(meta),
-      trailing: preview
-          ? Text(
-              context.l10n.tr('course.preview'),
-              style: const TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            )
-          : unlocked
-          ? const Icon(Icons.chevron_right_rounded, size: 18)
-          : const Icon(Icons.lock_outline_rounded, size: 18),
+    final colors = Theme.of(context).colorScheme;
+    final isAvailable = published && unlocked;
+    return Semantics(
+      button: true,
+      enabled: isAvailable,
+      label: '$title, $meta',
+      child: ListTile(
+        enabled: published,
+        onTap: onTap,
+        leading: AppIcon(
+          icon,
+          color: published ? colors.primary : colors.onSurfaceVariant,
+          size: 22,
+        ),
+        title: Text(title),
+        subtitle: Text(meta),
+        trailing: preview
+            ? Text(
+                context.l10n.tr('course.preview'),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: colors.primary),
+              )
+            : isAvailable
+            ? AppIcon(
+                AppIcons.arrowRight,
+                size: 19,
+                color: colors.onSurfaceVariant,
+              )
+            : AppIcon(AppIcons.lock, size: 18, color: colors.onSurfaceVariant),
+      ),
     );
   }
+}
+
+class _CourseActionBar extends StatelessWidget {
+  const _CourseActionBar({
+    required this.course,
+    required this.enrolled,
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final Course course;
+  final bool enrolled;
+  final bool loading;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SafeArea(
+      top: false,
+      child: Material(
+        color: colors.surface,
+        elevation: 8,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.maxContentWidth,
+            ),
+            child: Padding(
+              padding: AppLayout.pagePadding(
+                context,
+              ).copyWith(top: AppSpacing.sm, bottom: AppSpacing.md),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final compact = constraints.maxWidth < 420;
+                  final price = !enrolled
+                      ? _PriceSummary(course: course)
+                      : const SizedBox.shrink();
+                  final action = FilledButton.icon(
+                    onPressed: loading ? null : onPressed,
+                    icon: loading
+                        ? const SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : AppIcon(
+                            enrolled ? AppIcons.play : AppIcons.lock,
+                            size: 20,
+                          ),
+                    label: Text(
+                      enrolled
+                          ? context.l10n.tr('course.continue')
+                          : course.isFree
+                          ? context.l10n.tr('course.enrollFree')
+                          : context.l10n.tr('course.buy'),
+                    ),
+                  );
+                  if (enrolled) {
+                    return SizedBox(width: double.infinity, child: action);
+                  }
+                  if (compact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        price,
+                        const SizedBox(height: AppSpacing.sm),
+                        action,
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      price,
+                      const SizedBox(width: AppSpacing.lg),
+                      Expanded(child: action),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PriceSummary extends StatelessWidget {
+  const _PriceSummary({required this.course});
+  final Course course;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        context.l10n.tr('course.price'),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+      Text(
+        course.displayPrice,
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+      ),
+    ],
+  );
+}
+
+String _lessonTypeLabel(BuildContext context, String type) {
+  return switch (type) {
+    'video' => context.l10n.tr('lesson.type.video'),
+    'pdf' => context.l10n.tr('lesson.type.pdf'),
+    'quiz' => context.l10n.tr('lesson.type.quiz'),
+    'assignment' => context.l10n.tr('lesson.type.assignment'),
+    'live' => context.l10n.tr('lesson.type.live'),
+    _ => context.l10n.tr('lesson.type.text'),
+  };
+}
+
+String _loadFailureMessage(BuildContext context) =>
+    context.l10n.tr('course.loadFailed');
+
+String _overviewUnavailableMessage(BuildContext context) =>
+    context.l10n.tr('course.overviewUnavailable');
+
+String _enrollmentFailureMessage(BuildContext context) =>
+    context.l10n.tr('course.enrollmentFailed');
+
+String _lessonUnavailableMessage(BuildContext context) =>
+    context.l10n.tr('course.lessonUnavailable');
+
+String _courseProgressLabel(
+  BuildContext context,
+  Course course,
+  double progress,
+) {
+  final completed = context.l10n.number(course.completedLessons);
+  final total = context.l10n.number(course.lessons);
+  final percent = context.l10n.percent((progress * 100).round());
+  return context.l10n.tr(
+    'course.progressSemantics',
+    args: {'completed': completed, 'total': total, 'percent': percent},
+  );
 }

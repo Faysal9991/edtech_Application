@@ -120,6 +120,8 @@ abstract class AuthUserDto with _$AuthUserDto {
     @JsonKey(name: 'display_name') required String displayName,
     required String status,
     @Default(<String>[]) List<String> roles,
+    @Default(<OrganizationMembership>[])
+    List<OrganizationMembership> memberships,
     @JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt,
   }) = _AuthUserDto;
 
@@ -132,7 +134,8 @@ abstract class AuthUserDto with _$AuthUserDto {
     email: email,
     status: status,
     roles: roles,
-    role: roles.isEmpty ? 'student' : roles.first,
+    memberships: memberships,
+    role: roles.isEmpty ? 'unknown' : roles.first,
     emailVerifiedAt: emailVerifiedAt,
   );
 }

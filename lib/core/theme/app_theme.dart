@@ -1,6 +1,6 @@
 import 'package:edtech_application/core/theme/app_colors.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   const AppTheme._();
@@ -42,19 +42,24 @@ class AppTheme {
           ? AppColors.darkSecondaryContainer
           : AppColors.secondaryLight,
       onSecondaryContainer: isDark
-          ? AppColors.darkTextPrimary
-          : AppColors.secondaryDark,
+          ? AppColors.darkSuccessForeground
+          : AppColors.successForeground,
       error: isDark ? AppColors.darkError : AppColors.error,
       onError: AppColors.textOnPrimary,
       errorContainer: isDark
           ? AppColors.darkErrorBackground
           : AppColors.errorBackground,
-      onErrorContainer: isDark ? AppColors.darkError : AppColors.error,
+      onErrorContainer: isDark
+          ? AppColors.darkErrorForeground
+          : AppColors.errorForeground,
       tertiary: isDark ? AppColors.darkInfo : AppColors.info,
       onTertiary: isDark ? AppColors.darkBackground : AppColors.textOnPrimary,
       tertiaryContainer: isDark
           ? AppColors.darkInfoBackground
           : AppColors.infoBackground,
+      onTertiaryContainer: isDark
+          ? AppColors.darkInfoForeground
+          : AppColors.infoForeground,
       onSurface: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
       onSurfaceVariant: isDark
           ? AppColors.darkTextSecondary
@@ -76,14 +81,8 @@ class AppTheme {
           : AppColors.surfaceMuted,
     );
 
-    final banglaFont = GoogleFonts.notoSansBengali().fontFamily!;
-    final textTheme =
-        _withBanglaFallback(
-          GoogleFonts.interTextTheme(
-            ThemeData(brightness: brightness).textTheme,
-          ),
-          banglaFont,
-        ).apply(
+    final textTheme = _withAppFonts(ThemeData(brightness: brightness).textTheme)
+        .apply(
           bodyColor: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
           displayColor: isDark
               ? AppColors.darkTextPrimary
@@ -136,10 +135,14 @@ class AppTheme {
       iconTheme: IconThemeData(color: secondaryText, size: 24),
 
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: isDark
+            ? AppColors.darkBackground
+            : AppColors.background,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: false,
+        toolbarHeight: 64,
         iconTheme: IconThemeData(color: colorScheme.onSurface),
         titleTextStyle: textTheme.titleLarge?.copyWith(
           color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -153,7 +156,7 @@ class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
           side: BorderSide(color: borderColor),
         ),
       ),
@@ -222,9 +225,10 @@ class AppTheme {
 
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size(0, 56),
+          minimumSize: const Size(0, 54),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
@@ -233,13 +237,14 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.primary,
-          minimumSize: const Size(0, 56),
+          minimumSize: const Size(0, 54),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           side: BorderSide(
             color: colorScheme.primary.withValues(alpha: 0.5),
             width: 1.4,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
         ),
@@ -283,9 +288,11 @@ class AppTheme {
       listTileTheme: ListTileThemeData(
         iconColor: colorScheme.onSurfaceVariant,
         textColor: colorScheme.onSurface,
-        minTileHeight: 56,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        minTileHeight: 60,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+        ),
       ),
 
       iconButtonTheme: IconButtonThemeData(
@@ -307,7 +314,7 @@ class AppTheme {
       ),
 
       navigationBarTheme: NavigationBarThemeData(
-        height: 72,
+        height: 76,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
@@ -359,6 +366,52 @@ class AppTheme {
           fontSize: 12,
         ),
       ),
+
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.surface,
+        indicatorColor: isDark
+            ? AppColors.darkPrimaryContainer
+            : AppColors.primaryLight,
+        selectedIconTheme: IconThemeData(color: colorScheme.primary, size: 24),
+        unselectedIconTheme: IconThemeData(color: secondaryText, size: 24),
+        selectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w800,
+        ),
+        unselectedLabelTextStyle: textTheme.labelMedium?.copyWith(
+          color: secondaryText,
+          fontWeight: FontWeight.w600,
+        ),
+        minWidth: 88,
+        groupAlignment: -.45,
+      ),
+
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          visualDensity: VisualDensity.standard,
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+          ),
+          textStyle: const WidgetStatePropertyAll(
+            TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+
+      dropdownMenuTheme: DropdownMenuThemeData(
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: fieldFill,
+          border: _inputBorder(borderColor),
+          enabledBorder: _inputBorder(borderColor),
+          focusedBorder: _inputBorder(colorScheme.primary),
+        ),
+      ),
     );
   }
 
@@ -369,9 +422,11 @@ class AppTheme {
     );
   }
 
-  static TextTheme _withBanglaFallback(TextTheme theme, String banglaFont) {
-    TextStyle? fallback(TextStyle? style) =>
-        style?.copyWith(fontFamilyFallback: [banglaFont]);
+  static TextTheme _withAppFonts(TextTheme theme) {
+    TextStyle? fallback(TextStyle? style) => style?.copyWith(
+      fontFamily: 'Inter',
+      fontFamilyFallback: const ['NotoSansBengali'],
+    );
 
     return theme.copyWith(
       displayLarge: fallback(theme.displayLarge),

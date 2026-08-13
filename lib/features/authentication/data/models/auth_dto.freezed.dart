@@ -2143,7 +2143,7 @@ as DateTime,
 /// @nodoc
 mixin _$AuthUserDto {
 
- String get id; String get email;@JsonKey(name: 'display_name') String get displayName; String get status; List<String> get roles;@JsonKey(name: 'email_verified_at') DateTime? get emailVerifiedAt;
+ String get id; String get email;@JsonKey(name: 'display_name') String get displayName; String get status; List<String> get roles; List<OrganizationMembership> get memberships;@JsonKey(name: 'email_verified_at') DateTime? get emailVerifiedAt;
 /// Create a copy of AuthUserDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2156,16 +2156,16 @@ $AuthUserDtoCopyWith<AuthUserDto> get copyWith => _$AuthUserDtoCopyWithImpl<Auth
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthUserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.roles, roles)&&(identical(other.emailVerifiedAt, emailVerifiedAt) || other.emailVerifiedAt == emailVerifiedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthUserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.roles, roles)&&const DeepCollectionEquality().equals(other.memberships, memberships)&&(identical(other.emailVerifiedAt, emailVerifiedAt) || other.emailVerifiedAt == emailVerifiedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,status,const DeepCollectionEquality().hash(roles),emailVerifiedAt);
+int get hashCode => Object.hash(runtimeType,id,email,displayName,status,const DeepCollectionEquality().hash(roles),const DeepCollectionEquality().hash(memberships),emailVerifiedAt);
 
 @override
 String toString() {
-  return 'AuthUserDto(id: $id, email: $email, displayName: $displayName, status: $status, roles: $roles, emailVerifiedAt: $emailVerifiedAt)';
+  return 'AuthUserDto(id: $id, email: $email, displayName: $displayName, status: $status, roles: $roles, memberships: $memberships, emailVerifiedAt: $emailVerifiedAt)';
 }
 
 
@@ -2176,7 +2176,7 @@ abstract mixin class $AuthUserDtoCopyWith<$Res>  {
   factory $AuthUserDtoCopyWith(AuthUserDto value, $Res Function(AuthUserDto) _then) = _$AuthUserDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String email,@JsonKey(name: 'display_name') String displayName, String status, List<String> roles,@JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt
+ String id, String email,@JsonKey(name: 'display_name') String displayName, String status, List<String> roles, List<OrganizationMembership> memberships,@JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt
 });
 
 
@@ -2193,14 +2193,15 @@ class _$AuthUserDtoCopyWithImpl<$Res>
 
 /// Create a copy of AuthUserDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? status = null,Object? roles = null,Object? emailVerifiedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? status = null,Object? roles = null,Object? memberships = null,Object? emailVerifiedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,roles: null == roles ? _self.roles : roles // ignore: cast_nullable_to_non_nullable
-as List<String>,emailVerifiedAt: freezed == emailVerifiedAt ? _self.emailVerifiedAt : emailVerifiedAt // ignore: cast_nullable_to_non_nullable
+as List<String>,memberships: null == memberships ? _self.memberships : memberships // ignore: cast_nullable_to_non_nullable
+as List<OrganizationMembership>,emailVerifiedAt: freezed == emailVerifiedAt ? _self.emailVerifiedAt : emailVerifiedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }
@@ -2286,10 +2287,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName,  String status,  List<String> roles, @JsonKey(name: 'email_verified_at')  DateTime? emailVerifiedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName,  String status,  List<String> roles,  List<OrganizationMembership> memberships, @JsonKey(name: 'email_verified_at')  DateTime? emailVerifiedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthUserDto() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,_that.emailVerifiedAt);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,_that.memberships,_that.emailVerifiedAt);case _:
   return orElse();
 
 }
@@ -2307,10 +2308,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName,  String status,  List<String> roles, @JsonKey(name: 'email_verified_at')  DateTime? emailVerifiedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName,  String status,  List<String> roles,  List<OrganizationMembership> memberships, @JsonKey(name: 'email_verified_at')  DateTime? emailVerifiedAt)  $default,) {final _that = this;
 switch (_that) {
 case _AuthUserDto():
-return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,_that.emailVerifiedAt);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,_that.memberships,_that.emailVerifiedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2327,10 +2328,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName,  String status,  List<String> roles, @JsonKey(name: 'email_verified_at')  DateTime? emailVerifiedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email, @JsonKey(name: 'display_name')  String displayName,  String status,  List<String> roles,  List<OrganizationMembership> memberships, @JsonKey(name: 'email_verified_at')  DateTime? emailVerifiedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthUserDto() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,_that.emailVerifiedAt);case _:
+return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,_that.memberships,_that.emailVerifiedAt);case _:
   return null;
 
 }
@@ -2342,7 +2343,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.status,_that.roles,
 @JsonSerializable()
 
 class _AuthUserDto extends AuthUserDto {
-  const _AuthUserDto({required this.id, required this.email, @JsonKey(name: 'display_name') required this.displayName, required this.status, final  List<String> roles = const <String>[], @JsonKey(name: 'email_verified_at') this.emailVerifiedAt}): _roles = roles,super._();
+  const _AuthUserDto({required this.id, required this.email, @JsonKey(name: 'display_name') required this.displayName, required this.status, final  List<String> roles = const <String>[], final  List<OrganizationMembership> memberships = const <OrganizationMembership>[], @JsonKey(name: 'email_verified_at') this.emailVerifiedAt}): _roles = roles,_memberships = memberships,super._();
   factory _AuthUserDto.fromJson(Map<String, dynamic> json) => _$AuthUserDtoFromJson(json);
 
 @override final  String id;
@@ -2354,6 +2355,13 @@ class _AuthUserDto extends AuthUserDto {
   if (_roles is EqualUnmodifiableListView) return _roles;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_roles);
+}
+
+ final  List<OrganizationMembership> _memberships;
+@override@JsonKey() List<OrganizationMembership> get memberships {
+  if (_memberships is EqualUnmodifiableListView) return _memberships;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_memberships);
 }
 
 @override@JsonKey(name: 'email_verified_at') final  DateTime? emailVerifiedAt;
@@ -2371,16 +2379,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthUserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._roles, _roles)&&(identical(other.emailVerifiedAt, emailVerifiedAt) || other.emailVerifiedAt == emailVerifiedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthUserDto&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._roles, _roles)&&const DeepCollectionEquality().equals(other._memberships, _memberships)&&(identical(other.emailVerifiedAt, emailVerifiedAt) || other.emailVerifiedAt == emailVerifiedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,status,const DeepCollectionEquality().hash(_roles),emailVerifiedAt);
+int get hashCode => Object.hash(runtimeType,id,email,displayName,status,const DeepCollectionEquality().hash(_roles),const DeepCollectionEquality().hash(_memberships),emailVerifiedAt);
 
 @override
 String toString() {
-  return 'AuthUserDto(id: $id, email: $email, displayName: $displayName, status: $status, roles: $roles, emailVerifiedAt: $emailVerifiedAt)';
+  return 'AuthUserDto(id: $id, email: $email, displayName: $displayName, status: $status, roles: $roles, memberships: $memberships, emailVerifiedAt: $emailVerifiedAt)';
 }
 
 
@@ -2391,7 +2399,7 @@ abstract mixin class _$AuthUserDtoCopyWith<$Res> implements $AuthUserDtoCopyWith
   factory _$AuthUserDtoCopyWith(_AuthUserDto value, $Res Function(_AuthUserDto) _then) = __$AuthUserDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email,@JsonKey(name: 'display_name') String displayName, String status, List<String> roles,@JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt
+ String id, String email,@JsonKey(name: 'display_name') String displayName, String status, List<String> roles, List<OrganizationMembership> memberships,@JsonKey(name: 'email_verified_at') DateTime? emailVerifiedAt
 });
 
 
@@ -2408,14 +2416,15 @@ class __$AuthUserDtoCopyWithImpl<$Res>
 
 /// Create a copy of AuthUserDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? status = null,Object? roles = null,Object? emailVerifiedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = null,Object? status = null,Object? roles = null,Object? memberships = null,Object? emailVerifiedAt = freezed,}) {
   return _then(_AuthUserDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,roles: null == roles ? _self._roles : roles // ignore: cast_nullable_to_non_nullable
-as List<String>,emailVerifiedAt: freezed == emailVerifiedAt ? _self.emailVerifiedAt : emailVerifiedAt // ignore: cast_nullable_to_non_nullable
+as List<String>,memberships: null == memberships ? _self._memberships : memberships // ignore: cast_nullable_to_non_nullable
+as List<OrganizationMembership>,emailVerifiedAt: freezed == emailVerifiedAt ? _self.emailVerifiedAt : emailVerifiedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }

@@ -5,8 +5,9 @@ import 'package:edtech_application/features/home/data/repositories/student_lms_r
 import 'package:edtech_application/shared/models/course.dart';
 import 'package:edtech_application/shared/models/mock_data.dart';
 import 'package:flutter/foundation.dart';
+import 'package:edtech_application/shared/state/safe_change_notifier.dart';
 
-class StudentLmsController extends ChangeNotifier {
+class StudentLmsController extends ChangeNotifier with SafeChangeNotifier {
   StudentLmsController({StudentLmsRepository? repository})
     : _repository = repository;
 
@@ -201,6 +202,21 @@ class StudentLmsController extends ChangeNotifier {
     notifications = notifications
         .map((item) => item.copyWith(readAt: DateTime.now().toUtc()))
         .toList();
+    unreadNotifications = 0;
+    notifyListeners();
+  }
+
+  void clearScopedData() {
+    courses = const [];
+    enrollments = const [];
+    results = const [];
+    certificates = const [];
+    notifications = const [];
+    dashboard = null;
+    liveClasses = const [];
+    quizzes = const [];
+    assignments = const [];
+    exams = const [];
     unreadNotifications = 0;
     notifyListeners();
   }

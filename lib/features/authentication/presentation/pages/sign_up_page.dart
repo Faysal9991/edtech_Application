@@ -1,8 +1,10 @@
 import 'package:edtech_application/core/routing/app_routes.dart';
-import 'package:edtech_application/core/theme/app_colors.dart';
+import 'package:edtech_application/core/theme/app_layout.dart';
 import 'package:edtech_application/features/authentication/presentation/controllers/auth_controller.dart';
-import 'package:edtech_application/shared/animations/app_animations.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
+import 'package:edtech_application/shared/widgets/app_icon.dart';
+import 'package:edtech_application/shared/widgets/app_page.dart';
+import 'package:edtech_application/shared/widgets/app_state_view.dart';
 import 'package:edtech_application/shared/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,175 +36,175 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
-
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AppEntrance.popIn(
-                    child: FloatingAnimation(
-                      distance: 5,
-                      child: Container(
-                        width: 62,
-                        height: 62,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Icon(
-                          Icons.waving_hand_rounded,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  AppEntrance.fadeInLeft(
-                    delay: const Duration(milliseconds: 80),
-                    child: Text(
-                      context.l10n.tr('auth.createTitle'),
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  AppEntrance.fadeInLeft(
-                    delay: const Duration(milliseconds: 140),
-                    child: Text(
-                      context.l10n.tr('auth.createSubtitle'),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  StaggeredAnimation(
-                    index: 0,
-                    child: AppTextField(
-                      controller: _name,
-                      label: context.l10n.tr('auth.fullName'),
-                      hint: context.l10n.tr('auth.nameHint'),
-                      prefixIcon: Icons.person_outline_rounded,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) => (value?.trim().length ?? 0) < 2
-                          ? context.l10n.tr('auth.nameInvalid')
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  StaggeredAnimation(
-                    index: 1,
-                    child: AppTextField(
-                      controller: _email,
-                      label: context.l10n.tr('auth.email'),
-                      hint: context.l10n.tr('auth.emailHint'),
-                      prefixIcon: Icons.mail_outline_rounded,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) =>
-                          RegExp(
-                            r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
-                          ).hasMatch(value?.trim() ?? '')
-                          ? null
-                          : context.l10n.tr('auth.emailInvalid'),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  StaggeredAnimation(
-                    index: 2,
-                    child: AppTextField(
-                      controller: _password,
-                      label: context.l10n.tr('auth.password'),
-                      hint: context.l10n.tr('auth.password12Hint'),
-                      prefixIcon: Icons.lock_outline_rounded,
-                      obscureText: true,
-                      textInputAction: TextInputAction.next,
-                      validator: (value) => (value?.length ?? 0) < 12
-                          ? context.l10n.tr('auth.password12Invalid')
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  StaggeredAnimation(
-                    index: 3,
-                    child: AppTextField(
-                      controller: _confirmPassword,
-                      label: context.l10n.tr('auth.confirmPassword'),
-                      hint: context.l10n.tr('auth.confirmHint'),
-                      prefixIcon: Icons.lock_reset_rounded,
-                      obscureText: true,
-                      textInputAction: TextInputAction.done,
-                      validator: (value) => value != _password.text
-                          ? context.l10n.tr('auth.passwordMismatch')
-                          : null,
-                      onSubmitted: (_) => _createAccount(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    value: _agreed,
-                    onChanged: (value) =>
-                        setState(() => _agreed = value ?? false),
-                    title: Text(context.l10n.tr('auth.terms')),
-                  ),
-                  const SizedBox(height: 14),
-                  if (auth.errorMessage != null) ...[
-                    Text(
-                      auth.errorMessage!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  StaggeredAnimation(
-                    index: 5,
-                    child: PressableScale(
-                      child: FilledButton(
-                        onPressed: auth.isLoading ? null : _createAccount,
-                        child: auth.isLoading
-                            ? const SizedBox.square(
-                                dimension: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(context.l10n.tr('auth.createAccount')),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(context.l10n.tr('auth.alreadyAccount')),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(context.l10n.tr('auth.signIn')),
-                      ),
-                    ],
-                  ),
-                ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: AppScrollablePage(
+          maxWidth: AppLayout.maxFormWidth,
+          children: [
+            Center(
+              child: AppIconBadge(
+                icon: AppIcons.student,
+                size: 68,
+                iconSize: 32,
               ),
             ),
-          ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              context.l10n.tr('auth.createTitle'),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              context.l10n.tr('auth.createSubtitle'),
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: AutofillGroup(
+                  child: Form(
+                    key: _formKey,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppTextField(
+                          controller: _name,
+                          label: context.l10n.tr('auth.fullName'),
+                          hint: context.l10n.tr('auth.nameHint'),
+                          prefixAppIcon: AppIcons.profile,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.name],
+                          validator: (value) => (value?.trim().length ?? 0) < 2
+                              ? context.l10n.tr('auth.nameInvalid')
+                              : null,
+                          onSubmitted: (_) =>
+                              FocusScope.of(context).nextFocus(),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        AppTextField(
+                          controller: _email,
+                          label: context.l10n.tr('auth.email'),
+                          hint: context.l10n.tr('auth.emailHint'),
+                          prefixAppIcon: AppIcons.mail,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.email],
+                          validator: (value) =>
+                              RegExp(
+                                r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                              ).hasMatch(value?.trim() ?? '')
+                              ? null
+                              : context.l10n.tr('auth.emailInvalid'),
+                          onSubmitted: (_) =>
+                              FocusScope.of(context).nextFocus(),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        AppTextField(
+                          controller: _password,
+                          label: context.l10n.tr('auth.password'),
+                          hint: context.l10n.tr('auth.password12Hint'),
+                          prefixAppIcon: AppIcons.lock,
+                          obscureText: true,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [AutofillHints.newPassword],
+                          validator: (value) => (value?.length ?? 0) < 12
+                              ? context.l10n.tr('auth.password12Invalid')
+                              : null,
+                          onSubmitted: (_) =>
+                              FocusScope.of(context).nextFocus(),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        AppTextField(
+                          controller: _confirmPassword,
+                          label: context.l10n.tr('auth.confirmPassword'),
+                          hint: context.l10n.tr('auth.confirmHint'),
+                          prefixAppIcon: AppIcons.password,
+                          obscureText: true,
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.newPassword],
+                          validator: (value) => value != _password.text
+                              ? context.l10n.tr('auth.passwordMismatch')
+                              : null,
+                          onSubmitted: (_) => _createAccount(),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: colors.surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: CheckboxListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.sm,
+                            ),
+                            controlAffinity: ListTileControlAffinity.leading,
+                            value: _agreed,
+                            onChanged: auth.isLoading
+                                ? null
+                                : (value) =>
+                                      setState(() => _agreed = value ?? false),
+                            title: Text(context.l10n.tr('auth.terms')),
+                          ),
+                        ),
+                        if (auth.errorMessage != null) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          AppStatusBanner(
+                            message: auth.errorMessage!,
+                            icon: AppIcons.error,
+                            tone: AppStateTone.error,
+                          ),
+                        ],
+                        const SizedBox(height: AppSpacing.lg),
+                        FilledButton(
+                          onPressed: auth.isLoading ? null : _createAccount,
+                          child: auth.isLoading
+                              ? SizedBox.square(
+                                  dimension: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: colors.onPrimary,
+                                  ),
+                                )
+                              : Text(context.l10n.tr('auth.createAccount')),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(context.l10n.tr('auth.alreadyAccount')),
+                TextButton(
+                  onPressed: auth.isLoading
+                      ? null
+                      : () => Navigator.pop(context),
+                  child: Text(context.l10n.tr('auth.signIn')),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
   Future<void> _createAccount() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (!_agreed) {
       ScaffoldMessenger.of(context).showSnackBar(

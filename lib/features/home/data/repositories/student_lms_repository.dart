@@ -1,13 +1,16 @@
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/api_service.dart';
 import 'package:edtech_application/core/network/expanded_api_dto.dart';
+import 'package:edtech_application/core/network/mobile_api_dto.dart';
 import 'package:edtech_application/core/network/phase_one_dto.dart';
+import 'package:edtech_application/features/learning/data/services/offline_learning_gateway.dart';
 import 'package:edtech_application/shared/models/course.dart';
 
-class StudentLmsRepository {
+class StudentLmsRepository implements OfflineLearningGateway {
   const StudentLmsRepository({required ApiService api, required Dio uploadDio})
     : _api = api,
       _uploadDio = uploadDio;
@@ -150,6 +153,9 @@ class StudentLmsRepository {
   Future<ExamAttemptDto> startExam(String examId) =>
       _guard(() => _api.studentStartExamAttempt(examId));
 
+  Future<ExamAttemptDto> restoreExamAttempt(String attemptId) =>
+      _guard(() => _api.studentGetExamAttempt(attemptId));
+
   Future<void> saveExamAnswer({
     required String attemptId,
     required String questionId,
@@ -195,6 +201,38 @@ class StudentLmsRepository {
     ),
   );
 
+  Future<StudentSyllabusProgressListDto> getSyllabusProgress(
+    String enrollmentId,
+  ) => _guard(() => _api.studentGetSyllabusProgress(enrollmentId));
+
+  Future<PhysicalAttendanceListDto> listAttendance({String? cursor}) =>
+      _guard(() => _api.studentListPhysicalAttendance(cursor, 100));
+
+  Future<PhysicalAttendanceRecordDto> checkInAttendance({
+    required String attendanceSessionId,
+    required String code,
+    Map<String, dynamic>? riskEvidence,
+  }) => _guard(
+    () => _api.studentPhysicalAttendanceCheckIn(
+      attendanceSessionId,
+      AttendanceCheckInRequest(code: code.trim(), riskEvidence: riskEvidence),
+    ),
+  );
+
+  Future<AttendanceCorrectionDto> requestAttendanceCorrection({
+    required String attendanceRecordId,
+    required String requestedStatus,
+    required String reason,
+  }) => _guard(
+    () => _api.studentRequestAttendanceCorrection(
+      attendanceRecordId,
+      AttendanceCorrectionRequest(
+        requestedStatus: requestedStatus,
+        reason: reason.trim(),
+      ),
+    ),
+  );
+
   Future<QuizAttemptDto> startQuiz(String quizId) =>
       _guard(() => _api.startQuizAttempt(quizId));
 
@@ -221,29 +259,74 @@ class StudentLmsRepository {
     required Uint8List bytes,
     required String filename,
     required String contentType,
+    List<String> allowedContentTypes = const [],
+    int? maximumSizeBytes,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
   }) => _guard(() async {
-    final intent = await _api.createUploadIntent(
-      UploadIntentWriteRequest(
-        kind: 'assignment',
-        filename: filename,
-        contentType: contentType,
-        sizeBytes: bytes.length,
-      ),
-    );
-    // A clean client prevents bearer-token leakage to the presigned storage
-    // origin, which may be different from the LMS API origin.
-    await _uploadDio.put<void>(
-      intent.uploadUrl,
-      data: Stream<List<int>>.value(bytes),
-      options: Options(
-        headers: {
-          Headers.contentTypeHeader: contentType,
-          Headers.contentLengthHeader: bytes.length,
-        },
-      ),
-    );
-    await _api.completeMediaUpload(intent.id);
-    return intent.mediaAssetId;
+    if (maximumSizeBytes != null && bytes.length > maximumSizeBytes) {
+      throw const AppException('ফাইলটি assignment-এর সর্বোচ্চ size ছাড়িয়েছে।');
+    }
+    final extension = filename.contains('.')
+        ? filename.split('.').last.toLowerCase()
+        : '';
+    final typeAllowed =
+        allowedContentTypes.isEmpty ||
+        allowedContentTypes.any(
+          (allowed) =>
+              allowed.toLowerCase() == contentType.toLowerCase() ||
+              allowed.toLowerCase() == extension ||
+              (allowed.endsWith('/*') &&
+                  contentType.startsWith(
+                    allowed.substring(0, allowed.length - 1),
+                  )),
+        );
+    if (!typeAllowed) {
+      throw const AppException('এই file type assignment-এ অনুমোদিত নয়।');
+    }
+
+    Future<String> upload({required bool mayRetryExpiredIntent}) async {
+      final intent = await _api.createUploadIntent(
+        UploadIntentWriteRequest(
+          kind: 'assignment',
+          filename: filename,
+          contentType: contentType,
+          sizeBytes: bytes.length,
+          checksumSha256: sha256.convert(bytes).toString(),
+        ),
+      );
+      if (!intent.expiresAt.toUtc().isAfter(DateTime.now().toUtc())) {
+        if (mayRetryExpiredIntent) return upload(mayRetryExpiredIntent: false);
+        throw const AppException('Upload URL-এর মেয়াদ শেষ হয়েছে।');
+      }
+      try {
+        // A clean client prevents bearer-token leakage to the presigned storage
+        // origin, which may be different from the LMS API origin.
+        await _uploadDio.put<void>(
+          intent.uploadUrl,
+          data: Stream<List<int>>.value(bytes),
+          cancelToken: cancelToken,
+          onSendProgress: onSendProgress,
+          options: Options(
+            headers: {
+              Headers.contentTypeHeader: contentType,
+              Headers.contentLengthHeader: bytes.length,
+            },
+          ),
+        );
+      } on DioException catch (error) {
+        if (mayRetryExpiredIntent &&
+            (error.response?.statusCode == 401 ||
+                error.response?.statusCode == 403)) {
+          return upload(mayRetryExpiredIntent: false);
+        }
+        rethrow;
+      }
+      await _api.completeMediaUpload(intent.id);
+      return intent.mediaAssetId;
+    }
+
+    return upload(mayRetryExpiredIntent: true);
   });
 
   Future<String> createAssignmentSubmission({
@@ -302,6 +385,16 @@ class StudentLmsRepository {
     return items.map(ResultDto.fromJson).toList();
   });
 
+  Future<RecheckRequestDto> requestResultRecheck({
+    required String resultId,
+    required String reason,
+  }) => _guard(
+    () => _api.studentRequestResultRecheck(
+      resultId,
+      RecheckRequestWriteRequest(reason: reason.trim()),
+    ),
+  );
+
   Future<List<CertificateDto>> listCertificates() => _guard(() async {
     final items = await _allPages(
       (cursor) => _api.getStudentCertificates(cursor, 100),
@@ -347,6 +440,166 @@ class StudentLmsRepository {
   Future<void> markAllNotificationsRead() => _guard(() async {
     await _api.markAllNotificationsRead();
   });
+
+  Future<void> registerDeviceToken({
+    required String token,
+    required String platform,
+  }) => _guard(() async {
+    await _api.registerDevice(
+      DeviceTokenWriteRequest(token: token, platform: platform),
+    );
+  });
+
+  Future<void> removeDeviceToken(String token) =>
+      _guard(() => _api.removeDevice(token));
+
+  Future<MasterySummaryDto> getTopicMastery({String? cursor}) =>
+      _guard(() => _api.studentTopicMastery(cursor, 100));
+
+  Future<MasterySummaryDto> getWeakTopics({String? cursor}) =>
+      _guard(() => _api.studentWeakTopics(cursor, 100));
+
+  Future<DoubtThreadListDto> listDoubts({String? cursor}) =>
+      _guard(() => _api.studentListDoubts(cursor, 100));
+
+  Future<DoubtThreadDto> createDoubt(DoubtWriteRequest request) =>
+      _guard(() => _api.studentCreateDoubt(request));
+
+  Future<DoubtThreadDetailDto> getDoubt(String doubtId) =>
+      _guard(() => _api.studentGetDoubt(doubtId));
+
+  Future<DoubtMessageDto> replyToDoubt({
+    required String doubtId,
+    required String body,
+    List<String> attachmentAssetIds = const [],
+  }) => _guard(
+    () => _api.studentReplyToDoubt(
+      doubtId,
+      DoubtMessageWriteRequest(
+        body: body.trim(),
+        attachmentAssetIds: attachmentAssetIds,
+      ),
+    ),
+  );
+
+  Future<DoubtThreadDto> resolveDoubt(String doubtId) =>
+      _guard(() => _api.studentResolveDoubt(doubtId));
+
+  Future<DoubtThreadDto> reopenDoubt(String doubtId) =>
+      _guard(() => _api.studentReopenDoubt(doubtId));
+
+  Future<StudyPlanListDto> listStudyPlans({String? cursor}) =>
+      _guard(() => _api.studentListStudyPlans(cursor, 100));
+
+  Future<StudyTaskListDto> listStudyTasks({String? cursor, String? status}) =>
+      _guard(() => _api.studentListStudyPlanTasks(cursor, 100, status));
+
+  Future<StudyTaskDto> completeStudyTask({
+    required String taskId,
+    required int version,
+  }) => _guard(
+    () => _api.studentCompleteStudyPlanTask(
+      taskId,
+      VersionWriteRequest(version: version),
+    ),
+  );
+
+  Future<StudyTaskDto> rescheduleStudyTask({
+    required String taskId,
+    required int version,
+    required DateTime dueAt,
+  }) => _guard(
+    () => _api.studentRescheduleStudyPlanTask(
+      taskId,
+      StudyTaskRescheduleRequest(version: version, dueAt: dueAt),
+    ),
+  );
+
+  Future<StudentGoalListDto> listGoals({String? cursor}) =>
+      _guard(() => _api.studentListGoals(cursor, 100));
+
+  Future<StudentGoalDto> createGoal(StudentGoalWriteRequest request) =>
+      _guard(() => _api.studentCreateGoal(request));
+
+  @override
+  Future<OfflineEntitlementDto> issueOfflineEntitlement(String enrollmentId) =>
+      _guard(
+        () => _api.studentIssueOfflineEntitlement(
+          OfflineEntitlementWriteRequest(enrollmentId: enrollmentId),
+        ),
+      );
+
+  @override
+  Future<OfflineManifestDto> getOfflineManifest(String enrollmentId) =>
+      _guard(() => _api.studentGetOfflineManifest(enrollmentId));
+
+  @override
+  Future<OfflineChangeListDto> listOfflineChanges({String? cursor}) =>
+      _guard(() => _api.studentListOfflineChanges(cursor, 100));
+
+  @override
+  Future<SyncResultListDto> syncOfflineProgress(
+    List<ProgressSyncOperation> operations,
+  ) {
+    if (operations.isEmpty || operations.length > 100) {
+      throw const AppException(
+        'Offline sync-এ ১ থেকে ১০০টি operation প্রয়োজন।',
+      );
+    }
+    return _guard(
+      () => _api.studentSyncOfflineProgress(
+        ProgressSyncWriteRequest(operations: operations),
+      ),
+    );
+  }
+
+  @override
+  Future<SyncResultListDto> syncOfflineAnswers(
+    List<AnswerSyncOperation> operations,
+  ) {
+    if (operations.isEmpty || operations.length > 100) {
+      throw const AppException(
+        'Offline sync-এ ১ থেকে ১০০টি operation প্রয়োজন।',
+      );
+    }
+    return _guard(
+      () => _api.studentSyncOfflineAnswers(
+        AnswerSyncWriteRequest(operations: operations),
+      ),
+    );
+  }
+
+  Future<MediaRenditionListDto> listMediaRenditions(String mediaAssetId) =>
+      _guard(() => _api.listMediaRenditions(mediaAssetId));
+
+  Future<SmsContactListDto> listSmsContacts() => _guard(_api.listMySmsContacts);
+
+  Future<SmsContactVerificationStartedDto> createSmsContact(String phone) =>
+      _guard(
+        () => _api.createMySmsContact(SmsContactWriteRequest(phone: phone)),
+      );
+
+  Future<SmsContactDto> verifySmsContact(String token) => _guard(
+    () => _api.verifyMySmsContact(SmsContactVerifyRequest(token: token)),
+  );
+
+  Future<AdmitCardListDto> listAdmitCards() =>
+      _guard(_api.studentListAdmitCards);
+
+  Future<Uri> admitCardDownloadUrl(String admitCardId) => _guard(() async {
+    final download = await _api.studentDownloadAdmitCard(admitCardId);
+    if (!download.url.hasScheme) {
+      throw const AppException('Admit-card download URL পাওয়া যায়নি।');
+    }
+    return download.url;
+  });
+
+  Future<PublicAdmitVerificationDto> verifyAdmitCard(String token) =>
+      _guard(() => _api.publicVerifyAdmitCard(token.trim()));
+
+  Future<PublicIdentifierVerificationDto> verifyStudentIdentifier(
+    String token,
+  ) => _guard(() => _api.publicVerifyStudentIdentifier(token.trim()));
 
   Course _courseFromDto(
     CourseDto dto, {
@@ -421,8 +674,8 @@ class StudentLmsRepository {
       rethrow;
     } on DioException catch (error) {
       throw AppException.fromDioException(error);
-    } on FormatException catch (error) {
-      throw AppException('Server response বোঝা যায়নি: ${error.message}');
+    } on FormatException {
+      throw const AppException('Server response বোঝা যায়নি।');
     }
   }
 
