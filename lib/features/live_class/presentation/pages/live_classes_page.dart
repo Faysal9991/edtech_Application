@@ -134,9 +134,12 @@ class _LiveClassCard extends StatelessWidget {
                   ),
                 ),
                 Chip(
-                  label: Text(
-                    context.l10n.tr(isLive ? 'live.liveNow' : 'live.scheduled'),
-                  ),
+                  label: Text(switch (item.status) {
+                    'live' => context.l10n.tr('live.liveNow'),
+                    'ended' => 'Ended',
+                    'cancelled' => 'Cancelled',
+                    _ => context.l10n.tr('live.scheduled'),
+                  }),
                 ),
               ],
             ),

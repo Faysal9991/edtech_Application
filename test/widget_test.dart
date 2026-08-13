@@ -1,30 +1,60 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:edtech_application/core/storage/local_storage.dart';
+import 'package:edtech_application/main.dart';
+import 'package:edtech_application/shared/localization/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:edtech_application/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('mock sign in opens the animated home experience', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpWidget(MyApp(storage: LocalStorage(preferences)));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.text('আবার স্বাগতম'), findsOneWidget);
+    expect(find.text('সাইন ইন'), findsOneWidget);
+
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'preview@learnly.app');
+    await tester.enterText(fields.at(1), 'preview-only');
+    await tester.ensureVisible(find.text('সাইন ইন'));
+    await tester.tap(find.text('সাইন ইন'));
+
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.textContaining('শুভ সকাল'), findsOneWidget);
+    expect(find.text('আজকের কাজ'), findsOneWidget);
+    expect(find.text('হোম'), findsOneWidget);
+    expect(find.text('এক্সপ্লোর'), findsOneWidget);
+    expect(find.text('লার্নিং'), findsOneWidget);
+    expect(find.text('রেজাল্ট'), findsOneWidget);
+    expect(find.text('প্রোফাইল'), findsOneWidget);
+  });
+
+  test('Bangla and English resources stay in sync', () {
+    const bangla = AppLocalizations(Locale('bn'));
+    const english = AppLocalizations(Locale('en'));
+
+    expect(bangla.tr('nav.learning'), 'লার্নিং');
+    expect(english.tr('nav.learning'), 'Learning');
+    expect(
+      bangla.tr('home.greeting', args: {'name': 'Faysal'}),
+      'শুভ সকাল, Faysal 👋',
+    );
+    expect(bangla.number(125), '১২৫');
+    expect(AppLocalizations.missingKeys('bn'), isEmpty);
   });
 }

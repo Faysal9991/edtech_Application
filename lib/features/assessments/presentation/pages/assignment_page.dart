@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
+import 'package:edtech_application/core/network/expanded_api_dto.dart';
 import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
@@ -18,11 +20,21 @@ class AssignmentPage extends StatefulWidget {
 
 class _AssignmentPageState extends State<AssignmentPage> {
   final _answer = TextEditingController();
-  _PickedAttachment? _attachment;
+  final List<_PickedAttachment> _attachments = [];
+  StudentAssignmentDto? _assignment;
+  CancelToken? _uploadCancellation;
+  double? _uploadProgress;
   bool _submitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadAssignment());
+  }
+
+  @override
   void dispose() {
+    _uploadCancellation?.cancel('Assignment page closed');
     _answer.dispose();
     super.dispose();
   }
@@ -68,13 +80,27 @@ class _AssignmentPageState extends State<AssignmentPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.l10n.tr('assignment.id'),
+                    _assignment?.title ?? context.l10n.tr('assignment.id'),
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   const SizedBox(height: 6),
-                  SelectableText(assignmentId),
+                  if (_assignment == null) SelectableText(assignmentId),
                   const SizedBox(height: 8),
-                  Text(context.l10n.tr('assignment.detailsMissing')),
+                  Text(
+                    _assignment?.instructions.isNotEmpty == true
+                        ? _assignment!.instructions
+                        : context.l10n.tr('assignment.detailsMissing'),
+                  ),
+                  if (_assignment?.dueAt != null) ...[
+                    const SizedBox(height: 8),
+                    Text('Due: ${_assignment!.dueAt!.toLocal()}'),
+                  ],
+                  if (_assignment?.allowedFileTypes.isNotEmpty == true) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Allowed: ${_assignment!.allowedFileTypes.join(', ')}',
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -96,14 +122,13 @@ class _AssignmentPageState extends State<AssignmentPage> {
             ),
           ),
           const SizedBox(height: 16),
-          if (_attachment == null)
-            OutlinedButton.icon(
-              onPressed: _submitting ? null : _pickFile,
-              icon: const Icon(Icons.attach_file_rounded),
-              label: Text(context.l10n.tr('assignment.attach')),
-            )
-          else
-            Card(
+          OutlinedButton.icon(
+            onPressed: _submitting ? null : _pickFiles,
+            icon: const Icon(Icons.attach_file_rounded),
+            label: Text(context.l10n.tr('assignment.attach')),
+          ),
+          ..._attachments.asMap().entries.map(
+            (entry) => Card(
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: Theme.of(
@@ -114,18 +139,28 @@ class _AssignmentPageState extends State<AssignmentPage> {
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                 ),
-                title: Text(_attachment!.file.name),
+                title: Text(entry.value.file.name),
                 subtitle: Text(
-                  '${(_attachment!.bytes.length / 1024).ceil()} KB • ${context.l10n.tr('assignment.uploadReady')}',
+                  '${(entry.value.bytes.length / 1024).ceil()} KB • ${context.l10n.tr('assignment.uploadReady')}',
                 ),
                 trailing: IconButton(
                   onPressed: _submitting
                       ? null
-                      : () => setState(() => _attachment = null),
+                      : () => setState(() => _attachments.removeAt(entry.key)),
                   icon: const Icon(Icons.close_rounded),
                 ),
               ),
             ),
+          ),
+          if (_uploadProgress != null) ...[
+            const SizedBox(height: 10),
+            LinearProgressIndicator(value: _uploadProgress),
+            TextButton.icon(
+              onPressed: () => _uploadCancellation?.cancel('Cancelled by user'),
+              icon: const Icon(Icons.cancel_outlined),
+              label: const Text('Cancel upload'),
+            ),
+          ],
         ],
       ),
       bottomSheet: SafeArea(
@@ -156,16 +191,33 @@ class _AssignmentPageState extends State<AssignmentPage> {
     );
   }
 
-  Future<void> _pickFile() async {
+  Future<void> _loadAssignment() async {
+    final id = widget.assignmentId;
+    final repository = context.read<StudentLmsRepository?>();
+    if (id == null || repository == null) return;
+    try {
+      final assignment = await repository.getAssignment(id);
+      if (mounted) setState(() => _assignment = assignment);
+    } catch (_) {
+      // Submission remains available for deep links whose detail fetch fails.
+    }
+  }
+
+  Future<void> _pickFiles() async {
     final types = XTypeGroup(
       label: context.l10n.tr('assignment.files'),
       extensions: ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx'],
     );
-    final file = await openFile(acceptedTypeGroups: [types]);
-    if (file == null) return;
-    final bytes = await file.readAsBytes();
+    final files = await openFiles(acceptedTypeGroups: [types]);
+    if (files.isEmpty) return;
+    final picked = <_PickedAttachment>[];
+    for (final file in files) {
+      picked.add(
+        _PickedAttachment(file: file, bytes: await file.readAsBytes()),
+      );
+    }
     if (mounted) {
-      setState(() => _attachment = _PickedAttachment(file: file, bytes: bytes));
+      setState(() => _attachments.addAll(picked));
     }
   }
 
@@ -173,7 +225,7 @@ class _AssignmentPageState extends State<AssignmentPage> {
     final id = widget.assignmentId;
     final repository = context.read<StudentLmsRepository?>();
     if (id == null || repository == null) return;
-    if (_answer.text.trim().isEmpty && _attachment == null) {
+    if (_answer.text.trim().isEmpty && _attachments.isEmpty) {
       _message(context.l10n.tr('assignment.answerOrFile'));
       return;
     }
@@ -198,14 +250,21 @@ class _AssignmentPageState extends State<AssignmentPage> {
         false;
     if (!confirmed || !mounted) return;
     setState(() => _submitting = true);
+    _uploadCancellation = CancelToken();
     try {
       final mediaIds = <String>[];
-      final attachment = _attachment;
-      if (attachment != null) {
+      for (final attachment in _attachments) {
         final assetId = await repository.uploadAssignmentFile(
           bytes: attachment.bytes,
           filename: attachment.file.name,
           contentType: _contentType(_extension(attachment.file.name)),
+          allowedContentTypes: _assignment?.allowedFileTypes ?? const [],
+          cancelToken: _uploadCancellation,
+          onSendProgress: (sent, total) {
+            if (mounted && total > 0) {
+              setState(() => _uploadProgress = sent / total);
+            }
+          },
         );
         mediaIds.add(assetId);
       }
@@ -221,7 +280,13 @@ class _AssignmentPageState extends State<AssignmentPage> {
     } catch (error) {
       if (mounted) _message('$error');
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      _uploadCancellation = null;
+      if (mounted) {
+        setState(() {
+          _submitting = false;
+          _uploadProgress = null;
+        });
+      }
     }
   }
 

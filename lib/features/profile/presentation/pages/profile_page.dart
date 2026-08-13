@@ -89,6 +89,12 @@ class ProfilePage extends StatelessWidget {
                 _message(context, context.l10n.tr('profile.savedApiMissing')),
           ),
           _ProfileTile(
+            icon: AppIcons.learning,
+            title: 'Student services',
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.studentServices),
+          ),
+          _ProfileTile(
             icon: AppIcons.certificate,
             title: context.l10n.tr('profile.certificates'),
             onTap: () => Navigator.pushNamed(context, AppRoutes.certificates),

@@ -132,7 +132,7 @@ abstract class AuthUserDto with _$AuthUserDto {
     email: email,
     status: status,
     roles: roles,
-    role: roles.isEmpty ? 'student' : roles.first,
+    role: roles.isEmpty ? 'unknown' : roles.first,
     emailVerifiedAt: emailVerifiedAt,
   );
 }

@@ -12,6 +12,7 @@ class AppRoutes {
   static const home = '/home';
   static const courseDetails = '/course-details';
   static const lesson = '/lesson';
+  static const studentServices = '/student-services';
   static const assessments = '/assessments';
   static const quiz = '/quiz';
   static const exam = '/exam';

@@ -215,7 +215,7 @@ return $default(_that.id,_that.name,_that.email,_that.status,_that.roles,_that.r
 @JsonSerializable()
 
 class _AppUser implements AppUser {
-  const _AppUser({required this.id, required this.name, required this.email, this.status = 'active', final  List<String> roles = const <String>[], this.role = 'student', this.emailVerifiedAt}): _roles = roles;
+  const _AppUser({required this.id, required this.name, required this.email, this.status = 'active', final  List<String> roles = const <String>[], this.role = 'unknown', this.emailVerifiedAt}): _roles = roles;
   factory _AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
 
 @override final  String id;

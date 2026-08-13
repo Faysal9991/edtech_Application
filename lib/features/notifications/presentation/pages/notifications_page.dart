@@ -1,4 +1,5 @@
 import 'package:edtech_application/core/network/phase_one_dto.dart';
+import 'package:edtech_application/core/routing/internal_deep_link.dart';
 import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/presentation/controllers/student_lms_controller.dart';
 import 'package:edtech_application/shared/animations/app_animations.dart';
@@ -56,9 +57,7 @@ class NotificationsPage extends StatelessWidget {
             type: EntranceType.fadeInRight,
             child: _NotificationCard(
               item: item,
-              onTap: item.readAt == null
-                  ? () => _markRead(context, item.id)
-                  : null,
+              onTap: () => _open(context, item),
             ),
           );
         },
@@ -66,9 +65,22 @@ class NotificationsPage extends StatelessWidget {
     );
   }
 
-  Future<void> _markRead(BuildContext context, String id) async {
+  Future<void> _open(BuildContext context, NotificationDto item) async {
     try {
-      await context.read<StudentLmsController>().markNotificationRead(id);
+      if (item.readAt == null) {
+        await context.read<StudentLmsController>().markNotificationRead(
+          item.id,
+        );
+      }
+      if (!context.mounted) return;
+      final target = InternalDeepLink.tryParse(item.deepLink);
+      if (target != null) {
+        await Navigator.pushNamed(
+          context,
+          target.route,
+          arguments: target.argument,
+        );
+      }
     } catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -11,7 +11,7 @@ abstract class AppUser with _$AppUser {
     required String email,
     @Default('active') String status,
     @Default(<String>[]) List<String> roles,
-    @Default('student') String role,
+    @Default('unknown') String role,
     DateTime? emailVerifiedAt,
   }) = _AppUser;
 

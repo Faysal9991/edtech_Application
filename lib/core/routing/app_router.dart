@@ -13,6 +13,7 @@ import 'package:edtech_application/features/authentication/presentation/pages/ve
 import 'package:edtech_application/features/courses/presentation/pages/course_details_page.dart';
 import 'package:edtech_application/features/home/presentation/pages/home_shell.dart';
 import 'package:edtech_application/features/learning/presentation/pages/lesson_page.dart';
+import 'package:edtech_application/features/learning/presentation/pages/student_services_page.dart';
 import 'package:edtech_application/features/live_class/presentation/pages/live_classes_page.dart';
 import 'package:edtech_application/features/live_class/presentation/pages/live_class_room_page.dart';
 import 'package:edtech_application/features/notifications/presentation/pages/notifications_page.dart';
@@ -27,6 +28,17 @@ import 'package:flutter/material.dart';
 
 class AppRouter {
   const AppRouter._();
+
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
+  static Future<void> handleSessionExpired() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        AppRoutes.signIn,
+        (route) => false,
+      );
+    });
+  }
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
     final page = switch (settings.name) {
@@ -55,6 +67,7 @@ class AppRouter {
         settings.arguments is Course
             ? LessonPage(course: settings.arguments! as Course)
             : const _MissingCoursePage(),
+      AppRoutes.studentServices => const StudentServicesPage(),
       AppRoutes.assessments => const AssessmentsPage(),
       AppRoutes.quiz => QuizPage(
         quizId: settings.arguments is String

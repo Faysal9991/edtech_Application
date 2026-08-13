@@ -1,17 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:edtech_application/core/auth/secure_token_storage.dart';
+import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/api_constants.dart';
 import 'package:flutter/foundation.dart';
 
 typedef TokenRefreshCallback =
     Future<AuthTokenPair?> Function(String refreshToken);
+typedef SessionExpiredCallback = Future<void> Function();
 
 class AppDioClient {
   AppDioClient({
     required SecureTokenStorage tokenStorage,
     TokenRefreshCallback? refreshToken,
+    SessionExpiredCallback? onSessionExpired,
   }) : _tokenStorage = tokenStorage,
-       _refreshToken = refreshToken {
+       _refreshToken = refreshToken,
+       _onSessionExpired = onSessionExpired {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -47,9 +51,28 @@ class AppDioClient {
     '/api/v1/auth/logout',
     '/api/v1/auth/logout-all',
   };
+  static const _publicExactPaths = <String>{
+    '/health/live',
+    '/health/ready',
+    '/metrics',
+    '/openapi.yaml',
+    '/api/v1/auth/register',
+    '/api/v1/auth/login',
+    '/api/v1/auth/refresh',
+    '/api/v1/auth/forgot-password',
+    '/api/v1/auth/reset-password',
+    '/api/v1/auth/verify-email',
+    '/api/v1/auth/resend-verification',
+  };
+  static const _publicPathPrefixes = <String>{
+    '/api/v1/academic/',
+    '/api/v1/certificates/verify/',
+    '/api/v1/public/',
+  };
 
   final SecureTokenStorage _tokenStorage;
   final TokenRefreshCallback? _refreshToken;
+  final SessionExpiredCallback? _onSessionExpired;
   late final Dio _dio;
   Future<AuthTokenPair?>? _refreshOperation;
 
@@ -59,6 +82,10 @@ class AppDioClient {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) {
+    if (_isPublicRequest(options)) {
+      handler.next(options);
+      return;
+    }
     final token = _tokenStorage.accessToken;
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -83,6 +110,24 @@ class AppDioClient {
       return;
     }
 
+    // Another request may already have completed a rotating refresh before
+    // this 401 reached the interceptor. Reuse that newer access token instead
+    // of spending (and rotating) the new refresh token a second time.
+    final currentAccessToken = _tokenStorage.accessToken;
+    final failedAuthorization = request.headers['Authorization'];
+    if (currentAccessToken != null &&
+        currentAccessToken.isNotEmpty &&
+        failedAuthorization != 'Bearer $currentAccessToken') {
+      try {
+        handler.resolve(
+          await _retryWithAccessToken(request, currentAccessToken),
+        );
+      } on DioException catch (retryError) {
+        handler.next(retryError);
+      }
+      return;
+    }
+
     final storedRefreshToken = await _tokenStorage.refreshToken;
     if (storedRefreshToken == null || storedRefreshToken.isEmpty) {
       handler.next(error);
@@ -97,17 +142,12 @@ class AppDioClient {
       }
 
       await _tokenStorage.save(tokens);
-      final retryRequest = request.copyWith(
-        headers: {
-          ...request.headers,
-          'Authorization': 'Bearer ${tokens.accessToken}',
-        },
-        extra: {...request.extra, _retriedKey: true},
-      );
-      final response = await _dio.fetch<dynamic>(retryRequest);
-      handler.resolve(response);
-    } catch (_) {
-      await _tokenStorage.clear();
+      handler.resolve(await _retryWithAccessToken(request, tokens.accessToken));
+    } catch (refreshError) {
+      if (_isUnauthorizedRefreshFailure(refreshError)) {
+        await _tokenStorage.clear();
+        await _onSessionExpired?.call();
+      }
       handler.next(error);
     }
   }
@@ -124,6 +164,29 @@ class AppDioClient {
     });
     _refreshOperation = operation;
     return operation;
+  }
+
+  Future<Response<dynamic>> _retryWithAccessToken(
+    RequestOptions request,
+    String accessToken,
+  ) => _dio.fetch<dynamic>(
+    request.copyWith(
+      headers: {...request.headers, 'Authorization': 'Bearer $accessToken'},
+      extra: {...request.extra, _retriedKey: true},
+    ),
+  );
+
+  static bool _isUnauthorizedRefreshFailure(Object error) =>
+      (error is DioException && error.response?.statusCode == 401) ||
+      (error is AppException && error.statusCode == 401);
+
+  static bool _isPublicRequest(RequestOptions request) {
+    final path = request.uri.path;
+    if (_publicExactPaths.contains(path)) return true;
+    if (_publicPathPrefixes.any(path.startsWith)) return true;
+    // Course reads are public; POST /courses/{id}/enroll is authenticated.
+    return request.method.toUpperCase() == 'GET' &&
+        (path == '/api/v1/courses' || path.startsWith('/api/v1/courses/'));
   }
 }
 

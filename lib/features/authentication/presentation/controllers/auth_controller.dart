@@ -22,7 +22,10 @@ class AuthController extends ChangeNotifier {
 
   AppUser? get user => _user;
   bool get isLoading => _isLoading;
-  bool get isAuthenticated => _user != null && _user!.status == 'active';
+  bool get isAuthenticated =>
+      _user != null &&
+      _user!.status == 'active' &&
+      _user!.roles.contains('student');
   String? get errorMessage => _errorMessage;
   String? get rememberedEmail => _storage.rememberedEmail;
   String? get pendingVerificationToken => _pendingVerificationToken;
@@ -54,7 +57,15 @@ class AuthController extends ChangeNotifier {
       await _storage.saveRememberedEmail(rememberEmail ? email : null);
     });
     if (success && !isAuthenticated) {
-      _errorMessage = 'অ্যাকাউন্ট active নয়। আগে email verify করুন।';
+      _errorMessage = switch (_user?.status) {
+        'pending' => 'অ্যাকাউন্ট pending। আগে email verify করুন।',
+        'suspended' =>
+          'অ্যাকাউন্টটি suspended। সহায়তার জন্য support-এ যোগাযোগ করুন।',
+        'disabled' =>
+          'অ্যাকাউন্টটি disabled। সহায়তার জন্য support-এ যোগাযোগ করুন।',
+        'active' => 'এই mobile app-এ আপনার account role সমর্থিত নয়।',
+        _ => 'অ্যাকাউন্টের বর্তমান অবস্থা সমর্থিত নয়।',
+      };
       notifyListeners();
       return false;
     }
@@ -125,6 +136,18 @@ class AuthController extends ChangeNotifier {
   Future<void> signOut() async {
     try {
       await _repository.signOut();
+    } on AppException catch (error) {
+      _errorMessage = error.message;
+    } finally {
+      _user = null;
+      await _storage.clearSession();
+      notifyListeners();
+    }
+  }
+
+  Future<void> signOutAll() async {
+    try {
+      await _repository.signOutAll();
     } on AppException catch (error) {
       _errorMessage = error.message;
     } finally {

@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/expanded_api_dto.dart';
+import 'package:edtech_application/core/storage/local_storage.dart';
 import 'package:edtech_application/core/theme/app_colors.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
 import 'package:edtech_application/shared/localization/app_localizations.dart';
@@ -26,6 +28,7 @@ class _ExamPageState extends State<ExamPage> {
   bool _loading = true;
   bool _saving = false;
   bool _submitting = false;
+  bool _deadlineReached = false;
   String? _error;
 
   @override
@@ -42,6 +45,7 @@ class _ExamPageState extends State<ExamPage> {
 
   Future<void> _start() async {
     final repository = context.read<StudentLmsRepository?>();
+    final storage = context.read<LocalStorage>();
     final examId = widget.examId;
     if (repository == null || examId == null || examId.isEmpty) {
       setState(() {
@@ -51,7 +55,26 @@ class _ExamPageState extends State<ExamPage> {
       return;
     }
     try {
-      final attempt = await repository.startExam(examId);
+      final savedAttemptId = storage.examAttemptId(examId);
+      ExamAttemptDto? attempt;
+      if (savedAttemptId != null) {
+        try {
+          final restored = await repository.restoreExamAttempt(savedAttemptId);
+          final deadline = restored.submitBefore ?? restored.expiresAt;
+          if (restored.status == 'in_progress' &&
+              (deadline == null || deadline.isAfter(DateTime.now().toUtc()))) {
+            attempt = restored;
+          } else {
+            await storage.clearExamAttempt(examId);
+          }
+        } on AppException catch (error) {
+          if (!error.isNotFound) rethrow;
+          await storage.clearExamAttempt(examId);
+        }
+      }
+      attempt ??= await repository.startExam(examId);
+      await storage.saveExamAttemptId(examId, attempt.id);
+      _restoreDraft(storage.examDraft(examId), attempt.id);
       if (!mounted) return;
       setState(() {
         _attempt = attempt;
@@ -75,6 +98,7 @@ class _ExamPageState extends State<ExamPage> {
       setState(() => _remainingSeconds = seconds.clamp(0, 86400));
       if (seconds <= 0) {
         _timer?.cancel();
+        setState(() => _deadlineReached = true);
         unawaited(_submit(force: true));
       }
     }
@@ -178,7 +202,11 @@ class _ExamPageState extends State<ExamPage> {
                         initialValue: _textAnswers[question.id] ?? '',
                         minLines: 4,
                         maxLines: 8,
-                        onChanged: (value) => _textAnswers[question.id] = value,
+                        enabled: !_deadlineReached,
+                        onChanged: (value) {
+                          _textAnswers[question.id] = value;
+                          unawaited(_persistDraft());
+                        },
                         decoration: InputDecoration(
                           hintText: context.l10n.tr('quiz.answerHint'),
                         ),
@@ -195,7 +223,9 @@ class _ExamPageState extends State<ExamPage> {
                                   entry.value.id,
                                 ) ??
                                 false,
-                            onTap: () => _select(question, entry.value.id),
+                            onTap: _deadlineReached
+                                ? () {}
+                                : () => _select(question, entry.value.id),
                           ),
                         ),
                       ),
@@ -221,7 +251,7 @@ class _ExamPageState extends State<ExamPage> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: _index == 0 || _saving
+              onPressed: _index == 0 || _saving || _deadlineReached
                   ? null
                   : () => _move(question, -1),
               child: Text(context.l10n.tr('common.previous')),
@@ -230,7 +260,7 @@ class _ExamPageState extends State<ExamPage> {
           const SizedBox(width: 10),
           Expanded(
             child: FilledButton(
-              onPressed: _saving || _submitting
+              onPressed: _saving || _submitting || _deadlineReached
                   ? null
                   : _index == attempt.questions.length - 1
                   ? _submit
@@ -267,6 +297,7 @@ class _ExamPageState extends State<ExamPage> {
       _selected[question.id] = selected;
       _saving = true;
     });
+    await _persistDraft();
     await _save(question);
   }
 
@@ -293,6 +324,7 @@ class _ExamPageState extends State<ExamPage> {
             ? _textAnswers[question.id]
             : null,
       );
+      await _removeAcknowledgedDraft(question.id);
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -306,6 +338,7 @@ class _ExamPageState extends State<ExamPage> {
 
   Future<void> _submit({bool force = false}) async {
     final repository = context.read<StudentLmsRepository?>();
+    final storage = context.read<LocalStorage>();
     final attempt = _attempt;
     if (repository == null || attempt == null || _submitting) return;
     final current = attempt.questions[_index];
@@ -337,6 +370,10 @@ class _ExamPageState extends State<ExamPage> {
     try {
       final result = await repository.submitExam(attempt.id);
       _timer?.cancel();
+      final examId = widget.examId;
+      if (examId != null) {
+        await storage.clearExamAttempt(examId);
+      }
       if (!mounted) return;
       await showDialog<void>(
         context: context,
@@ -407,6 +444,49 @@ class _ExamPageState extends State<ExamPage> {
       avatar: const Icon(Icons.timer_outlined, size: 18),
       label: Text(context.l10n.digits('$minutes:$remainder')),
     );
+  }
+
+  void _restoreDraft(Map<String, dynamic> draft, String attemptId) {
+    if (draft['attempt_id'] != attemptId) return;
+    final selected = draft['selected'];
+    if (selected is Map) {
+      for (final entry in selected.entries) {
+        if (entry.value is List) {
+          _selected['${entry.key}'] = (entry.value as List)
+              .whereType<String>()
+              .toSet();
+        }
+      }
+    }
+    final text = draft['text'];
+    if (text is Map) {
+      for (final entry in text.entries) {
+        if (entry.value is String) _textAnswers['${entry.key}'] = entry.value;
+      }
+    }
+  }
+
+  Future<void> _persistDraft() async {
+    final examId = widget.examId;
+    final attempt = _attempt;
+    if (examId == null || attempt == null) return;
+    await context.read<LocalStorage>().saveExamDraft(examId, {
+      'attempt_id': attempt.id,
+      'selected': {
+        for (final entry in _selected.entries) entry.key: entry.value.toList(),
+      },
+      'text': _textAnswers,
+    });
+  }
+
+  Future<void> _removeAcknowledgedDraft(String questionId) async {
+    // The in-memory answer remains visible. Only the crash-recovery copy is
+    // removed after the server acknowledges the autosave.
+    final selected = _selected.remove(questionId);
+    final text = _textAnswers.remove(questionId);
+    await _persistDraft();
+    if (selected != null) _selected[questionId] = selected;
+    if (text != null) _textAnswers[questionId] = text;
   }
 }
 

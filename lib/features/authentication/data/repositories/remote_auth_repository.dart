@@ -29,9 +29,7 @@ class RemoteAuthRepository implements AuthRepository {
     try {
       final tokens = await _refreshTokens(refreshToken);
       await _tokenStorage.save(tokens);
-      return AuthUserDto.fromJson(
-        (await _api.getCurrentProfile()).value,
-      ).toDomain();
+      return (await _api.me()).toDomain();
     } on AppException catch (error) {
       await _tokenStorage.clear();
       if (error.statusCode == 401) return null;
@@ -95,6 +93,19 @@ class RemoteAuthRepository implements AuthRepository {
       if (refreshToken != null && refreshToken.isNotEmpty) {
         await _api.logout(RefreshTokenRequest(refreshToken: refreshToken));
       }
+    } on DioException catch (error) {
+      if (error.response?.statusCode != 401) {
+        throw AppException.fromDioException(error);
+      }
+    } finally {
+      await _tokenStorage.clear();
+    }
+  }
+
+  @override
+  Future<void> signOutAll() async {
+    try {
+      await _api.logoutAll();
     } on DioException catch (error) {
       if (error.response?.statusCode != 401) {
         throw AppException.fromDioException(error);

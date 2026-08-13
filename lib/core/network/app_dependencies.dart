@@ -4,9 +4,12 @@ import 'package:edtech_application/core/error/app_exception.dart';
 import 'package:edtech_application/core/network/api_constants.dart';
 import 'package:edtech_application/core/network/api_service.dart';
 import 'package:edtech_application/core/network/app_dio_client.dart';
+import 'package:edtech_application/core/routing/app_router.dart';
 import 'package:edtech_application/features/authentication/data/models/auth_dto.dart';
 import 'package:edtech_application/features/authentication/data/repositories/remote_auth_repository.dart';
 import 'package:edtech_application/features/home/data/repositories/student_lms_repository.dart';
+import 'package:edtech_application/features/learning/data/services/offline_learning_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Owns the live API graph. The refresh client is intentionally separate so a
 /// failed access token can never recursively trigger another refresh request.
@@ -14,12 +17,14 @@ class AppDependencies {
   AppDependencies._({
     required this.authRepository,
     required this.studentRepository,
+    required this.offlineLearningService,
   });
 
   final RemoteAuthRepository authRepository;
   final StudentLmsRepository studentRepository;
+  final OfflineLearningService offlineLearningService;
 
-  factory AppDependencies.live() {
+  factory AppDependencies.live(SharedPreferences preferences) {
     final tokenStorage = SecureTokenStorage();
     final refreshDio = Dio(
       BaseOptions(
@@ -58,8 +63,19 @@ class AppDependencies {
     final client = AppDioClient(
       tokenStorage: tokenStorage,
       refreshToken: refreshTokens,
+      onSessionExpired: AppRouter.handleSessionExpired,
     );
     final api = ApiService(client.dio);
+
+    final studentRepository = StudentLmsRepository(
+      api: api,
+      uploadDio: Dio(
+        BaseOptions(
+          connectTimeout: ApiConstants.connectTimeout,
+          receiveTimeout: ApiConstants.receiveTimeout,
+        ),
+      ),
+    );
 
     return AppDependencies._(
       authRepository: RemoteAuthRepository(
@@ -67,14 +83,10 @@ class AppDependencies {
         tokenStorage: tokenStorage,
         refreshTokens: refreshTokens,
       ),
-      studentRepository: StudentLmsRepository(
-        api: api,
-        uploadDio: Dio(
-          BaseOptions(
-            connectTimeout: ApiConstants.connectTimeout,
-            receiveTimeout: ApiConstants.receiveTimeout,
-          ),
-        ),
+      studentRepository: studentRepository,
+      offlineLearningService: OfflineLearningService(
+        repository: studentRepository,
+        preferences: preferences,
       ),
     );
   }

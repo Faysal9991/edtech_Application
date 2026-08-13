@@ -14,7 +14,7 @@ _AppUser _$AppUserFromJson(Map<String, dynamic> json) => _AppUser(
   roles:
       (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
-  role: json['role'] as String? ?? 'student',
+  role: json['role'] as String? ?? 'unknown',
   emailVerifiedAt: json['emailVerifiedAt'] == null
       ? null
       : DateTime.parse(json['emailVerifiedAt'] as String),
